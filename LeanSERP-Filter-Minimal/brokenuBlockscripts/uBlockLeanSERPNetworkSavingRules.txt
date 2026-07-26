@@ -1,0 +1,22 @@
+! Block media resources on major search engines
+||google.com^$media
+||google.co.uk^$media
+||google.de^$media
+||bing.com^$media
+||duckduckgo.com^$media
+||search.brave.com^$media
+
+! Block third-party images and fonts on SERPs
+||google.com^$third-party,image,font
+||google.co.uk^$third-party,image,font
+||google.de^$third-party,image,font
+||bing.com^$third-party,image,font
+||duckduckgo.com^$third-party,image,font
+||search.brave.com^$third-party,image,font
+
+! Common Google telemetry and advertising
+||googleadservices.com^
+||googlesyndication.com^
+||adtrafficquality.google^
+||play.google.com/log^$xhr
+||google.com/gen_204^$xhr

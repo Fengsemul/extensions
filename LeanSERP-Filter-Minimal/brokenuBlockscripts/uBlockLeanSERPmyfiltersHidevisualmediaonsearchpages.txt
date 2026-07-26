@@ -1,0 +1,8 @@
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##img
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##picture
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##video
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##audio
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##canvas
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##iframe
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##object
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##embed

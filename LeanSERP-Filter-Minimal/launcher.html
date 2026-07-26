@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+    <title>LeanSERP Filter Minimal</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            font-family:
+                system-ui,
+                -apple-system,
+                "Segoe UI",
+                sans-serif;
+            font-size: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 280px;
+            margin: 0;
+            padding: 14px;
+            background: Canvas;
+            color: CanvasText;
+        }
+
+        main {
+            display: grid;
+            gap: 10px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.15rem;
+        }
+
+        p {
+            margin: 0;
+            color: color-mix(
+                in srgb,
+                CanvasText 72%,
+                transparent
+            );
+            line-height: 1.4;
+        }
+
+        button {
+            width: 100%;
+            min-height: 38px;
+            border: 1px solid color-mix(
+                in srgb,
+                CanvasText 28%,
+                transparent
+            );
+            border-radius: 7px;
+            padding: 8px 12px;
+            background: ButtonFace;
+            color: ButtonText;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 650;
+        }
+
+        button:hover {
+            filter: brightness(1.06);
+        }
+
+        button:disabled {
+            cursor: default;
+            opacity: 0.6;
+        }
+
+        #status {
+            min-height: 20px;
+            font-size: 0.85rem;
+        }
+
+        #status[data-state="error"] {
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>LeanSERP Filter Minimal</h1>
+        <button
+            id="open-manager"
+            type="button"
+        >
+            Open rule manager
+        </button>
+        <p>
+            Production imports run in a persistent tab so file selections
+            and progress are not lost.
+        </p>
+        <p
+            id="status"
+            role="status"
+            aria-live="polite"
+        ></p>
+    </main>
+    <script src="launcher.js"></script>
+</body>
+</html>

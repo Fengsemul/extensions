@@ -1,0 +1,78 @@
+! LeanSERP universal text-only mode
+! Disable a line by placing ! at its beginning.
+*##img
+*##picture
+*##video
+*##audio
+*##canvas
+*##object
+*##embed
+*##svg:not([aria-label])
+*##iframe
+*##source
+*##track
+*##[style*="background-image"]
+*##[class*="carousel" i]
+*##[class*="slideshow" i]
+*##[class*="gallery" i]
+*##[class*="lightbox" i]
+*##[class*="thumbnail" i]
+*##[class*="avatar" i]
+*##[class*="skeleton" i]
+*##[class*="shimmer" i]
+*##[class*="spinner" i]
+*##[class*="loading" i]
+*##.ad
+*##.ads
+*##.advert
+*##.advertisement
+*##[class*="advertisement" i]
+*##[class*="sponsored" i]
+*##[aria-label*="advertisement" i]
+*##[aria-label*="sponsored" i]
+*##[role="dialog"]
+*##[aria-modal="true"]
+*##[class*="modal" i]
+*##[class*="popup" i]
+*##[class*="overlay" i]
+*##[class*="cookie" i]
+*##[id*="cookie" i]
+*##[class*="consent" i]
+*##[id*="consent" i]
+*##[class*="newsletter" i]
+*##[class*="subscribe" i]
+*##[class*="social-share" i]
+*##[class*="share-button" i]
+*##[class*="floating" i]
+*##[class*="sticky" i]
+*##+js(set, window.requestAnimationFrame, noopFunc)
+*##+js(set, window.cancelAnimationFrame, noopFunc)
+! Generic visual simplification
+*#$#html { scroll-behavior: auto !important; }
+*#$#*, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+*#$#body {
+    background: #fff !important;
+    color: #111 !important;
+    font-family: system-ui, sans-serif !important;
+}
+*#$#a {
+    color: #0645ad !important;
+    text-decoration: underline !important;
+}
+*#$#pre, code, kbd, samp {
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+}
+*#$#table {
+    border-collapse: collapse !important;
+}
+*#$#th, td {
+    border: 1px solid #888 !important;
+}

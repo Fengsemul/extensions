@@ -1,0 +1,4 @@
+If Google behaves incorrectly, disable this line first:
+text
+
+||google.com/gen_204^$xhr

@@ -1,0 +1,85 @@
+! Google text-only SERP
+google.*##img
+google.*##picture
+google.*##video
+google.*##audio
+google.*##canvas
+google.*##iframe
+google.*##[style*="background-image"]
+google.*##[data-sgrd]
+google.*##[data-attrid*="AI Overview" i]
+google.*##[data-attrid*="Generative AI" i]
+google.*##.related-question-pair
+google.*##[data-initq]
+google.*##[data-snf="M7eMpf"]
+google.*##.kb0PBd.A9Y9g[data-snf="M7eMpf"]
+google.*##table.SwU7oc
+google.*##div.EIaa9b
+google.*##[data-video-docid]
+google.*##[data-news-docid]
+google.*##.image-pack
+google.*##[class*="carousel" i]
+google.*#$#*, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+! Bing text-only SERP
+bing.com##img
+bing.com##picture
+bing.com##video
+bing.com##audio
+bing.com##canvas
+bing.com##iframe
+bing.com##.b_imgans
+bing.com##.b_videos
+bing.com##.b_rs
+bing.com##[class*="carousel" i]
+bing.com##[style*="background-image"]
+bing.com#$#*, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+! DuckDuckGo text-only SERP
+duckduckgo.com##img
+duckduckgo.com##picture
+duckduckgo.com##video
+duckduckgo.com##audio
+duckduckgo.com##canvas
+duckduckgo.com##iframe
+duckduckgo.com##[data-testid="feedback-prompt"]
+duckduckgo.com##[class*="feedback" i]
+duckduckgo.com##[class*="related-search" i]
+duckduckgo.com##[class*="carousel" i]
+duckduckgo.com##[style*="background-image"]
+duckduckgo.com#$#*, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+! Brave Search text-only SERP
+search.brave.com##img
+search.brave.com##picture
+search.brave.com##video
+search.brave.com##audio
+search.brave.com##canvas
+search.brave.com##iframe
+search.brave.com##[class*="carousel" i]
+search.brave.com##[style*="background-image"]
+search.brave.com#$#*, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}

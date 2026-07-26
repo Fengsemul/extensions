@@ -1,0 +1,8 @@
+google.*##div:has(> div > div > h1:has-text(/^AI Overview$/i))
+google.*##div:has(> div > div > h2:has-text(/^AI Overview$/i))
+google.*##div:has(> div > div > h3:has-text(/^AI Overview$/i))
+google.*##div:has(> div > div > span:has-text(/^AI Overview$/i))
+google.*##div:has(> div > div > h1:has-text(/^KI.?Übersicht$/i))
+google.*##div:has(> div > div > h2:has-text(/^KI.?Übersicht$/i))
+google.*##div:has(> div > div > h3:has-text(/^KI.?Übersicht$/i))
+google.*##div:has(> div > div > span:has-text(/^KI.?Übersicht$/i))

@@ -1,0 +1,4 @@
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##html:style(scroll-behavior: auto !important;)
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##*:style(animation: none !important; transition: none !important; scroll-behavior: auto !important; text-shadow: none !important; box-shadow: none !important; background-image: none !important;)
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##body:style(font-family: system-ui, sans-serif !important;)
+google.*,bing.com,duckduckgo.com,search.brave.com,etools.ch,wiby.org,secretsearchenginelabs.com,rawweb.org,slsearch.eu.org,searchthis.ch,degoog.org##a:style(text-decoration: underline !important;)

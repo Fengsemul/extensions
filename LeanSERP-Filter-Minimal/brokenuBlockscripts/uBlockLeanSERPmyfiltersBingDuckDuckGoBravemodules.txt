@@ -1,0 +1,12 @@
+bing.com##.b_imgans
+bing.com##.b_videos
+bing.com##.b_rs
+bing.com##[class*="carousel" i]
+
+duckduckgo.com##[data-testid="feedback-prompt"]
+duckduckgo.com##[class*="feedback" i]
+duckduckgo.com##[class*="related-search" i]
+duckduckgo.com##[class*="carousel" i]
+
+search.brave.com##[class*="carousel" i]
+search.brave.com##[class*="related" i]

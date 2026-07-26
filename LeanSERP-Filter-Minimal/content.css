@@ -1,0 +1,10 @@
+html.leanserp-disable-animations *,
+html.leanserp-disable-animations *::before,
+html.leanserp-disable-animations *::after {
+    animation-delay: 0ms !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+}

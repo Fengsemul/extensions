@@ -1,0 +1,450 @@
+2026.07.26 11:41 : pasted-text.txt
+
+TXT
+
+A practical Firefox extension cannot reach a literal theoretical minimum across CPU, GPU, RAM, network, and disk simultaneously. Some goals conflict:
+
+    Fast exact lookups require an indexed local copy, increasing disk use.
+    Atomic replacement requires temporary duplicate storage.
+    Dynamic filtering requires a content script and observer.
+    True request blocking requires browser-level request permissions and reliable Firefox support.
+    Automatic pagination necessarily increases network, CPU, RAM, and DOM use.
+
+The best low-resource design is therefore:
+
+    Keep the v3 two-slot primitive-key database.
+    Remove automatic pagination, CAPTCHA polling, experimental window.stop(), and inactive module code from the minimal build.
+    Inject only on explicitly supported search domains.
+    Use one observer only while the tab is visible.
+    Scan added DOM subtrees once, in bounded batches.
+    Cache final hostname decisions, not PSL objects or full rule lists.
+    Delete matched result containers immediately.
+    Use a dedicated browser-level blocker such as uBlock Origin for network requests.
+    Do not attempt CSP injection or page networking API patches.
+    Keep optional module removal in a separate edition, not the minimal filtering core.
+
+Creating another complete extension now would duplicate and risk destabilizing the already validated v3 database. First preserve v3 and create a separate minimal development copy:
+powershell
+
+$source = "C:\Users\PC\Downloads\LeanSERP-Filter-v3"
+$target = "C:\Users\PC\Downloads\LeanSERP-Filter-Minimal"
+if (-not (Test-Path -LiteralPath $source -PathType Container)) {
+    throw "LeanSERP-Filter-v3 was not found."
+}
+if (Test-Path -LiteralPath $target) {
+    throw "The minimal development folder already exists: $target"
+}
+Copy-Item `
+    -LiteralPath $source `
+    -Destination $target `
+    -Recurse
+Write-Host "Minimal development copy created." -ForegroundColor Green
+Write-Host $target -ForegroundColor Green
+
+Files the minimal edition should contain
+text
+
+LeanSERP-Filter-Minimal\
+├── manifest.json
+├── database.js
+├── background.js
+├── content.js
+├── content.css
+├── launcher.html
+├── launcher.js
+├── manager.html
+├── manager.css
+├── manager.js
+└── public_suffix_list.dat
+
+It should have no options page and no optional runtime machinery. Its fixed policy should be:
+Behavior	Minimal setting
+Public-suffix exclusion	Mandatory
+Exact confirmation	Mandatory
+Delete blocked results	Always
+Pause in hidden tabs	Always
+Disable animations	Always
+Pagination	Removed
+Module removal	Removed
+Text-only mode	Removed
+Image/media blocking	Delegated to uBlock Origin
+Prefetch suppression	Removed
+window.stop()	Removed
+Lite-interface redirects	Removed
+Minimal manifest
+
+Replace:
+text
+
+C:\Users\PC\Downloads\LeanSERP-Filter-Minimal\manifest.json
+
+with:
+json
+
+{
+  "manifest_version": 3,
+  "name": "LeanSERP Filter Minimal",
+  "version": "1.0.0",
+  "description": "Low-overhead, public-suffix-aware SERP filtering with bounded local lookups.",
+  "permissions": [
+    "unlimitedStorage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.google.com/*",
+    "*://*.google.co.uk/*",
+    "*://*.google.ca/*",
+    "*://*.google.com.au/*",
+    "*://*.google.de/*",
+    "*://*.google.fr/*",
+    "*://*.google.es/*",
+    "*://*.google.it/*",
+    "*://*.google.nl/*",
+    "*://*.google.pl/*",
+    "*://*.google.co.jp/*",
+    "*://*.google.co.in/*",
+    "*://*.bing.com/*",
+    "*://*.duckduckgo.com/*",
+    "*://search.brave.com/*",
+    "*://etools.ch/*",
+    "*://*.etools.ch/*",
+    "*://wiby.org/*",
+    "*://*.wiby.org/*",
+    "*://secretsearchenginelabs.com/*",
+    "*://*.secretsearchenginelabs.com/*",
+    "*://rawweb.org/*",
+    "*://*.rawweb.org/*",
+    "*://slsearch.eu.org/*",
+    "*://*.slsearch.eu.org/*",
+    "*://searchthis.ch/*",
+    "*://*.searchthis.ch/*",
+    "*://degoog.org/*",
+    "*://*.degoog.org/*"
+  ],
+  "background": {
+    "scripts": [
+      "database.js",
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.google.com/*",
+        "*://*.google.co.uk/*",
+        "*://*.google.ca/*",
+        "*://*.google.com.au/*",
+        "*://*.google.de/*",
+        "*://*.google.fr/*",
+        "*://*.google.es/*",
+        "*://*.google.it/*",
+        "*://*.google.nl/*",
+        "*://*.google.pl/*",
+        "*://*.google.co.jp/*",
+        "*://*.google.co.in/*",
+        "*://*.bing.com/*",
+        "*://*.duckduckgo.com/*",
+        "*://search.brave.com/*",
+        "*://etools.ch/*",
+        "*://*.etools.ch/*",
+        "*://wiby.org/*",
+        "*://*.wiby.org/*",
+        "*://secretsearchenginelabs.com/*",
+        "*://*.secretsearchenginelabs.com/*",
+        "*://rawweb.org/*",
+        "*://*.rawweb.org/*",
+        "*://slsearch.eu.org/*",
+        "*://*.slsearch.eu.org/*",
+        "*://searchthis.ch/*",
+        "*://*.searchthis.ch/*",
+        "*://degoog.org/*",
+        "*://*.degoog.org/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_title": "LeanSERP Filter Minimal",
+    "default_popup": "launcher.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "public_suffix_list.dat"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "leanserp-filter-minimal@local.invalid",
+      "strict_min_version": "109.0"
+    }
+  }
+}
+
+Using document_idle avoids competing with initial page construction. It may hide results fractionally later than document_start, but generally reduces interference and startup cost.
+Database
+
+Keep the v3 two-slot database.js unchanged in the minimal folder. It is already the right production-storage design:
+
+    primitive string keys;
+    value 0;
+    two fixed slots;
+    no generation/type duplication per key;
+    bounded imports and deletion;
+    file-aware manual rules.
+
+Do not replace 0 with null. The lookup code correctly treats undefined as absent, and 0 as present.
+What this design improves
+
+    CPU: no pagination timers, module-removal scans, settings normalization, or optional branches.
+    RAM: only a bounded hostname cache, bounded message batches, and bounded DOM roots.
+    GPU: blocked result nodes are deleted; animations can be disabled with static CSS.
+    Network: the filter itself creates no network requests, but it does not block search-engine requests.
+    Disk: two-slot primitive-key IndexedDB remains the best crash-safe Firefox-local compromise.
+
+For truly minimized network traffic, use the minimal extension alongside uBlock Origin. A custom MV3 implementation cannot reliably outperform a mature request blocker without broad permissions, large rule machinery, and additional runtime complexity.
+
+2026.07.26: "The Minimal edition does not use an options page. The next step is a complete structural validation before loading it into Firefox."
+
+pasted-text.txt
+
+TXT
+
+For the best balance of CPU, GPU, RAM, network, and disk efficiency, keep LeanSERP Filter Minimal focused on local label filtering and let uBlock Origin handle request blocking. Avoid running multiple overlapping blockers such as uBlock Origin plus uMatrix-style tools unless you need manual per-site control.
+Recommended setup
+Component	Purpose
+LeanSERP Filter Minimal	PSL-aware filtering of search results
+uBlock Origin	Network request and cosmetic blocking
+Firefox built-in settings	Autoplay, tracking, cache, and process controls
+Optional userscript	Only for modules not reliably handled by uBlock filters
+LeanSERP Filter Minimal
+
+Keep the Minimal edition as it is:
+
+    Production package in one active slot.
+    Delete matched result containers.
+    Pause its observer in hidden tabs.
+    Disable transitions and animations.
+    Keep automatic pagination, media handling, AI-module scanning, and other optional machinery out of this edition.
+
+This gives it one focused job and avoids overlapping with uBlock Origin.
+uBlock Origin settings
+Filter lists
+
+Enable:
+
+    uBlock filters
+    uBlock filters - Ads
+    uBlock filters - Privacy
+    uBlock filters - Quick fixes
+    EasyList
+    EasyPrivacy
+    Online Malicious URL Blocklist
+    Your regional list, if needed
+
+Use caution with large collections of extra lists. More lists increase filtering-engine memory, update traffic, and startup work. A few well-maintained lists are usually more efficient than enabling everything.
+Settings
+
+Recommended:
+
+    Disable cosmetic filtering: Off
+    Parse and enforce cosmetic filters: On
+    Suspend network activity until all filter lists are loaded: On, if available
+    Block remote fonts: On if you do not care about site-specific fonts
+    Block media elements larger than: 50-100 KB
+    Pre-fetching: Disabled in Firefox itself
+    Hyperlink auditing: Disabled
+    CNAME uncloaking: On
+    Cloud storage: Off unless needed
+
+Do not enable advanced mode unless you want to maintain per-site rules manually.
+uBlock Origin custom filters
+
+Add these under My filters.
+Google
+text
+
+google.*##[data-sgrd]
+google.*##[data-attrid*="AI Overview"]
+google.*##[data-attrid*="Generative AI"]
+google.*##.related-question-pair
+google.*##[data-initq]
+google.*##[data-snf="M7eMpf"]
+google.*##.kb0PBd.A9Y9g[data-snf="M7eMpf"]
+google.*##table.SwU7oc
+google.*##div.EIaa9b
+google.*##[data-video-docid]
+google.*##[data-news-docid]
+google.*##.image-pack
+google.*##[class*="carousel"]
+
+Some Google classes change frequently. Prefer stable attributes such as data-snf and data-attrid; remove selectors that cause false positives.
+DuckDuckGo
+text
+
+duckduckgo.com##[data-testid="feedback-prompt"]
+duckduckgo.com##[class*="feedback"]
+duckduckgo.com##[class*="related-search"]
+duckduckgo.com##[class*="carousel"]
+duckduckgo.com##video
+duckduckgo.com##audio
+
+Bing
+text
+
+bing.com##.b_imgans
+bing.com##.b_videos
+bing.com##.b_rs
+bing.com##[class*="carousel"]
+bing.com##video
+bing.com##audio
+
+Hide media across supported search engines
+text
+
+google.*##video
+google.*##audio
+bing.com##video
+bing.com##audio
+duckduckgo.com##video
+duckduckgo.com##audio
+search.brave.com##video
+search.brave.com##audio
+
+Network filters
+
+These reduce telemetry and advertisement traffic:
+text
+
+||google.com/gen_204^$xhr
+||googleadservices.com^
+||googlesyndication.com^
+||adtrafficquality.google^
+||play.google.com/log^$xhr
+
+Blocking gen_204 can occasionally interfere with Google diagnostics or interactions. If something breaks, remove that line first.
+Firefox settings
+Privacy and networking
+
+In Firefox settings or about:config:
+Preference	Suggested value
+network.prefetch-next	false
+network.dns.disablePrefetch	true
+network.predictor.enabled	false
+network.predictor.enable-prefetch	false
+network.http.speculative-parallel-limit	0
+browser.urlbar.speculativeConnect.enabled	false
+beacon.enabled	false
+media.autoplay.default	5
+media.preload.default	0
+media.preload.auto	0
+
+Some preferences may affect usability or have changed across Firefox releases. Record existing values before editing.
+Animations
+
+Set:
+text
+
+ui.prefersReducedMotion = 1
+
+This is more comprehensive than extension CSS on sites that respect the system preference.
+Disk cache
+
+If reducing disk writes matters more than repeated network use:
+text
+
+browser.cache.disk.enable = false
+
+This shifts caching toward memory and can increase network usage after restarts. Do not disable disk cache if data usage is your greater concern.
+
+A balanced choice is to leave disk cache enabled and reduce its size:
+text
+
+browser.cache.disk.capacity = 262144
+
+That represents roughly 256 MB, though Firefox may manage cache behavior differently by version.
+Memory
+
+Avoid aggressive memory tweaks unless Firefox is actually under pressure. Practical measures are safer:
+
+    Keep fewer tabs open.
+    Enable tab unloading.
+    Avoid duplicate blocker extensions.
+    Close DevTools when finished; attached DevTools keep background pages alive.
+    Use about:unloads to unload inactive tabs manually.
+
+Search-engine choices
+Interface	Resource profile
+DuckDuckGo Lite	Lowest page complexity
+DuckDuckGo HTML	Low complexity with more formatting
+Wiby	Usually lightweight
+Google	Heavy scripts, telemetry, modules, and dynamic UI
+Bing	Heavy media and dynamic modules
+Brave Search	Moderate to heavy depending on features
+
+For strict efficiency, use Lite/HTML interfaces directly instead of trying to transform a heavy Google page into a lightweight one after it has downloaded.
+
+Useful bookmarks:
+text
+
+[lite.duckduckgo.com](https://lite.duckduckgo.com/lite/)
+[html.duckduckgo.com](https://html.duckduckgo.com/html/)
+[wiby.org](https://wiby.org/)
+
+Extensions to avoid combining
+uMatrix
+
+uMatrix is no longer the best default choice for ordinary users. It offers powerful matrix-based control but requires maintenance and can overlap heavily with uBlock Origin.
+
+For lower overhead and fewer conflicts:
+
+    Use uBlock Origin alone for network filtering.
+    Use its advanced mode only when necessary.
+    Do not run uMatrix and multiple other request blockers together.
+
+NoScript
+
+NoScript can save substantial resources by blocking scripts, but modern search engines may break. It is useful only if you are prepared to build per-site permissions.
+Auto Tab Discard
+
+A tab-unloading extension can save RAM, but Firefox already has tab unloading. Try the built-in behavior first to avoid another persistent extension.
+Userscript guidance
+
+A userscript manager adds its own extension process, injection logic, update checks, and storage. For a few selectors, uBlock cosmetic filters are lighter than a userscript.
+
+Use a userscript only when you need behavior that static filters cannot provide, such as:
+
+    Removing a module based on complex text.
+    Rewriting a destination URL.
+    Waiting for a particular dynamic state.
+    Adding controls.
+
+For simple hiding, prefer:
+text
+
+example.com##selector
+
+over a MutationObserver userscript.
+Recommended final profile
+
+    LeanSERP Filter Minimal for exact local rule matching.
+    uBlock Origin with standard lists and a small set of custom SERP filters.
+    DuckDuckGo Lite/HTML or Wiby when practical.
+    Disable Firefox prefetch, speculative connections, and autoplay.
+    Keep Google automatic pagination disabled.
+    Avoid a second network blocker unless you need manual script control.
+    Close DevTools outside testing.
+    Keep only one active LeanSERP production slot after verifying replacements.
+
+This arrangement minimizes duplicated work: LeanSERP handles the large local index, uBlock handles requests and cosmetic modules, and Firefox handles browser-level networking and tab lifecycle.

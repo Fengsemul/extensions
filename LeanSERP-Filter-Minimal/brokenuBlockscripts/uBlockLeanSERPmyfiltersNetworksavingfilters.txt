@@ -1,0 +1,9 @@
+||googleadservices.com^
+||googlesyndication.com^
+||adtrafficquality.google^
+||play.google.com/log^$xhr
+||google.com/gen_204^$xhr
+||google.com^$media
+||bing.com^$media
+||duckduckgo.com^$media
+||search.brave.com^$media

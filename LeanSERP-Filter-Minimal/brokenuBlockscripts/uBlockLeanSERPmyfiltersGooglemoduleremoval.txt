@@ -1,0 +1,13 @@
+google.*##[data-sgrd]
+google.*##[data-attrid*="AI Overview" i]
+google.*##[data-attrid*="Generative AI" i]
+google.*##.related-question-pair
+google.*##[data-initq]
+google.*##[data-snf="M7eMpf"]
+google.*##.kb0PBd.A9Y9g[data-snf="M7eMpf"]
+google.*##table.SwU7oc
+google.*##div.EIaa9b
+google.*##[data-video-docid]
+google.*##[data-news-docid]
+google.*##.image-pack
+google.*##[class*="carousel" i]
