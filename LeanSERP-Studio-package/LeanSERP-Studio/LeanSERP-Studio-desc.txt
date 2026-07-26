@@ -1,0 +1,58 @@
+pasted-text.txt
+
+TXT
+
+Run this single PowerShell command:
+powershell
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio-GUI.ps1"
+
+To open it without keeping a visible PowerShell window:
+powershell
+
+Start-Process -FilePath "powershell.exe" -ArgumentList '-NoProfile -ExecutionPolicy Bypass -STA -WindowStyle Hidden -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio-GUI.ps1"' -WindowStyle Hidden
+2026-07-22 15:24: powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio-GUI.ps1"
+
+Use the reliable engine for large builds
+
+Run important builds directly in PowerShell instead of through the GUI:
+powershell
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio.ps1" -InputFile "C:\Users\PC\Downloads\1.txt" -OutputDirectory "C:\Users\PC\Downloads\LeanSERP-Output" -ChunkSize 250000 -KeepUnderscores
+
+Run the launcher with: powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File "C:\Users\PC\Downloads\LeanSERP-Studio\Start-LeanSERP-Build.ps1"
+To test interruption safely, press Ctrl+C in that build console after Created chunk 1 appears.
+
+safest production workflow is:
+
+    Use Start-LeanSERP-Build.ps1.
+    Watch progress in its dedicated console.
+    Press Ctrl+C to request interruption.
+    Verify no builder process remains.
+    Remove only incomplete build directories.
+    Use the GUI for selecting files, reports, and small builds until the polling-based runner integration is tested.
+
+2026.07.22 18:47: "One older process, PID 7208, was still shown earlier. Since the restarted build is now running, do not terminate PowerShell processes blindly. After this build completes, verify no runner or builder remains:
+powershell
+
+$remaining = @(
+    Get-CimInstance Win32_Process |
+        Where-Object {
+            $_.Name -eq "powershell.exe" -and
+            $_.ProcessId -ne $PID -and
+            (
+                $_.CommandLine -like "*Invoke-LeanSERP-Build.ps1*" -or
+                $_.CommandLine -like "*LeanSERP-Studio.ps1*"
+            )
+        }
+)
+if ($remaining.Count -eq 0) {
+    Write-Host "No LeanSERP build process remains." -ForegroundColor Green
+}
+else {
+    $remaining |
+        Select-Object ProcessId, ParentProcessId, CommandLine |
+        Format-List
+}
+"
+2026.07.23 19:22:"Press Ctrl+C only in the log-watching window after completion. Pressing it in the runner window would stop the actual build."
