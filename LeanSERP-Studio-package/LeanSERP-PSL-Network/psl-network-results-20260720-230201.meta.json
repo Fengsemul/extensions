@@ -1,0 +1,27 @@
+{
+    "format":  "leanserp-psl-network-diagnostics",
+    "version":  1,
+    "createdAt":  "2026-07-21T01:21:45.0081612+00:00",
+    "startedAt":  "2026-07-20T23:02:01.5276800+00:00",
+    "durationSeconds":  8383.48,
+    "inputFile":  "C:\\Users\\PC\\Downloads\\LeanSERP-PSL-Candidates\\psl-host-candidates-20260720-175051.txt",
+    "inputSha256":  "0b268d01edac0f61762c5adbf9293686dd6091b6b0818139c960156cf3cd663c",
+    "inputHostCount":  3005,
+    "testedHostCount":  3005,
+    "timeoutSeconds":  10,
+    "delayMilliseconds":  500,
+    "maximumHosts":  3005,
+    "maximumRedirects":  8,
+    "classificationCounts":  {
+                                 "possible-bot-challenge":  23,
+                                 "temporarily-inconclusive":  102,
+                                 "dns-only":  55,
+                                 "http-error-response":  263,
+                                 "not-resolved":  1630,
+                                 "redirect-and-https-success":  433,
+                                 "https-success":  32,
+                                 "http-success":  467
+                             },
+    "resultSha256":  "89bfe334b57b3b034be36ac2c1533344f686839fc7da62b4265d240886afd483",
+    "networkTestsPerformed":  true
+}

@@ -1,0 +1,16 @@
+{
+    "format":  "leanserp-psl-host-candidates",
+    "version":  1,
+    "createdAt":  "2026-07-20T20:36:56.8316427+00:00",
+    "durationSeconds":  9965.002,
+    "inputFile":  "C:\\Users\\PC\\Downloads\\cleanurl\\m\\top100110millions.txt",
+    "inputByteLength":  741035210,
+    "inputLineCount":  39140169,
+    "validHostnameCount":  39132914,
+    "rejectedLineCount":  7255,
+    "publicSuffixRuleCount":  8218,
+    "candidateOccurrences":  11260,
+    "uniqueCandidateCount":  3005,
+    "candidateSha256":  "0b268d01edac0f61762c5adbf9293686dd6091b6b0818139c960156cf3cd663c",
+    "networkTestsPerformed":  false
+}

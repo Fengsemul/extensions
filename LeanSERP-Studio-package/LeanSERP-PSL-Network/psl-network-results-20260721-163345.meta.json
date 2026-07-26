@@ -1,0 +1,26 @@
+{
+    "format":  "leanserp-psl-network-diagnostics",
+    "version":  1,
+    "createdAt":  "2026-07-21T18:14:12.0603309+00:00",
+    "startedAt":  "2026-07-21T16:33:45.2256289+00:00",
+    "durationSeconds":  6026.835,
+    "inputFile":  "C:\\Users\\PC\\Downloads\\LeanSERP-PSL-Network\\psl-network-retest-uncertain.txt",
+    "inputSha256":  "01170629c32c7916af6880cadb1004e0c597c624ca5e545ffcfdc6e4d9e911aa",
+    "inputHostCount":  1787,
+    "testedHostCount":  1787,
+    "timeoutSeconds":  20,
+    "delayMilliseconds":  1000,
+    "maximumHosts":  3005,
+    "maximumRedirects":  8,
+    "classificationCounts":  {
+                                 "possible-bot-challenge":  1,
+                                 "dns-only":  55,
+                                 "http-error-response":  2,
+                                 "not-resolved":  1631,
+                                 "https-success":  1,
+                                 "temporarily-inconclusive":  95,
+                                 "http-success":  2
+                             },
+    "resultSha256":  "9b1dfaa3e67805c1852d2d0ec0141b39589f43a2b4ccb01ef22aef19ef9e50a2",
+    "networkTestsPerformed":  true
+}
