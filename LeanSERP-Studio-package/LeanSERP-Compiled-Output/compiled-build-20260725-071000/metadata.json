@@ -1,0 +1,27 @@
+{
+  "Format": "leanserp-compiled-label-package",
+  "Version": 1,
+  "CreatedAt": "2026-07-25T07:10:12.2720706\u002B00:00",
+  "DurationSeconds": 12.219,
+  "InputLines": 1456946,
+  "AcceptedLines": 1455873,
+  "RejectedLines": 1073,
+  "PublicSuffixOnlyLines": 1073,
+  "UniqueLabels": 1226658,
+  "DuplicatesRemoved": 229215,
+  "KeepUnderscores": true,
+  "RemoveCommonWwwLabels": true,
+  "PublicSuffixRuleCount": 10248,
+  "LabelsSha256": "d2c60346433e64534489f4b292023a891e4605a2e7c77831a587a4b78d0d200c",
+  "RejectionsSha256": "242ead9c4b6794bf6e1182cf691b5286666d1f2d990123a71c03b1fc17b00de9",
+  "Sources": [
+    {
+      "Path": "C:\\Users\\PC\\Downloads\\top100110millionurls\\01.txt",
+      "ByteLength": 25520934,
+      "Lines": 1456946,
+      "AcceptedLines": 1455873,
+      "RejectedLines": 1073,
+      "Sha256": "b8dfe48c0688796b408a13917536cf889f4b8fd8959ff56322f18fea111c96ff"
+    }
+  ]
+}
