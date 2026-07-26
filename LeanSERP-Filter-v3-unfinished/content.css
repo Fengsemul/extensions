@@ -1,0 +1,93 @@
+html.leanserp-disable-animations *,
+html.leanserp-disable-animations *::before,
+html.leanserp-disable-animations *::after {
+    animation-delay: 0ms !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+}
+
+html.leanserp-block-images img,
+html.leanserp-block-images picture,
+html.leanserp-block-images input[type="image"],
+html.leanserp-block-images [style*="background-image"] {
+    display: none !important;
+    background-image: none !important;
+}
+
+html.leanserp-block-media audio,
+html.leanserp-block-media video,
+html.leanserp-block-media source,
+html.leanserp-block-media track,
+html.leanserp-block-media object,
+html.leanserp-block-media embed {
+    display: none !important;
+}
+
+html.leanserp-text-only img,
+html.leanserp-text-only picture,
+html.leanserp-text-only video,
+html.leanserp-text-only audio,
+html.leanserp-text-only canvas,
+html.leanserp-text-only iframe,
+html.leanserp-text-only object,
+html.leanserp-text-only embed,
+html.leanserp-text-only svg:not([aria-label]) {
+    display: none !important;
+}
+
+html.leanserp-text-only * {
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+[data-leanserp-blocked="true"] {
+    display: none !important;
+}
+
+#leanserp-pagination-panel {
+    position: fixed !important;
+    right: 16px !important;
+    bottom: 16px !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    align-items: center !important;
+    max-width: min(520px, calc(100vw - 32px)) !important;
+    border: 1px solid rgba(127, 127, 127, 0.55) !important;
+    border-radius: 9px !important;
+    padding: 10px !important;
+    background: Canvas !important;
+    color: CanvasText !important;
+    box-shadow: 0 3px 16px rgba(0, 0, 0, 0.25) !important;
+    font: 13px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+}
+
+#leanserp-pagination-panel .leanserp-pagination-status {
+    flex: 1 1 240px !important;
+    min-width: 0 !important;
+}
+
+#leanserp-pagination-panel button {
+    min-height: 30px !important;
+    border: 1px solid currentColor !important;
+    border-radius: 6px !important;
+    padding: 5px 9px !important;
+    background: ButtonFace !important;
+    color: ButtonText !important;
+    cursor: pointer !important;
+    font: inherit !important;
+}
+
+#leanserp-pagination-panel button:disabled {
+    cursor: default !important;
+    opacity: 0.6 !important;
+}
+
+#leanserp-pagination-panel button[hidden] {
+    display: none !important;
+}

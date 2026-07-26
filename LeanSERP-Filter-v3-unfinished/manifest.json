@@ -1,0 +1,115 @@
+{
+  "manifest_version": 3,
+  "name": "LeanSERP Filter v3",
+  "version": "0.5.0",
+  "description": "Disk-efficient two-slot, file-aware, public-suffix-aware SERP filtering with optional low-resource controls.",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.google.com/*",
+    "*://*.google.co.uk/*",
+    "*://*.google.ca/*",
+    "*://*.google.com.au/*",
+    "*://*.google.de/*",
+    "*://*.google.fr/*",
+    "*://*.google.es/*",
+    "*://*.google.it/*",
+    "*://*.google.nl/*",
+    "*://*.google.pl/*",
+    "*://*.google.co.jp/*",
+    "*://*.google.co.in/*",
+    "*://*.bing.com/*",
+    "*://*.duckduckgo.com/*",
+    "*://search.brave.com/*",
+    "*://etools.ch/*",
+    "*://*.etools.ch/*",
+    "*://wiby.org/*",
+    "*://*.wiby.org/*",
+    "*://secretsearchenginelabs.com/*",
+    "*://*.secretsearchenginelabs.com/*",
+    "*://rawweb.org/*",
+    "*://*.rawweb.org/*",
+    "*://slsearch.eu.org/*",
+    "*://*.slsearch.eu.org/*",
+    "*://searchthis.ch/*",
+    "*://*.searchthis.ch/*",
+    "*://degoog.org/*",
+    "*://*.degoog.org/*"
+  ],
+  "background": {
+    "scripts": [
+      "database.js",
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.google.com/*",
+        "*://*.google.co.uk/*",
+        "*://*.google.ca/*",
+        "*://*.google.com.au/*",
+        "*://*.google.de/*",
+        "*://*.google.fr/*",
+        "*://*.google.es/*",
+        "*://*.google.it/*",
+        "*://*.google.nl/*",
+        "*://*.google.pl/*",
+        "*://*.google.co.jp/*",
+        "*://*.google.co.in/*",
+        "*://*.bing.com/*",
+        "*://*.duckduckgo.com/*",
+        "*://search.brave.com/*",
+        "*://etools.ch/*",
+        "*://*.etools.ch/*",
+        "*://wiby.org/*",
+        "*://*.wiby.org/*",
+        "*://secretsearchenginelabs.com/*",
+        "*://*.secretsearchenginelabs.com/*",
+        "*://rawweb.org/*",
+        "*://*.rawweb.org/*",
+        "*://slsearch.eu.org/*",
+        "*://*.slsearch.eu.org/*",
+        "*://searchthis.ch/*",
+        "*://*.searchthis.ch/*",
+        "*://degoog.org/*",
+        "*://*.degoog.org/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "action": {
+    "default_title": "LeanSERP Filter v3",
+    "default_popup": "launcher.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "public_suffix_list.dat"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "leanserp-filter-v3-temporary@local.invalid",
+      "strict_min_version": "109.0"
+    }
+  }
+}
