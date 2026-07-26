@@ -1,0 +1,535 @@
+MZ       ÿÿ  ¸       @                                   €   º ´	Í!¸LÍ!This program cannot be run in DOS mode.
+
+$       PE  L I^¯»        à " 0  N         úl       €    @                       À          `…                           ¨l  O    €  È                         Œl                                                               H           .text   M       N                    `.rsrc   È   €      P              @  @.reloc             V              @  B                Ül      H     P7  <5                                                       0	 >    (  
+(  (  
+{  (  
+&(  
+r  p(  
+{  r!  p(  
+(  
+
+	rA  p(  
+	(  
+&(  
+&	rO  p(  
+	re  p(  
+	r‹  p(  
+	r¹  p(  
+rÕ  p(  
+{  (  	r p	o  Œ-  (  
+(  
+s  
+
+s  
+s  
+s  
+
+jjjjj(  (  ra po  
+r™ po  
+{  o   
+8š  (!  
+rÝ p(  
+(  
+jjjs"  
+    s#  
+ 8ì  jXjX!{	  
+(  "rñ p#"(B  o$  
+,"(B  #8  "(A  o$  
+9”  {
+  -	"(A  +"(A  (  $$	(	  %$.o%  
+&%&Ži?Ú   jXjXjX*  %$(
+  ¢%ró p¢%r÷ p&&Ži%Y(&  
+(  +((  
+(
+  ¢%ró p¢%(
+  ¢%ró p¢%()  
+(*  
+¢(+  
+o  
+*  %rû p¢%(
+  ¢%ró p¢%()  
+(*  
+¢%ró p¢%!(
+  ¢(+  
+o  
+8~  &Ži%YY''/`jXjX*  %r# p¢%(
+  ¢%ró p¢%()  
+(*  
+¢%ró p¢%!(
+  ¢(+  
+o  
+8  &'š#+ojXjX*  %"(C  (
+  ¢%ró p¢%(
+  ¢%ró p¢%()  
+(*  
+¢%ró p¢%!(
+  ¢(+  
+o  
+8–   
+#o,  
+,jXjX+jXjXjX
+o-  
+{  2;X
+(
+  ((o.  
+
+o/  
+rO pŒ-  Œ8  (0  
+ @B j]-r¥ pŒ8  (  
+ o1  
+%!:ýÿÿs?  %(2  
+o4  %s3  
+(4  
+o6  %o8  %o:  %o<  %(  o>  o5  
+Þ , o6  
+Ü(7  
+:ZüÿÿÞþ  o6  
+ÜÞ,o6  
+ÜÞ,o6  
+Ü
+o-  
+1#X
+(
+  ))o.  
+
+o/  
+o8  
+-rÕ ps9  
+zr po8  
+Œ-  (  
+(  %{:  
+{;  
+X(  
+s2  %rS p(<  
+o  %(=  
+**(>  
+(?  
+o  %o  %o  %o  %o!  %o#  %o%  %{	  o'  %{
+  o)  %	o  o+  %(  o-  %(  o/  %o1  %s@  
+%oA  
+(  +(C  
+(  
+sD  
+(E  
+(F  
+(G  
+rW p(  
+r pŒ8  (  
+rÅ pŒ8  (  
+ró pŒ8  (  
+r! pŒ8  (  
+rc pŒ8  (  
+r pŒ8  (  
+rÅ p(  
+	(  
+r× p(  
+(  
+rë p(  
+o,  (  
++Þ",(H  
+r po  
+(H  
+,oI  
++Þ +*  A|     w  R  É            6  ­  ã              â  ó              ù                       "     0 Ü    s  
+8Ä  šoJ  
+
+	9ž  	($  
+YE   Ÿ      i      {   Q  Ò   Q     Q  Q  Q  Q  Q  á   8L  	(K  
+-.+o.:82  	(K  
+c;€   r;‰   8  	r# p(L  
+:¡   8ý   	r3 p(L  
+:¡   8è   	rC p(L  
+-z8Ö   	rQ p(L  
+-}8Ä   	rc p(L  
+-{8²   	ro p(L  
+-i8    	ry p(L  
+-g8Ž   	r“ p(L  
+-x+	r­ p(L  
+-F+p	rÃ p(L  
+-Q+a{  (  o.  
++](  }  +M(  }  +=(  ()  
+(M  
+}  +#}	  +}
+  +ré p(  
+sN  
+zXŽi?3þÿÿ*vJXTJŽi2r psN  
+zJš*  0 ·     {  o8  
+-rg psN  
+z{  o   
+
++ (!  
+(O  
+-r£ psP  
+z (7  
+-ÛÞ þ  o6  
+Ü{  (Q  
+,r× psN  
+z{  (O  
+-r p{  sP  
+z{   è  2
+{   @B 1re psR  
+z*    $ )M     0 3    s  
+(S  
+oT  
+8£   oU  
+oV  
+o$  
+9Œ   ry poW  
+-r poX  
+
+	2	oY  
+oV  
+o$  
+,XoJ  
+r‡ poW  
+,{
+  oZ  
+o,  
+&+/r‹ poW  
+,{  oZ  
+o,  
+&+
+{  o,  
+&o[  
+:RÿÿÿÞ
+,o6  
+Üo   è  2H{  r‘ po\  
+,6{  r™ po\  
+,${  r¥ po\  
+,{
+  r« po\  
+-r¹ ps]  
+z*     µÇ 
+    0 '    (  oV  
+
+o$  
+,r
+ poW  
+-
+r‡ poW  
+,rñ prñ pr ps@  *o^  
+2rñ prñ prG ps@  *rc p(_  
+Ži2šrk p(`  
+,š
++š
+r¯ poW  
+,rñ prñ prµ ps@  *oJ  
+
+rÓ p(a  
+ob  
+,oc  
+od  
+oe  
+
+r	 poW  
+,
+oZ  
+
++ar#	 poW  
+,oZ  
+
+r‹ poW  
+,?oZ  
+
++5r-	 p(`  
+,((f  
+-rñ prñ prY	 ps@  *og  
+
+(  
+N  %Ð  (h  
+oi  
+
+	2		oY  
+
+@oj  
+2XoZ  
+
+rq	 prñ p(k  
+
+.ol  
+
+-r}	 p+r¡	 p(`  
+,rñ prñ ps@  *o$  
+,!o$  
+ ý   0:om  
+-
+.om  
+-rñ prñ prÇ	 ps@  *s  
+.o%  
+	8©   	š
+
+o$  
+-rñ prñ pré	 ps@  ÝÀ   
+on  
+oJ  
+o$  
+,?o$  
+?04-r
+ p+r-
+ p(`  
+,rI
+ poW  
+-rI
+ poo  
+,rñ prñ prM
+ ps@  ÞQo.  
+	X		Ži?LÿÿÿÞ&rñ prñ pr{
+ ps@  Þr÷ p((  
+rñ prñ ps@  **     &Éï  0 <      ÿþ  op  
+
++oZ  
+
+r§
+ poW  
+-ë+oZ  
+
+r¯
+ poW  
+-ë*0 @     .o%  
+sq  
+
++or  
+o8  
+1os  
+r·
+ p(`  
+-Ýr÷ p((  
+*0 Æ     .o%  
+
+Ži/*rñ pŽiY
+8   o$  
+,	šr÷ p(t  
++	šŽi	Y{
+  o\  
+,Y(&  
+*{  o\  
+,1	ŽiY/2.o^  
+2#XoZ  
+{  o\  
+,1	Y
+	<iÿÿÿŽi(u  
+*  0 t   	  rÉ
+ prÙ
+ p()  
+(v  
+rß
+ p(t  
+(  
+
+(  +(  
+(  +(  
++	šo  
+X	Ži2åÞ
+,o6  
+Ü*   @ 'g 
+    0 i  
+  oy  
+sz  
+
+sJ  s{  
+jj
+(  +So|  
+s"  
+    s#  
+o}  
+o1  
+,sH  %oE  %oG  o~  
+&Xoy  
+2£8‚   o  
+		o€  
+&,	oD  (  
+-	oD  o  
+	oD  jX+	jX
+	oF  o‚  
+o1  
+
+
+,!sH  %
+oE  %	oF  oG  o~  
+&oƒ  
+=rÿÿÿÞ0o„  
++(…  
+o†  
+(‡  
+-ëÞþ
+  o6  
+ÜÜ	sˆ  
+Þ,o6  
+Ü*   AL     '     @            (   ÷     0          (   2  Z         NsD  
+    s‰  
+*v	 oŠ  
+
+ oŠ  
+
+ oŠ  
+*  0 ~     (‹  
+
+        sŒ  
+o  
+%ŽiZsŽ  
+
++$	‘ré
+ p()  
+(  
+o  
+&X	Ži2Õo‘  
+Þ,o6  
+Ü,o6  
+Ü*      Mg 
+      kq 
+    Îs  
+}  rñ p}  rñ p}    ¡ }  (’  
+*’{  o-  
+{  o-  
+X{
+  o-  
+X*Þ(“  
+s  
+}  (“  
+s  
+}  (“  
+s  
+}
+  (’  
+*{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *{  *"}  *   0 E       rï
+ p}  }  rñ p}  rñ p}  rñ p}  s  
+}  (’  
+*{  *"}  *{  *"}  *{   *"}   *{!  *"}!  *{"  *"}"  *{#  *"}#  *vrñ p}  rñ p}#  (’  
+*Z}$  }%  }&  *{$  *{%  *{&  *{'  *"}'  *{(  *"}(  *Jrñ p}'  (’  
+*   0 <     3*-*-*oD  oD  (”  
+
+,*oF  oF  (•  
+*(’  
+*BSJB         v4.0.30319     l   t  #~  à    #Strings    p$  0  #US  /     #GUID   °/  Œ  #Blob         WŸ¢)	
+   ú3      Y      (   J   3      •      h               4   
+                    –	      Nˆ Íˆ c2 À    R ´K
+ üK
+ ¹K
+ ÖK
+ nK
+ ‰K
+ ˆ ‡ˆ wˆ ÚÖ	 áÖ	
+ _ Á
+ r Á l'
+ “Ö	 ÁšK !   jš ð	Ö	 Ö
+Ö	 E Á Œ™ N	Ö	 3ˆ … Ö	 i Á
+ S Á ž 0 °	š ’¼ Hˆ  ˆ ÚÖ	 % Á nš 3š yÖ	 Çš uÖ	  Ö	  Ö	 1 Á Îš E¼ I¼ 
+Ö	 žÖ	 ?L  Á ''
+ ˜ Ö	 ‚Ö	 wš š JÖ	 ´
+Ö	" ôà
+" ãà
+ Ö	 iš Î
+Ö	 ‚
+š ˜
+Ö	 Ö	 ¸ m
+š ™ ™ F™ ]
+™ ™ 
+Ö	 ^Ö	 Rˆ *Ö	 VÖ	  Á 6š aš äš Ëš Ý	0 ´	š ëÖ	    r      € »	  =      {  =    "  =    Ú  =    ¤  =    ²  =  3    ™ $ @  Ì	  = ' D  ¯  = ) I     ™ ) K Q€ÜÆQ€	ÆQ€Æ31É& ÏÍ hÔ ‡Ô %Æ ¹
+× Z×& ÔÚ& ~Ú& *Ú ªÔ &Æ Ô Wá æä Çä ¨ä ä Jä ‚ä )× h× ÂÆ BÔ `Ô xç ÖÔ ìä ‘ä Çä ¨ä *Ô! ¥Ô! Ô! ?Ô ¿Ô éÆP     ‘ 
+ú (    ‘ ×   *    ‘   *    ‘ ä ô*    ‘ ƒ D,    ‘ ¨ ˆ/    ‘ xJ
+ Ð/    ‘ %J 0    ‘ 	$ ð0    ‘ R	+ €1    ‘ ð
+6 D3    ‘ ÙE X3    ‘ J x3    ‘ » J  4    †,  T4    †6ë  y4    †,  ±4    †¾F ¹4    †É  Â4    †
+ë  Ê4    †
+  Ó4    †’F Û4    †   ä4    †Vo ì4    †jK õ4    †O
+O ý4    †^
+P 5    †+
+O 5    †=
+P 5    †
+O 5    †
+P (5    †m
+O 05    †‡
+P 95    †O A5    †P J5    †òO  R5    †P  [5    †¡
+S! c5    †µ
+y! l5    †<S" t5    †Vy" }5    †@ë # …5    †Z # Ž5    †É F$ –5    †Ú  $ Ÿ5    †ë F% §5    †  % °5    †¨U& ¸5    †´^& Ä5    †, ' 6    †£F' 6    †¬ ' &6    †îO( .6    †ýP( 76    †éO) ?6    †óP) H6    †+
+O* P6    †=
+P* Y6    †
+O+ a6    †
+P+ j6    †¥ F, r6    †°  , {6    †, - ™6    †,h- °6    †}F0 ¸6    †x	F0 À6    †ñ
+F0 È6    †ðF0 Ð6    †ú 0 Ù6    †ìë 1 á6    †ü 1 ê6    †, 2  7    æîo2 H7    †, 4    à
+   à
+   à
+      5   Ì   ¾   É
+   ù	      Š   Š   ã   Ù
+   x   c         å
+   Á   Ì      Ì                                                                     Š   ‰	   ü
+         ð   õ
+  	 ,  ,  ,
+ ) , 1 , 9 , A , I , Q , Y , a , i , q , é , !, ), q ,   Ý| AX ¡ Õˆ ¡ w Q·’ YÒ’ a´˜ a´ q]	£  ,¯  , $ , ™ , ´  Ç , *Ö ‰,Û ¹ ,á QÑë Qûï ¡èø ©Aþ Q
+
+¹ö Áw&Q·- Ü3 6ë  Ü9 X a´?Ñ«FYµJÙ, ÙÑO$ Ü9á) , ³S 6ë é, 4 y ^4 ’ b w  <
+fÁ Eo¡sñ, ñàyù/~Æ‰,y	È‘AAša´ a¤´ªQ
+FQH¹Q‚¾i1Ä, 	‹Õ,ÚQ#Õ!, 	ýì< ýD *Ö Që	FQ:	Q=Q€Q€1³S p39, Q==AûBAŠ¾AŒIQlSÙ =SYÃ	YaðFá 7`á ˜FykQMuQ9=A{Që	‚Qp‡™ E	 Q1	Qt‚ ,˜ ®  Ã	£Q·{¡
+ø iwÁ©(É~×L 6ë T , \ ,$d Ã	£T Ü9\ Ü3\ ý	Ö \ 3Qü
+5T Ã	£\ 6ë T Ç l *Ö Ñ) l ³S4 ,E© ,MQW	:n,t¹’†, ÉwÁŽy wFy , q£ Qi	ši   ·  ¼  Á% ‹ ï' [ €.  ”.  .  ¼. # Å. + . 3 . ; +. C 8. K . S C c NC k Tc { Cƒ k T£ k TÃ k Tã k Tk Tƒ C#k TCc TÁ{ Cá{ C{ C!{ C$s Z$k T@{ CA{ C`{ Ca{ C€{ C{ C { C¡{ CÀ{ CÁ{ Cà{ Cá{ C { C{ C { C!{ C@{ CA{ C`{ Ca{ C€{ C{ C { C¡{ CÀ{ CÁ{ Cà{ Cá{ C { C{ C { C!{ C@{ CA{ C`{ Ca{ C€{ C{ C { C¡{ CÀ{ CÁ{ Cà{ Cá{ C { C{ C { C@{ C`{ C€{ C { CÀ{ Cà{ C { C { C`{ C€{ C { CÀ{ Cà{ C { C { C@{ C`{ C€{ C { CÀ{ C { C@{ C`{ C€{ C { CÀ{ Cà{ C 	c H     . ¯Ìà$Œ©´æ]•        	    nw  Í{  
+w  ¤{  n  b
+ƒ  A
+ƒ  
+ƒ  ‹
+ƒ  ƒ  ƒ  ¹
+‡  Z‡  ^w  Þ {  {  ¸‹  Ç{  	ƒ  ›
+ƒ  A
+ƒ  
+ƒ  {  {  |	{  õ
+{  {   w                 	   	         
+   
+                  !   "   #   $   %   &   '   (   )   *   +   ,   -   . !  / !  0 #  1 #  3 %  4 %  5 '  6 '  7 )  8 )  9 +  : +  ; -  < -  = /  > /  A 1  B 3  C 5  D 7  E 7  F 9  G 9 & © º À Ð Wö/> m   €               ò             ¥œ               ¥¸               ¥™               ¥0               ¥n               ¥y               ¥L               ®à
+              	  
+    O … ˆï ñ    IEnumerable`1 IReadOnlyCollection`1 IComparer`1 IEqualityComparer`1 IEnumerator`1 SortedSet`1 HashSet`1 IReadOnlyList`1 Item1 Int32 ValueTuple`2 Item2 Int64 SHA256 get_Sha256 set_Sha256 ComputeSha256 get_LabelsSha256 set_LabelsSha256 get_RejectionsSha256 set_RejectionsSha256 __StaticArrayInitTypeSize=6 3F68494D359B55DCCE1B5F85C838FDFA19B83E480A1F8F603FCE1095C0EA7BA7 <Module> <PrivateImplementationDetails> System.IO BuildMetadata SourceMetadata System.Collections.Generic Add set_WriteIndented get_DuplicatesRemoved set_DuplicatesRemoved EscapeField <Sha256>k__BackingField <LabelsSha256>k__BackingField <RejectionsSha256>k__BackingField <DuplicatesRemoved>k__BackingField <Hostname>k__BackingField <Value>k__BackingField <Path>k__BackingField <ByteLength>k__BackingField <CompactLabel>k__BackingField <Version>k__BackingField <Reason>k__BackingField <DurationSeconds>k__BackingField <Sources>k__BackingField <Lines>k__BackingField <RejectedLines>k__BackingField <AcceptedLines>k__BackingField <InputLines>k__BackingField <PublicSuffixOnlyLines>k__BackingField <KeepUnderscores>k__BackingField <UniqueLabels>k__BackingField <RemoveCommonWwwLabels>k__BackingField <CreatedAt>k__BackingField <Format>k__BackingField <PublicSuffixRuleCount>k__BackingField <ReaderIndex>k__BackingField Append UriKind Round Replace IsNullOrWhiteSpace FileMode Enumerable IDisposable RuntimeFieldHandle File System.Console get_Hostname hostname DateTime System.Runtime ReadLine WriteLine rawLine get_NewLine Combine ValueType FileShare Compare get_InvariantCulture Capture get_OrdinalIgnoreCase Dispose Parse TryCreate Delete CompilerGeneratedAttribute DebuggableAttribute NullableAttribute AssemblyTitleAttribute TargetFrameworkAttribute AssemblyFileVersionAttribute AssemblyInformationalVersionAttribute AssemblyConfigurationAttribute RefSafetyRulesAttribute TupleElementNamesAttribute CompilationRelaxationsAttribute AssemblyProductAttribute NullableContextAttribute IsReadOnlyAttribute AssemblyCompanyAttribute RuntimeCompatibilityAttribute Byte get_Value set_Value RequireValue value Remove DefaultChunkSize Serialize LastIndexOf UTF8Encoding System.Runtime.Versioning IdnMapping ToString Substring IsMatch ComputeHash Math get_Path set_Path GetFullPath outputPath path get_Length MaxHostnameLength get_ByteLength set_ByteLength MaxLabelLength GetPublicSuffixLength EndsWith StartsWith GetAscii Uri WriteChunk get_Ordinal CompareOrdinal get_CompactLabel compactLabel LeanSerpUrlNormalizer.dll FileStream Program get_Item MergeItem System HashAlgorithm Trim TimeSpan idn get_Min Main Join get_Version set_Version System.Globalization op_Subtraction System.Reflection GroupCollection InvalidDataException FileNotFoundException ArgumentOutOfRangeException InvalidOperationException ArgumentException System.Text.Json get_Reason reason StringComparison CompareTo FileInfo CultureInfo DirectoryInfo Skip Group System.Linq Clear Char number StreamReader TextReader IFormatProvider StringBuilder StringComparer MergeItemComparer StreamWriter TextWriter NewWriter JsonSerializer LeanSerpUrlNormalizer get_Error IEnumerator GetEnumerator .ctor System.Diagnostics get_TotalSeconds get_DurationSeconds set_DurationSeconds Wildcards System.Runtime.CompilerServices get_Sources set_Sources DebuggingModes InputFiles PslRules rules get_Lines set_Lines ReadLines get_RejectedLines set_RejectedLines get_AcceptedLines set_AcceptedLines get_InputLines set_InputLines get_PublicSuffixOnlyLines set_PublicSuffixOnlyLines get_KeepUnderscores set_KeepUnderscores keepUnderscores values args chunkPaths MergeChunks Equals get_UniqueLabels set_UniqueLabels RemoveLeadingWwwLabels get_RemoveCommonWwwLabels set_RemoveCommonWwwLabels Contains System.Text.Encoding.Extensions System.Text.RegularExpressions System.Collections FileOptions ParseOptions ValidateOptions JsonSerializerOptions StringSplitOptions RegexOptions Exceptions options get_Groups get_Chars RuntimeHelpers FileAccess get_Success RemoveBomArtifacts Exists get_CreatedAt set_CreatedAt RemoveAt Concat get_Format set_Format Exact Object DateTimeOffset left right Split ParseResult ToLowerInvariant Environment get_Current get_Count get_PublicSuffixRuleCount set_PublicSuffixRuleCount TrimStart Sort LoadPublicSuffixList get_DnsSafeHost ParseInput MoveNext System.Text WriteAllText get_Now get_UtcNow Max get_ReaderIndex set_ReaderIndex index Regex InitializeArray ToArray System.Security.Cryptography IndexOfAny CreateDirectory OutputDirectory directory op_Equality    y y y y M M d d - H H m m s s c o m p i l e d - b u i l d - 
+c h u n k s  l a b e l s . t x t  %r e j e c t e d - l i n e s . t s v -p u b l i c - s u f f i x - o n l y . t s v m e t a d a t a . j s o n  ;L o a d i n g   P u b l i c   S u f f i x   L i s t . . .  OL o a d e d   { 0 : N 0 }   P u b l i c   S u f f i x   L i s t   r u l e s .  7r e a s o n 	 s o u r c e 	 l i n e 	 o r i g i n a l  Ch o s t n a m e 	 p u b l i c S u f f i x 	 s o u r c e 	 l i n e  R e a d i n g :     	  .  'p u b l i c - s u f f i x - o n l y 	 +m a i n - l a b e l - n o t - f o u n d 	 UC r e a t e d   c h u n k   { 0 } ;   p r o c e s s e d   { 1 : N 0 }   l i n e s .  /P r o c e s s e d   { 0 : N 0 }   l i n e s .  =N o   v a l i d   l a b e l s   w e r e   p r o d u c e d .  ?M e r g i n g   { 0 : N 0 }   s o r t e d   c h u n k s . . .  O  EL e a n S E R P   c o m p i l e d   b u i l d   c o m p l e t e d .  'I n p u t   l i n e s :   { 0 : N 0 }  -A c c e p t e d   l i n e s :   { 0 : N 0 }  -R e j e c t e d   l i n e s :   { 0 : N 0 }  AP u b l i c - s u f f i x - o n l y   l i n e s :   { 0 : N 0 } +U n i q u e   l a b e l s :   { 0 : N 0 }  5D u p l i c a t e s   r e m o v e d :   { 0 : N 0 }  P a c k a g e :  M e t a d a t a :  L a b e l s   S H A - 2 5 6 : B U I L D   E R R O R  - - i n p u t - o u t p u t 
+- i n p u t - - o u t p u t - - p s l 	- p s l - - c h u n k - s i z e - - r e m o v e - w w w - c h u n k s i z e %- - k e e p - u n d e r s c o r e s %U n k n o w n   a r g u m e n t :    WA   c o m m a n d - l i n e   o p t i o n   i s   m i s s i n g   i t s   v a l u e . ;N o   i n p u t   f i l e s   w e r e   s u p p l i e d .  3I n p u t   f i l e   w a s   n o t   f o u n d .  AT h e   o u t p u t   d i r e c t o r y   i s   m i s s i n g .  KT h e   P u b l i c   S u f f i x   L i s t   w a s   n o t   f o u n d .  C h u n k S i z e  / /    / /  !  * .  c o m  c o . u k  c k  
+w w w . c k  ST h e   P u b l i c   S u f f i x   L i s t   f a i l e d   v a l i d a t i o n .  #  5e m p t y - c o m m e n t - o r - d i r e c t i v e n u l - c h a r a c t e r \ s +  C^ ( ? : 0 \ . 0 \ . 0 \ . 0 | 1 2 7 \ . 0 \ . 0 \ . 1 | : : 1 ) $  @ @  e x c e p t i o n - r u l e A^ \ [ [ ^ \ ] ] * \ ] \ ( ( h t t p s ? : / / [ ^ ) ] + ) \ ) $  
+* : / / * .  	* : / /  +^ [ a - z ] [ a - z 0 - 9 + . - ] * : / / i n v a l i d - u r l : \ d + $  #^ [ a - z 0 - 9 - ] { 1 , 6 3 } $ %^ [ a - z 0 - 9 _ - ] { 1 , 6 3 } $ !i n v a l i d - h o s t n a m e )e m p t y - h o s t n a m e - l a b e l ^ [ a - z 0 - 9 - ] + $ ^ [ a - z 0 - 9 _ - ] + $ - -i n v a l i d - h o s t n a m e - l a b e l +i d n - c o n v e r s i o n - f a i l e d ï » ¿ ï ¿ ½ ^ w w w \ d * $  l a b e l s - D 6  	. t x t  x 2  ?l e a n s e r p - c o m p i l e d - l a b e l - p a c k a g e  )Èû`Í­Oˆ¾H5á2L         €$M-AEIIM
+
+
+
+
+
+
+AQUUY
+
+
+] ae  A €¥  Q      €¹E
+ €½ II  Y Y    	 €É   €Í €Ù €Ù 
+
+ €Ù  €Ý €å           
+  y
+
+  aAA  
+ 
+
+ 	 €ù
+   €É     €Á 	   €åY  i	 €Ù€Ù  i i    
+mIq   	 m%  - )
+ 5q	 AE    I
+ €Ù   
+U €å
+ €Ù  € '
+I]€$
+
+U]$Y]y
+
+II]€$
+ € } Y]  	 €É €…€‰€  €… MQUY a €  °?_Õ
+:Ì{ÿÍ-ÝQý   ?    ¡ ,IE
+
+I
+              M 
+ E y
+
+} U 
+ 
+  I	 I  $$( ( ( 
+( 
+( ( I        TWrapNonExceptionThrows      = .NETCoreApp,Version=v8.0 TFrameworkDisplayName.NET 8.0 LeanSerpUrlNormalizer   Release   1.0.0.0  
+ 1.0.0               %    UniqueLabelsDuplicateLabels                                      Ðl          êl                          Ül            _CorExeMain mscoree.dll     ÿ%  @ / ? #                                                                                                                                                                                                                                                                                €   P  €                  8  €                   €                     h  €                   È  €  8          84   V S _ V E R S I O N _ I N F O     ½ïþ                 ?                         D    V a r F i l e I n f o     $    T r a n s l a t i o n       °˜   S t r i n g F i l e I n f o   t   0 0 0 0 0 4 b 0   L   C o m p a n y N a m e     L e a n S e r p U r l N o r m a l i z e r   T   F i l e D e s c r i p t i o n     L e a n S e r p U r l N o r m a l i z e r   0   F i l e V e r s i o n     1 . 0 . 0 . 0   T   I n t e r n a l N a m e   L e a n S e r p U r l N o r m a l i z e r . d l l   (   L e g a l C o p y r i g h t       \   O r i g i n a l F i l e n a m e   L e a n S e r p U r l N o r m a l i z e r . d l l   L   P r o d u c t N a m e     L e a n S e r p U r l N o r m a l i z e r   0   P r o d u c t V e r s i o n   1 . 0 . 0   8   A s s e m b l y   V e r s i o n   1 . 0 . 0 . 0   Øƒ  ê          ï»¿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity version="1.0.0.0" name="MyApplication.app"/>
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+</assembly>                                                               `     ü<                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
