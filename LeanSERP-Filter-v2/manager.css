@@ -1,0 +1,356 @@
+:root {
+    color-scheme: light dark;
+    font-family:
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        sans-serif;
+    font-size: 15px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-width: 360px;
+    margin: 0;
+    background: Canvas;
+    color: CanvasText;
+}
+
+main {
+    display: grid;
+    gap: 18px;
+    width: min(1180px, calc(100% - 32px));
+    margin: 24px auto 48px;
+}
+
+header,
+section {
+    border: 1px solid color-mix(
+        in srgb,
+        CanvasText 20%,
+        transparent
+    );
+    border-radius: 10px;
+    padding: 17px;
+}
+
+h1,
+h2,
+p {
+    margin-top: 0;
+}
+
+h1 {
+    margin-bottom: 7px;
+    font-size: 1.7rem;
+}
+
+h2 {
+    margin-bottom: 10px;
+    font-size: 1.12rem;
+}
+
+p {
+    line-height: 1.45;
+}
+
+header p,
+section > p,
+.operation-status,
+.file-field output,
+#manual-file-selection {
+    color: color-mix(
+        in srgb,
+        CanvasText 72%,
+        transparent
+    );
+}
+
+.section-heading {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.section-heading p {
+    margin-bottom: 0;
+}
+
+.section-heading button {
+    flex: 0 0 auto;
+    width: auto;
+    margin-top: 0;
+}
+
+.count-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(150px, 1fr));
+    gap: 9px;
+    margin-top: 14px;
+}
+
+.count-card {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    border-radius: 8px;
+    padding: 12px 8px;
+    background: color-mix(
+        in srgb,
+        CanvasText 7%,
+        transparent
+    );
+    text-align: center;
+}
+
+.count-card span {
+    font-size: 0.83rem;
+}
+
+.count-card output {
+    overflow: hidden;
+    font-size: 1.12rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+}
+
+.status-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+    margin: 14px 0 0;
+}
+
+.status-list div {
+    border-radius: 7px;
+    padding: 10px;
+    background: color-mix(
+        in srgb,
+        CanvasText 5%,
+        transparent
+    );
+}
+
+.status-list dt {
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-list dd {
+    margin: 0;
+    font-weight: 700;
+}
+
+label {
+    display: block;
+    margin: 12px 0 6px;
+    font-weight: 650;
+}
+
+input,
+select,
+button,
+progress {
+    width: 100%;
+}
+
+input,
+select,
+button {
+    min-height: 38px;
+    font: inherit;
+}
+
+input[type="file"] {
+    padding: 6px;
+}
+
+input[type="text"],
+select {
+    border: 1px solid color-mix(
+        in srgb,
+        CanvasText 28%,
+        transparent
+    );
+    border-radius: 7px;
+    padding: 7px 9px;
+    background: Field;
+    color: FieldText;
+}
+
+button {
+    margin-top: 10px;
+    border: 1px solid color-mix(
+        in srgb,
+        CanvasText 28%,
+        transparent
+    );
+    border-radius: 7px;
+    padding: 8px 12px;
+    background: ButtonFace;
+    color: ButtonText;
+    cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+    filter: brightness(1.06);
+}
+
+button:disabled {
+    cursor: default;
+    opacity: 0.58;
+}
+
+button.danger,
+table button.danger {
+    color: #c62828;
+}
+
+progress {
+    height: 16px;
+    margin-top: 14px;
+}
+
+.file-field {
+    margin-top: 12px;
+    border-radius: 8px;
+    padding: 10px;
+    background: color-mix(
+        in srgb,
+        CanvasText 5%,
+        transparent
+    );
+}
+
+.file-field label {
+    margin-top: 0;
+}
+
+.file-field output,
+#manual-file-selection {
+    display: block;
+    min-height: 22px;
+    margin-top: 7px;
+    overflow-wrap: anywhere;
+}
+
+.operation-status {
+    min-height: 23px;
+    margin: 10px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.operation-status[data-state="success"] {
+    color: #16803a;
+}
+
+.operation-status[data-state="error"] {
+    color: #c62828;
+}
+
+.operation-status[data-state="warning"] {
+    color: #b65b00;
+}
+
+.table-scroll {
+    overflow-x: auto;
+    margin-top: 12px;
+}
+
+table {
+    width: 100%;
+    min-width: 840px;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border-bottom: 1px solid color-mix(
+        in srgb,
+        CanvasText 14%,
+        transparent
+    );
+    padding: 9px 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    font-size: 0.82rem;
+}
+
+td {
+    font-size: 0.87rem;
+}
+
+td.numeric,
+th.numeric {
+    text-align: right;
+}
+
+table button {
+    width: auto;
+    min-height: 30px;
+    margin: 0;
+    padding: 5px 9px;
+    white-space: nowrap;
+}
+
+.state-active {
+    color: #16803a;
+    font-weight: 700;
+}
+
+.state-staging {
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
+.state-failed {
+    color: #c62828;
+    font-weight: 700;
+}
+
+.state-obsolete {
+    color: color-mix(
+        in srgb,
+        CanvasText 65%,
+        transparent
+    );
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.button-row button {
+    flex: 1 1 220px;
+}
+
+@media (max-width: 760px) {
+    main {
+        width: min(100% - 20px, 1180px);
+        margin-top: 10px;
+    }
+
+    .count-grid,
+    .status-list {
+        grid-template-columns: 1fr;
+    }
+
+    .section-heading {
+        display: grid;
+    }
+
+    .section-heading button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+    <title>LeanSERP Filter v2 Options</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <main>
+        <header>
+            <h1>LeanSERP Filter v2 Options</h1>
+            <p>
+                Optional features are independent. Disabled features do not
+                create their own timer, observer, pagination controller, or
+                repeated page scan.
+            </p>
+        </header>
+        <form id="settings-form">
+            <section>
+                <h2>Filtering</h2>
+                <label class="setting">
+                    <input
+                        id="enabled"
+                        name="enabled"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Enable LeanSERP filtering</strong>
+                        <small>
+                            Confirm exact local rules before removing search
+                            results.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="deleteBlockedResults"
+                        name="deleteBlockedResults"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Delete blocked results until reload</strong>
+                        <small>
+                            Remove blocked result nodes from the DOM instead
+                            of only hiding them.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="decodeKnownRedirects"
+                        name="decodeKnownRedirects"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Decode known search redirects</strong>
+                        <small>
+                            Inspect known Google and DuckDuckGo destination
+                            parameters locally.
+                        </small>
+                    </span>
+                </label>
+            </section>
+            <section>
+                <h2>Images, media, and connection hints</h2>
+                <p class="notice">
+                    These controls use early page styling and DOM cleanup.
+                    They do not provide a permanent browser-level network
+                    kill switch.
+                </p>
+                <label class="setting">
+                    <input
+                        id="blockImages"
+                        name="blockImages"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Block thumbnails and result images</strong>
+                        <small>
+                            Hide result images and image backgrounds to reduce
+                            rendering, decoding, memory, and some network use.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="blockMedia"
+                        name="blockMedia"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Block media</strong>
+                        <small>
+                            Hide audio, video, embedded media, and related
+                            resource elements.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="disableAutoplay"
+                        name="disableAutoplay"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Disable autoplay</strong>
+                        <small>
+                            Remove autoplay attributes and pause recognized
+                            audio and video elements.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="suppressPrefetch"
+                        name="suppressPrefetch"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Suppress prefetch and preconnect</strong>
+                        <small>
+                            Remove recognized prefetch, preconnect,
+                            DNS-prefetch, prerender, and image-preload hints.
+                        </small>
+                    </span>
+                </label>
+            </section>
+            <section>
+                <h2>Search-page modules</h2>
+                <label class="setting">
+                    <input
+                        id="removeAiSummaries"
+                        name="removeAiSummaries"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Hide or remove AI summaries</strong>
+                        <small>
+                            Remove recognized AI summary modules during the
+                            normal result-page scan.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="removePeopleAlsoAsk"
+                        name="removePeopleAlsoAsk"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Hide or remove People Also Ask</strong>
+                        <small>
+                            Remove recognized related-question modules.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="removeDiscussionsForums"
+                        name="removeDiscussionsForums"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Hide or remove discussions and forums</strong>
+                        <small>
+                            Remove recognized discussion and forum modules.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="removeCarousels"
+                        name="removeCarousels"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Hide or remove image, video, and news carousels</strong>
+                        <small>
+                            Reduce media decoding, DOM growth, layout, and GPU
+                            work where recognized.
+                        </small>
+                    </span>
+                </label>
+            </section>
+            <section>
+			    <label class="setting">
+                    <input
+                        id="removeRelatedSearches"
+                        name="removeRelatedSearches"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>
+                            Hide related searches and more-results modules
+                        </strong>
+                        <small>
+                            Removes recognized "People also search for",
+                            "More results from", related-search grids, and
+                            similar recommendation modules across supported
+                            search engines.
+                        </small>
+                    </span>
+                </label>
+
+                <h2>Rendering and background activity</h2>
+                <label class="setting">
+                    <input
+                        id="disableAnimations"
+                        name="disableAnimations"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Disable animations and transitions</strong>
+                        <small>
+                            Reduce animation-related CPU and GPU activity.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="pauseHiddenTabs"
+                        name="pauseHiddenTabs"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Pause filtering observers in hidden tabs</strong>
+                        <small>
+                            Disconnect the primary result observer while the
+                            tab is hidden.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="textOnlyMode"
+                        name="textOnlyMode"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Use text-only results</strong>
+                        <small>
+                            Hide visual media, decorative backgrounds,
+                            shadows, and embedded content.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="preferLiteInterfaces"
+                        name="preferLiteInterfaces"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Prefer lite and HTML search interfaces</strong>
+                        <small>
+                            Store the preference for engines that support a
+                            lighter interface. Automatic redirects are not
+                            enabled in this version.
+                        </small>
+                    </span>
+                </label>
+            </section>
+            <section>
+                <h2>Infinite-loading limit</h2>
+                <label class="setting">
+                    <input
+                        id="limitInfiniteScrolling"
+                        name="limitInfiniteScrolling"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Stop infinite loading after a result limit</strong>
+                        <small>
+                            Disconnect the main result observer after the
+                            configured processed-result limit.
+                        </small>
+                    </span>
+                </label>
+                <label
+                    class="number-setting"
+                    for="infiniteScrollResultLimit"
+                >
+                    <span>
+                        <strong>Processed-result limit</strong>
+                        <small>Allowed range: 20 to 5,000.</small>
+                    </span>
+                    <input
+                        id="infiniteScrollResultLimit"
+                        name="infiniteScrollResultLimit"
+                        type="number"
+                        min="20"
+                        max="5000"
+                        step="10"
+                    >
+                </label>
+            </section>
+            <section>
+                <h2>Limited automatic pagination</h2>
+                <p class="notice warning-notice">
+                    Lazily creates the pagination controller only on supported engines
+                    with a reliable next-page control. Disabled on Google because
+                    automated result-page navigation can trigger CAPTCHA challenges.
+                </p>
+                <label class="setting">
+                    <input
+                        id="automaticPagination"
+                        name="automaticPagination"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Enable limited automatic pagination</strong>
+                        <small>
+                            Lazily creates the pagination controller and its
+                            Stop loading panel only when enabled.
+                        </small>
+                    </span>
+                </label>
+                <div
+                    id="pagination-settings"
+                    class="number-grid"
+                    aria-label="Automatic pagination limits"
+                >
+                    <label for="paginationTargetVisibleResults">
+                        <span>
+                            <strong>Target visible results</strong>
+                            <small>1 to 500.</small>
+                        </span>
+                        <input
+                            id="paginationTargetVisibleResults"
+                            name="paginationTargetVisibleResults"
+                            type="number"
+                            min="1"
+                            max="500"
+                            step="1"
+                        >
+                    </label>
+                    <label for="paginationMaximumPages">
+                        <span>
+                            <strong>Maximum pages</strong>
+                            <small>1 to 50.</small>
+                        </span>
+                        <input
+                            id="paginationMaximumPages"
+                            name="paginationMaximumPages"
+                            type="number"
+                            min="1"
+                            max="50"
+                            step="1"
+                        >
+                    </label>
+                    <label for="paginationMaximumProcessedResults">
+                        <span>
+                            <strong>Maximum processed results</strong>
+                            <small>10 to 5,000.</small>
+                        </span>
+                        <input
+                            id="paginationMaximumProcessedResults"
+                            name="paginationMaximumProcessedResults"
+                            type="number"
+                            min="10"
+                            max="5000"
+                            step="10"
+                        >
+                    </label>
+                    <label for="paginationDelayMilliseconds">
+                        <span>
+                            <strong>Delay between loads</strong>
+                            <small>Milliseconds: 250 to 10,000.</small>
+                        </span>
+                        <input
+                            id="paginationDelayMilliseconds"
+                            name="paginationDelayMilliseconds"
+                            type="number"
+                            min="250"
+                            max="10000"
+                            step="250"
+                        >
+                    </label>
+                    <label for="paginationEmptyPageLimit">
+                        <span>
+                            <strong>Empty-page limit</strong>
+                            <small>1 to 10.</small>
+                        </span>
+                        <input
+                            id="paginationEmptyPageLimit"
+                            name="paginationEmptyPageLimit"
+                            type="number"
+                            min="1"
+                            max="10"
+                            step="1"
+                        >
+                    </label>
+                    <label for="paginationMaximumElapsedSeconds">
+                        <span>
+                            <strong>Maximum elapsed time</strong>
+                            <small>Seconds: 5 to 600.</small>
+                        </span>
+                        <input
+                            id="paginationMaximumElapsedSeconds"
+                            name="paginationMaximumElapsedSeconds"
+                            type="number"
+                            min="5"
+                            max="600"
+                            step="5"
+                        >
+                    </label>
+                </div>
+                <label class="setting">
+                    <input
+                        id="paginationStopOnCaptcha"
+                        name="paginationStopOnCaptcha"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Pause when CAPTCHA is detected</strong>
+                        <small>
+                            Display a Resume after CAPTCHA button and wait for
+                            manual completion.
+                        </small>
+                    </span>
+                </label>
+                <label class="setting">
+                    <input
+                        id="paginationPauseHiddenTabs"
+                        name="paginationPauseHiddenTabs"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Pause pagination in hidden tabs</strong>
+                        <small>
+                            Prevent pagination steps while the tab is hidden.
+                        </small>
+                    </span>
+                </label>
+            </section>
+            <section>
+                <h2>Experimental page stop</h2>
+                <label class="setting experimental">
+                    <input
+                        id="experimentalWindowStop"
+                        name="experimentalWindowStop"
+                        type="checkbox"
+                    >
+                    <span>
+                        <strong>Stop remaining page load after results</strong>
+                        <small>
+                            Calls window.stop() when result containers exist
+                            and LeanSERP has no pending scan. If that condition
+                            is not reached within 15 seconds, it stops the page
+                            anyway. This is not a permanent network kill
+                            switch.
+                        </small>
+                    </span>
+                </label>
+            </section>
+            <div class="actions">
+                <button
+                    id="save-settings"
+                    type="submit"
+                >
+                    Save settings
+                </button>
+                <button
+                    id="restore-defaults"
+                    type="button"
+                >
+                    Restore defaults
+                </button>
+            </div>
+            <p
+                id="status"
+                role="status"
+                aria-live="polite"
+            >
+                Loading settings...
+            </p>
+        </form>
+        <section class="mandatory">
+            <h2>Mandatory protections</h2>
+            <ul>
+                <li>Generation-based atomic production imports</li>
+                <li>Bounded IndexedDB transactions</li>
+                <li>Bounded lookup batches and pending queues</li>
+                <li>Bounded hostname LRU cache</li>
+                <li>One manager operation at a time</li>
+                <li>No complete production list in memory</li>
+                <li>Exact database confirmation before hiding</li>
+                <li>Public-suffix exclusion</li>
+                <li>Observer and timer cleanup on page exit</li>
+            </ul>
+        </section>
+    </main>
+    <script src="options.js"></script>
+</body>
+</html>

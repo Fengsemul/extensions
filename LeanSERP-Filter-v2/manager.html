@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+    <title>LeanSERP Filter v2 Manager</title>
+    <link rel="stylesheet" href="manager.css">
+</head>
+<body>
+    <main>
+        <header>
+            <h1>LeanSERP Filter v2 Manager</h1>
+            <p>
+                Manage atomic production generations and removable
+                manual rule files.
+            </p>
+        </header>
+        <section>
+            <div class="section-heading">
+                <div>
+                    <h2>Database overview</h2>
+                    <p>
+                        Production rules belong to one active package.
+                        Manual imports remain separately removable.
+                    </p>
+                </div>
+                <button id="refresh-status" type="button">
+                    Refresh
+                </button>
+            </div>
+            <div class="count-grid" aria-live="polite">
+                <div class="count-card">
+                    <span>Production labels</span>
+                    <output id="production-label-count">...</output>
+                </div>
+                <div class="count-card">
+                    <span>Production exact hosts</span>
+                    <output id="production-exact-count">...</output>
+                </div>
+                <div class="count-card">
+                    <span>Production PSL overrides</span>
+                    <output id="production-override-count">...</output>
+                </div>
+                <div class="count-card">
+                    <span>Manual labels</span>
+                    <output id="manual-label-count">...</output>
+                </div>
+                <div class="count-card">
+                    <span>Manual exact hosts</span>
+                    <output id="manual-exact-count">...</output>
+                </div>
+                <div class="count-card">
+                    <span>Manual PSL overrides</span>
+                    <output id="manual-override-count">...</output>
+                </div>
+            </div>
+            <dl class="status-list">
+                <div>
+                    <dt>Active generation</dt>
+                    <dd id="active-generation">None</dd>
+                </div>
+                <div>
+                    <dt>Staging generation</dt>
+                    <dd id="staging-generation">None</dd>
+                </div>
+            </dl>
+        </section>
+        <section>
+            <h2>Import production package</h2>
+            <p>
+                Select all three files from one completed package. The
+                new generation becomes active only after every file has
+                been imported and verified.
+            </p>
+            <div class="file-field">
+                <label for="production-labels-file">
+                    labels.txt
+                </label>
+                <input
+                    id="production-labels-file"
+                    type="file"
+                    accept=".txt,text/plain"
+                >
+                <output id="production-labels-selection">
+                    No file selected.
+                </output>
+            </div>
+            <div class="file-field">
+                <label for="production-exact-file">
+                    exact-host-blocks.txt
+                </label>
+                <input
+                    id="production-exact-file"
+                    type="file"
+                    accept=".txt,text/plain"
+                >
+                <output id="production-exact-selection">
+                    No file selected.
+                </output>
+            </div>
+            <div class="file-field">
+                <label for="production-overrides-file">
+                    psl-label-overrides.txt
+                </label>
+                <input
+                    id="production-overrides-file"
+                    type="file"
+                    accept=".txt,text/plain"
+                >
+                <output id="production-overrides-selection">
+                    No file selected.
+                </output>
+            </div>
+            <label for="production-package-name">
+                Package name
+            </label>
+            <input
+                id="production-package-name"
+                type="text"
+                maxlength="160"
+                placeholder="Example: approved-build-20260725-130752"
+            >
+            <button id="import-production" type="button">
+                Import and activate package
+            </button>
+            <progress
+                id="production-progress"
+                max="100"
+                value="0"
+            ></progress>
+            <p
+                id="production-status"
+                class="operation-status"
+                aria-live="polite"
+            >
+                No production import running.
+            </p>
+        </section>
+        <section>
+            <h2>Production generations</h2>
+            <p>
+                The active generation cannot be deleted. Obsolete,
+                failed, and abandoned staging generations can be removed.
+            </p>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Generation</th>
+                            <th>Package</th>
+                            <th>State</th>
+                            <th>Labels</th>
+                            <th>Exact hosts</th>
+                            <th>Overrides</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="generation-rows">
+                        <tr>
+                            <td colspan="8">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section>
+            <h2>Import a manual rule file</h2>
+            <p>
+                Use this for small test files and exceptions. Every manual
+                file remains separately listed and removable.
+            </p>
+            <label for="manual-category">Rule category</label>
+            <select id="manual-category">
+                <option value="labels">
+                    Blocked labels
+                </option>
+                <option value="exactHosts">
+                    Exact blocked hosts
+                </option>
+                <option value="pslOverrides">
+                    Approved PSL overrides
+                </option>
+            </select>
+            <label for="manual-file">
+                Newline-delimited text file
+            </label>
+            <input
+                id="manual-file"
+                type="file"
+                accept=".txt,text/plain"
+            >
+            <output id="manual-file-selection">
+                No file selected.
+            </output>
+            <button id="import-manual" type="button">
+                Import manual file
+            </button>
+            <progress
+                id="manual-progress"
+                max="100"
+                value="0"
+            ></progress>
+            <p
+                id="manual-status"
+                class="operation-status"
+                aria-live="polite"
+            >
+                No manual import running.
+            </p>
+        </section>
+        <section>
+            <h2>Manual imports</h2>
+            <p>
+                Removing one import decreases reference counts and keeps
+                rules still supplied by another manual file.
+            </p>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Category</th>
+                            <th>State</th>
+                            <th>Valid</th>
+                            <th>Unique links</th>
+                            <th>Rejected</th>
+                            <th>Size</th>
+                            <th>Imported</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manual-import-rows">
+                        <tr>
+                            <td colspan="9">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section>
+            <h2>Actions</h2>
+            <div class="button-row">
+                <button id="open-options" type="button">
+                    Open low-resource options
+                </button>
+                <button id="clear-caches" type="button">
+                    Clear lookup caches
+                </button>
+                <button
+                    id="delete-database"
+                    class="danger"
+                    type="button"
+                >
+                    Delete entire v2 database
+                </button>
+            </div>
+            <p
+                id="action-status"
+                class="operation-status"
+                aria-live="polite"
+            >
+                Ready.
+            </p>
+        </section>
+    </main>
+    <script src="database.js"></script>
+    <script src="manager.js"></script>
+</body>
+</html>

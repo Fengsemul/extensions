@@ -1,0 +1,66 @@
+The active generation cannot be deleted. The easiest clean reset before importing production is the manager's Delete entire v2 database button.
+
+Then reload the extension and confirm:
+javascript
+
+await LeanDb.getCombinedCounts()
+
+All counts should be 0, with no active generation.
+
+After that, import the real three-file production package using the manager's Import production package section. Keep the manager tab open until activation completes.
+
+2026.07.26 07:47: "With Delete blocked results disabled, blocked results stay in the DOM, hidden and inspectable.
+With it enabled, the elements are removed, so querying [data-leanserp-blocked] normally returns zero."
+2026.07.26 10:16: "Recommended disk-saving changes
+1. Delete obsolete generations now
+
+Your test generations still consume space. Keep generation 5 active and delete generations 1-4 using the manager's Delete buttons.
+
+This is the safest immediate saving and requires no schema changes.
+2. Do not import production files as manual files
+
+Manual imports create:
+
+    A rule record with a reference count.
+    A separate ownership record for every rule.
+    Import metadata.
+
+That can roughly double database record overhead. Use the production package importer for the 18-million-label package.
+3. Keep only one active production generation
+
+After a new package activates, delete the obsolete generation promptly. Otherwise, two 18-million-rule generations may coexist.
+4. Remove per-rule values
+
+The current production importer writes:
+javascript
+
+store.put(
+    1,
+    [generation, ruleType, rule]
+);
+
+Changing the value from 1 to null may save a little:
+javascript
+
+store.put(
+    null,
+    [generation, ruleType, rule]
+);
+
+This is a modest saving because IndexedDB key and B-tree overhead dominate.
+5. Avoid unnecessary metadata duplication
+
+Store package-level values only once:
+
+    Import date
+    Filename
+    SHA-256
+    Counts
+    Generation state
+
+Do not add timestamps, filenames, or hashes to individual rule records.
+
+Your v2 schema already follows this principle.
+6. Delete source files only after verified backups
+
+Firefox cannot query the external labels.txt after import. Once the production generation is verified, you could remove the local 258 MB copy, but keep at least one verified backup elsewhere. This saves only 258 MB, whereas IndexedDB may occupy multiple gigabytes."
