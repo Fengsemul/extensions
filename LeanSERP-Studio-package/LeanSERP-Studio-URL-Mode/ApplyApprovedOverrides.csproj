@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Optimize>true</Optimize>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <AssemblyName>ApplyApprovedOverrides</AssemblyName>
+    <StartupObject>ApplyApprovedOverrides</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="ApplyApprovedOverrides.cs" />
+  </ItemGroup>
+</Project>

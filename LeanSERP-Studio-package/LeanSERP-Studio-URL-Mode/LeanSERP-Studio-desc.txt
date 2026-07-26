@@ -1,0 +1,141 @@
+pasted-text.txt
+
+TXT
+
+Run this single PowerShell command:
+powershell
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio-GUI.ps1"
+
+To open it without keeping a visible PowerShell window:
+powershell
+
+Start-Process -FilePath "powershell.exe" -ArgumentList '-NoProfile -ExecutionPolicy Bypass -STA -WindowStyle Hidden -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio-GUI.ps1"' -WindowStyle Hidden
+2026-07-22 15:24: powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio-GUI.ps1"
+
+Use the reliable engine for large builds
+
+Run important builds directly in PowerShell instead of through the GUI:
+powershell
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio.ps1" -InputFile "C:\Users\PC\Downloads\1.txt" -OutputDirectory "C:\Users\PC\Downloads\LeanSERP-Output" -ChunkSize 250000 -KeepUnderscores
+
+Run the launcher with: powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File "C:\Users\PC\Downloads\LeanSERP-Studio\Start-LeanSERP-Build.ps1"
+To test interruption safely, press Ctrl+C in that build console after Created chunk 1 appears.
+
+safest production workflow is:
+
+    Use Start-LeanSERP-Build.ps1.
+    Watch progress in its dedicated console.
+    Press Ctrl+C to request interruption.
+    Verify no builder process remains.
+    Remove only incomplete build directories.
+    Use the GUI for selecting files, reports, and small builds until the polling-based runner integration is tested.
+
+2026.07.22 18:47: "One older process, PID 7208, was still shown earlier. Since the restarted build is now running, do not terminate PowerShell processes blindly. After this build completes, verify no runner or builder remains:
+powershell
+
+$remaining = @(
+    Get-CimInstance Win32_Process |
+        Where-Object {
+            $_.Name -eq "powershell.exe" -and
+            $_.ProcessId -ne $PID -and
+            (
+                $_.CommandLine -like "*Invoke-LeanSERP-Build.ps1*" -or
+                $_.CommandLine -like "*LeanSERP-Studio.ps1*"
+            )
+        }
+)
+if ($remaining.Count -eq 0) {
+    Write-Host "No LeanSERP build process remains." -ForegroundColor Green
+}
+else {
+    $remaining |
+        Select-Object ProcessId, ParentProcessId, CommandLine |
+        Format-List
+}
+"
+
+[2026.07.23: pasted-text.txt
+
+TXT
+
+If b is stored as a blocked label, LeanSERP Filter hides results whose destination hostname contains a complete label exactly equal to b.
+Destination	Hidden?	Reason
+[b.com](http://b.com)	Yes	b is the registrable label.
+[b.org](https://b.org/path)	Yes	Scheme and path do not matter.
+[b.net](https://www.b.net)	Yes	www is ignored; b matches.
+[shop.b.co.uk](https://shop.b.co.uk)	Yes	b is a complete label; co.uk is the suffix.
+[b.example.com](https://b.example.com)	Yes	b is a complete subdomain label.
+[abc.com](https://abc.com)	No	b is only a substring of abc.
+[myb.example](https://myb.example)	No	b is not a separate label.
+[b-example.com](https://b-example.com)	No	The complete label is b-example.
+
+Thus, the effective pattern is conceptually *.b.* or b.* at hostname-label boundaries, not arbitrary text matching. It is case-insensitive, so B and b are equivalent. The http://, https://, path, query, and fragment do not affect the decision.
+
+One exception: if b occurs inside a Public Suffix List rule, it is normally excluded unless b is also placed in psl-label-overrides-approved.txt.
+
+Yes, if you use the URL-mode normalizer, with some important details.
+
+For each line it will:
+
+    Accept a full URL, hostname, compact label, or legacy rule.
+    Remove the scheme, credentials, port, path, query, and fragment.
+    Remove leading labels matching www, www1, www2, etc. when -RemoveCommonWwwLabels is enabled.
+    Use the Public Suffix List to identify structural suffixes such as com, co.uk, and com.au.
+    Extract the registrable domain's main label.
+    Lowercase, sort, and globally deduplicate the resulting labels.
+Important exceptions
+
+    PSL-only hostnames such as cloudfront.net are rejected unless explicitly approved.
+    Approved overrides such as gov and nhs are retained through psl-label-overrides.txt.
+    Approved exact hosts such as gov.uk remain separate in exact-host-blocks.txt.
+    www removal applies only to leading www-style labels. It does not remove arbitrary internal labels.
+    Malformed lines are recorded in rejected-lines.tsv, not silently corrected.
+]
+---
+[2026.07.25: Run both compiled programs in sequence: "# Step 1: Fast URL normalization (no approved overrides yet)
+$exe = "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\bin\Release\net8.0\LeanSerpUrlNormalizer.exe"
+$inputFile = "C:\Users\PC\Downloads\cleanurl\m\top100110millions.txt"
+$output = "C:\Users\PC\Downloads\LeanSERP-Compiled-Output"
+$psl = "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\public_suffix_list.dat"
+
+& $exe `
+    --input $inputFile `
+    --output $output `
+    --psl $psl `
+    --chunk-size 500000 `
+    --keep-underscores `
+    --remove-www
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Normalizer failed with exit code $LASTEXITCODE."
+}
+
+# Step 2: Apply approved PSL overrides (gov, nhs, hluttaw) and exact-host blocks
+$postExe = "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\bin\Release\net8.0\ApplyApprovedOverrides.exe"
+$approved = "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\Approved-Rules"
+
+# Find the newest compiled-build-* directory
+$compiledBuild = Get-ChildItem -LiteralPath $output -Directory |
+    Where-Object { $_.Name -like "compiled-build-*" } |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+
+if (-not $compiledBuild) {
+    throw "No compiled build was found."
+}
+
+& $postExe `
+    --input-build $compiledBuild.FullName `
+    --approved-rules $approved `
+    --output "C:\Users\PC\Downloads\LeanSERP-Compiled-Approved-Output"
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Approved-override postprocessor failed with exit code $LASTEXITCODE."
+}
+
+Run the regression verifier afterward to confirm the final labels.txt matches the PowerShell reference build: powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\RegressionVerifier.ps1" -ReferenceBuild "C:\Users\PC\Downloads\LeanSERP-URL-Output\url-build-20260724-171943" -CandidateBuild "<your-newest-approved-build>"
+
+]
+"

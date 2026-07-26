@@ -1,0 +1,11 @@
+LeanSERP URL-mode benchmark baseline
+Input lines: 1456946
+Accepted lines: 1455897
+Rejected lines: 1049
+Unique labels: 1226659
+Exact-host blocks: 1
+Host-subdomain blocks: 0
+PSL overrides: 3
+Duration seconds: 6956.437
+Approved overrides: gov, hluttaw, nhs
+Build: C:\Users\PC\Downloads\LeanSERP-URL-Output\url-build-20260723-192104

@@ -1,0 +1,12 @@
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\bin\Release\net8.0\ApplyApprovedOverrides.exe
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\bin\Release\net8.0\ApplyApprovedOverrides.deps.json
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\bin\Release\net8.0\ApplyApprovedOverrides.runtimeconfig.json
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\bin\Release\net8.0\ApplyApprovedOverrides.dll
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\ApplyApprovedOverrides.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\ApplyApprovedOverrides.AssemblyInfoInputs.cache
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\ApplyApprovedOverrides.AssemblyInfo.cs
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\ApplyApprovedOverrides.csproj.CoreCompileInputs.cache
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\ApplyApprovedOverrides.dll
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\refint\ApplyApprovedOverrides.dll
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\ApplyApprovedOverrides.genruntimeconfig.cache
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\ref\ApplyApprovedOverrides.dll

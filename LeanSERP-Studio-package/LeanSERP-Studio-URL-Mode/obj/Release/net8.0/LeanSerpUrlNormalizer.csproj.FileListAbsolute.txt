@@ -1,0 +1,12 @@
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\bin\Release\net8.0\LeanSerpUrlNormalizer.exe
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\bin\Release\net8.0\LeanSerpUrlNormalizer.deps.json
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\bin\Release\net8.0\LeanSerpUrlNormalizer.runtimeconfig.json
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\bin\Release\net8.0\LeanSerpUrlNormalizer.dll
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\LeanSerpUrlNormalizer.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\LeanSerpUrlNormalizer.AssemblyInfoInputs.cache
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\LeanSerpUrlNormalizer.AssemblyInfo.cs
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\LeanSerpUrlNormalizer.csproj.CoreCompileInputs.cache
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\LeanSerpUrlNormalizer.dll
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\refint\LeanSerpUrlNormalizer.dll
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\LeanSerpUrlNormalizer.genruntimeconfig.cache
+C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\obj\Release\net8.0\ref\LeanSerpUrlNormalizer.dll
