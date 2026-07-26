@@ -1,0 +1,25 @@
+{
+  "Format": "leanserp-approved-overrides",
+  "Version": 1,
+  "CreatedAt": "2026-07-25T13:07:53.9162244\u002B00:00",
+  "SourceBuild": "C:\\Users\\PC\\Downloads\\LeanSERP-Compiled-Output\\compiled-build-20260725-130153",
+  "OriginalLabelCount": 17849470,
+  "FinalLabelCount": 17849471,
+  "ApprovedOverrideCount": 3,
+  "UsedOverrideCount": 3,
+  "AddedLabelCount": 1,
+  "ApprovedExactHostCount": 2,
+  "UsedExactHostCount": 2,
+  "LabelsSha256": "11e6ed609e71790af4b96a30a10d954482b5d553a54eb83a6cd3ebf2e771ce2c",
+  "OverridesSha256": "10737bd3f71fb4af8f8201a2f0ea06e410a0fa3e7885d287142e971e878e7c06",
+  "ExactHostsSha256": "95b9e13ef905ef1256190b9a8911daefa8f175f3eba9fc148437a4bdea54ebb7",
+  "UsedOverrides": [
+    "gov",
+    "hluttaw",
+    "nhs"
+  ],
+  "UsedExactHosts": [
+    "gov.uk",
+    "nhs.uk"
+  ]
+}
