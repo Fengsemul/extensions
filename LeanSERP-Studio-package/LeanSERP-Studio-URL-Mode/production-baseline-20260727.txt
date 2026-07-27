@@ -1,0 +1,10 @@
+LeanSERP production baseline
+Package: C:\Users\PC\Downloads\LeanSERP-Packages\LeanSERP-Package-20260727-145651
+Labels: 17849471
+Exact-host blocks: 2
+Host-subdomain blocks: 0
+PSL label overrides: 3
+PSL host candidates: 0
+Manifest SHA-256: 7574b8c8ed41a56cd2741cd0ec9fa9b7e4388975bee892df43e1b38b3211321c
+All package file hashes verified: True
+Candidate file status: intentionally empty pending scanner completion

@@ -1,0 +1,650 @@
+pasted-text.txt
+
+TXT
+
+Run this single PowerShell command:
+powershell
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio-GUI.ps1"
+
+To open it without keeping a visible PowerShell window:
+powershell
+
+Start-Process -FilePath "powershell.exe" -ArgumentList '-NoProfile -ExecutionPolicy Bypass -STA -WindowStyle Hidden -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio-GUI.ps1"' -WindowStyle Hidden
+2026-07-22 15:24: powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio-GUI.ps1"
+
+Use the reliable engine for large builds
+
+Run important builds directly in PowerShell instead of through the GUI:
+powershell
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\PC\Downloads\LeanSERP-Studio\LeanSERP-Studio.ps1" -InputFile "C:\Users\PC\Downloads\1.txt" -OutputDirectory "C:\Users\PC\Downloads\LeanSERP-Output" -ChunkSize 250000 -KeepUnderscores
+
+Run the launcher with: powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File "C:\Users\PC\Downloads\LeanSERP-Studio\Start-LeanSERP-Build.ps1"
+To test interruption safely, press Ctrl+C in that build console after Created chunk 1 appears.
+
+safest production workflow is:
+
+    Use Start-LeanSERP-Build.ps1.
+    Watch progress in its dedicated console.
+    Press Ctrl+C to request interruption.
+    Verify no builder process remains.
+    Remove only incomplete build directories.
+    Use the GUI for selecting files, reports, and small builds until the polling-based runner integration is tested.
+
+2026.07.22 18:47: "One older process, PID 7208, was still shown earlier. Since the restarted build is now running, do not terminate PowerShell processes blindly. After this build completes, verify no runner or builder remains:
+powershell
+
+$remaining = @(
+    Get-CimInstance Win32_Process |
+        Where-Object {
+            $_.Name -eq "powershell.exe" -and
+            $_.ProcessId -ne $PID -and
+            (
+                $_.CommandLine -like "*Invoke-LeanSERP-Build.ps1*" -or
+                $_.CommandLine -like "*LeanSERP-Studio.ps1*"
+            )
+        }
+)
+if ($remaining.Count -eq 0) {
+    Write-Host "No LeanSERP build process remains." -ForegroundColor Green
+}
+else {
+    $remaining |
+        Select-Object ProcessId, ParentProcessId, CommandLine |
+        Format-List
+}
+"
+2026.07.23 19:22:"Press Ctrl+C only in the log-watching window after completion. Pressing it in the runner window would stop the actual build."
+
+2026.07.27 13:11 : "pasted-text.txt
+
+TXT
+
+Can you understand this? What do you understand?
+
+Yes. I understand that you are building two related but separate applications:
+1. LeanSERP Studio
+
+A standalone Windows application, currently based on PowerShell and WinForms. It should:
+
+    Use no active CPU, RAM, GPU, or network resources when closed.
+    Normalize, sort, deduplicate, inspect, and package very large domain or URL lists.
+    Keep processing work outside Firefox.
+    Produce compact files that LeanSERP Filter can import.
+    Support live progress, stopping, reports, SHA-256 verification, and bounded-memory processing.
+
+You have two processing modes:
+
+    Label mode for inputs such as *://*.example/* or example.
+    URL mode for full hostnames and URLs, using the Public Suffix List to extract main labels.
+
+2. LeanSERP Filter
+
+A lightweight Firefox extension that will eventually:
+
+    Import the package produced by Studio.
+    Filter search results using exact hostname and complete-label matching.
+    Respect Public Suffix List boundaries.
+    Allow explicitly approved PSL overrides such as gov, nhs, and hluttaw.
+    Avoid substring matches: gov matches the complete label gov, but not mygov.
+    Include optional SERP simplification and resource-saving features.
+
+Its package-import functionality has not yet been implemented.
+What has been completed
+Stable PowerShell label mode
+
+The ordinary label builder works and has been tested with:
+
+    Streaming input.
+    Bounded sorted chunks.
+    Global sorting and deduplication.
+    BOM cleanup.
+    Rejection reports.
+    Metadata and SHA-256 verification.
+    Multiple files.
+    Live GUI logging.
+    Process-tree stopping and cleanup.
+
+PowerShell URL mode
+
+The URL normalizer works correctly but is extremely slow. On the 1,456,946-line test:
+Metric	Result
+Accepted lines	1,455,897
+Rejected lines	1,049
+Unique labels	1,226,659
+Exact hosts	1
+PSL overrides	3
+Runtime	About 6,925 seconds
+
+Its output is the correctness reference.
+Compiled C# mode
+
+The compiled normalizer processed the same 1,456,946 lines in 12.219 seconds, roughly 567 times faster.
+
+Before applying approved rules, it produced:
+
+    1,226,658 labels.
+    One missing label: hluttaw.
+    24 extra PSL-only rejections.
+
+The separate ApplyApprovedOverrides.exe then:
+
+    Loaded the three approved overrides.
+    Used two of them in that dataset.
+    Added the missing hluttaw label.
+    Used one approved exact hostname.
+    Produced 1,226,659 final labels.
+    Produced the exact same label hash as the PowerShell reference:
+
+text
+
+4ccb08039ea029c081f4b52200e855ddb031b7a1b491b90025d6fa3af2ca5cb0
+
+That proves the two-stage compiled pipeline can reproduce the reference labels.txt for the benchmark.
+Current compiled workflow
+
+The current fast pipeline consists of:
+
+    LeanSerpUrlNormalizer.exe
+        Reads the large URL/domain list.
+        Removes schemes, paths, ports, and leading www<number> labels.
+        Uses the PSL to extract main labels.
+        Sorts and deduplicates using bounded chunks.
+        Writes a provisional compiled build.
+
+    ApplyApprovedOverrides.exe
+        Reads the provisional labels and PSL-only report.
+        Applies approved labels such as gov, nhs, and hluttaw.
+        Applies approved exact hosts.
+        Produces the final approved build.
+
+    RegressionVerifier.ps1
+        Compares sorted label files using bounded memory.
+        Verifies recorded hashes.
+        Previously confirmed that the prototype lacked only hluttaw.
+        Should now confirm exact equality for the benchmark after post-processing.
+
+Important correction to the proposed full-run instructions
+
+The full 39-million-line input is not the same dataset as the 1.45-million-line reference build. Therefore, this comparison would be invalid:
+text
+
+ReferenceBuild = 1.45-million-line PowerShell build
+CandidateBuild = 39-million-line approved build
+
+Those outputs are expected to differ because their inputs differ.
+
+For a valid regression test, both builds must use the same input files and settings:
+
+    Compare the compiled 01.txt result with the PowerShell 01.txt result.
+    For the full 39-million-line build, verify its internal hashes and counts.
+    An exact full-build comparison would require a PowerShell reference generated from that same 39-million-line input, which would take a very long time.
+
+Remaining work
+
+The system is not finished yet. The principal remaining tasks are:
+
+    Run the postprocessed benchmark through RegressionVerifier.ps1 without allowing known differences. It should report an exact label match.
+    Run the compiled pipeline on the full input, while preserving the benchmark builds.
+    Verify every final output file, not just labels.txt.
+    Add host-subdomain rules and transformations to compiled mode if those are required.
+    Create or connect a layman-friendly GUI to the compiled pipeline.
+    Implement the LeanSERP Filter package importer in Firefox.
+    Define a final unified package manifest so the extension can atomically import and verify:
+        labels.txt
+        exact-host-blocks.txt
+        host-subdomain-blocks.txt
+        psl-label-overrides.txt
+        metadata and hashes
+
+The immediate next step is to verify that the postprocessed 01.txt compiled build exactly matches the verified PowerShell 01.txt label file. After that, the full compiled build is justified.
+",
+2026.07.27 13:36:"Find-PslHostCandidates.ps1 already performs the correct first stage:
+
+    Load multi-label Public Suffix List entries such as github.io.
+    Stream your URL list.
+    Find exact PSL hostnames that also occur in that list.
+    Produce candidates for further classification."
+
+2026.07.27: 13:45: "powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\PC\Downloads\LeanSERP-Studio\Find-PslHostCandidates.ps1" -InputFile "C:\Users\PC\Downloads\cleanurl\m\top100110millions.txt" -PublicSuffixList "C:\Users\PC\Downloads\LeanSERP-Studio\public_suffix_list.dat"
+performs an offline, read-only intersection scan. It does not modify:
+
+    top100110millions.txt
+    public_suffix_list.dat
+    LeanSERP Filter
+    Firefox
+    your approved rules
+
+It loads the 8,218 multi-label Public Suffix List rules, streams through the 39-million-line input, normalizes each hostname, and records exact hostnames that are also multi-label PSL entries, such as github.io, gov.uk, or co.uk.
+
+Scanned {0:N0} lines is only a progress-formatting bug. 64 unique candidates is the meaningful part at that point.",
+"By default, the script writes reports under:
+text
+
+C:\Users\PC\Downloads\LeanSERP-PSL-Candidates",
+"First inspect files created or modified during the current scan:
+powershell
+
+$folder = "C:\Users\PC\Downloads\LeanSERP-PSL-Candidates"
+Get-ChildItem -LiteralPath $folder -File -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 20 Name, Length, LastWriteTime, FullName |
+    Format-Table -AutoSize",
+"If you stopped before completion, there may be only partial reports, or none. Remove only the current incomplete scan's files by using its timestamp. For example:
+powershell
+
+$folder = "C:\Users\PC\Downloads\LeanSERP-PSL-Candidates"
+$timestamp = "PASTE_CURRENT_SCAN_TIMESTAMP"
+Get-ChildItem -LiteralPath $folder -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -like "*$timestamp*" } |
+    Remove-Item -Force",
+"o delete the entire output directory only when you are certain it contains nothing worth retaining:
+powershell
+
+$folder = "C:\Users\PC\Downloads\LeanSERP-PSL-Candidates"
+if (Test-Path -LiteralPath $folder -PathType Container) {
+    Remove-Item -LiteralPath $folder -Recurse -Force
+    Write-Host "All PSL candidate reports were removed." -ForegroundColor Green
+}",
+"goal - hide a PSL entry when it is itself present as a website in your source - the safest generated rule is initially exact host github.io. Blocking all *.github.io is a separate, broader policy decision.",
+2026-07-27 13:59:"Double-suffix host candidates
+
+For names such as github.io, keep two concepts separate:
+
+    github.io remains a Public Suffix List rule for structural parsing.
+    If it occurs exactly in your URL list and is operational, it may additionally become an exact-host block.
+    Turning github into a cross-TLD label override is a separate, broader decision.
+
+Your existing Find-PslHostCandidates.ps1 is the correct offline first stage. For the full URL list, run:
+powershell
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File "C:\Users\PC\Downloads\LeanSERP-Studio\Find-PslHostCandidates.ps1" `
+  -InputFile "C:\Users\PC\Downloads\cleanurl\m\top100110millions.txt" `
+  -PublicSuffixList "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\public_suffix_list.dat" `
+  -OutputDirectory "C:\Users\PC\Downloads\LeanSERP-PSL-Candidates"
+
+Check specifically for github.io:
+powershell
+
+$candidate = Get-ChildItem "C:\Users\PC\Downloads\LeanSERP-PSL-Candidates" `
+  -Filter "psl-host-candidates-*.txt" |
+  Sort-Object LastWriteTime -Descending |
+  Select-Object -First 1
+Select-String -LiteralPath $candidate.FullName -Pattern "^github\.io$"
+
+If it matches, github.io should enter the candidate-review workflow, not automatically become github in psl-label-overrides.txt.
+",
+2026-07-27 14:37:"After the PSL scan finishes
+
+It should print a completed scan summary and candidate-file path. Then check github.io with:
+powershell
+
+$folder = "C:\Users\PC\Downloads\LeanSERP-PSL-Candidates"
+$candidate = Get-ChildItem -LiteralPath $folder -Filter "psl-host-candidates-*.txt" -File |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+if (-not $candidate) {
+    throw "No completed PSL candidate file was found."
+}
+$match = Select-String -LiteralPath $candidate.FullName -Pattern "^github\.io$"
+if ($match) {
+    Write-Host "github.io is present as an exact PSL-host candidate." -ForegroundColor Green
+    $match
+}
+else {
+    Write-Host "github.io was not found as an exact candidate in this input." -ForegroundColor Yellow
+}
+
+If found, github.io belongs in the exact-host candidate workflow. It should not automatically create the broad label override github.",
+2026.07.27 14:43:  finish the PSL-host candidate workflow, then produce one unified package manifest. Let the currently running candidate scan finish. After it returns to the PowerShell prompt, run this to inspect the newest result and check github.io: "$folder = "C:\Users\PC\Downloads\LeanSERP-PSL-Candidates"
+
+$candidateFile = Get-ChildItem -LiteralPath $folder -File |
+    Where-Object { $_.Name -like "psl-host-candidates-*.txt" } |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+
+if (-not $candidateFile) {
+    throw "No PSL-host candidate file was found."
+}
+
+$metadataPath = $candidateFile.FullName.Replace(".txt", ".meta.json")
+
+if (-not (Test-Path -LiteralPath $metadataPath -PathType Leaf)) {
+    throw "Candidate metadata was not found: $metadataPath"
+}
+
+$metadata = Get-Content -LiteralPath $metadataPath -Raw | ConvertFrom-Json
+$actualHash = (Get-FileHash -LiteralPath $candidateFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+
+if ($actualHash -ne ([string]$metadata.candidateSha256).ToLowerInvariant()) {
+    throw "The PSL-host candidate file failed SHA-256 verification."
+}
+
+$githubMatch = Select-String -LiteralPath $candidateFile.FullName -Pattern "^github\.io$"
+
+[pscustomobject]@{
+    CandidateFile      = $candidateFile.FullName
+    InputLines         = $metadata.inputLineCount
+    UniqueCandidates   = $metadata.uniqueCandidateCount
+    CandidateSha256    = $actualHash
+    GithubIoPresent    = [bool]$githubMatch
+    HashVerified       = $true
+} | Format-List
+
+if ($githubMatch) {
+    Write-Host "github.io is a PSL-host candidate." -ForegroundColor Green
+    Write-Host "Treat it as an exact-host review candidate, not automatically as the broad label github." -ForegroundColor Yellow
+}
+else {
+    Write-Host "github.io was not found as an exact candidate in this scan." -ForegroundColor Yellow
+}
+",
+2026.07.27 14:47: "Candidate approval model
+
+When the scan finishes, each exact PSL hostname should remain distinct from its possible label override:
+Candidate	Exact-host rule	Broad label override
+github.io	Blocks exactly github.io	github blocks any complete github label
+pages.dev	Blocks exactly pages.dev	pages blocks any complete pages label
+gov.uk	Blocks exactly gov.uk	gov blocks complete gov labels across suffixes",
+2026-07-27 15:00: "Once that scan completes, its candidate file and metadata should be hash-verified before adding candidates such as github.io to a new review-only package.",
+2026-07-27 15:02: "After the scan finishes
+
+Do not immediately treat candidates such as github.io as active rules. First identify and verify the newest completed scan:
+powershell
+
+$folder = "C:\Users\PC\Downloads\LeanSERP-PSL-Candidates"
+$metadataFile = Get-ChildItem -LiteralPath $folder -Filter "psl-host-candidates-*.meta.json" -File |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+if (-not $metadataFile) {
+    throw "No completed candidate metadata file was found."
+}
+$metadata = Get-Content -LiteralPath $metadataFile.FullName -Raw | ConvertFrom-Json
+$candidatePath = Join-Path $folder $metadataFile.Name.Replace(".meta.json", ".txt")
+if (-not (Test-Path -LiteralPath $candidatePath -PathType Leaf)) {
+    throw "The candidate file referenced by the metadata was not found: $candidatePath"
+}
+$actualHash = (Get-FileHash -LiteralPath $candidatePath -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($actualHash -ne ([string]$metadata.candidateSha256).ToLowerInvariant()) {
+    throw "The PSL candidate file failed SHA-256 verification."
+}
+[pscustomobject]@{
+    CandidateFile       = $candidatePath
+    InputLines          = $metadata.inputLineCount
+    ValidHostnames      = $metadata.validHostnameCount
+    RejectedLines       = $metadata.rejectedLineCount
+    UniqueCandidates    = $metadata.uniqueCandidateCount
+    CandidateSha256     = $actualHash
+    NetworkTestsRun     = $metadata.networkTestsPerformed
+    HashVerified        = $true
+} | Format-List
+
+Then check github.io:
+powershell
+
+Select-String -LiteralPath $candidatePath -Pattern "^github\.io$"
+
+A match means only:
+
+    github.io is a multi-label PSL entry.
+    The exact hostname occurs in your source.
+    It belongs in the review-only candidate list.
+
+It does not automatically mean that github should become a broad label override.",
+2026-07-27 15:06:"The intended flow is:
+Stage	Meaning
+Raw-Candidates	Hash-verified output from Find-PslHostCandidates.ps1.
+Network-Reports	DNS, HTTP, HTTPS, redirect, and timeout observations.
+Reviewed	Candidates you have manually inspected.
+Approved-Exact-Hosts	PSL hosts approved for exact-host blocking, such as github.io.
+Rejected	Candidates deliberately excluded from blocking.
+
+A candidate such as github.io should become an exact-host rule only after approval. It should not automatically create the broad label override github.",
+2026-07-27:"6. Define the compiled GUI controls
+
+The future compiled-pipeline GUI should have these pages:
+Build
+
+    Add files
+    Remove selected
+    Clear
+    Output directory
+    Chunk size
+    Keep underscores
+    Remove leading www, www54, etc.
+    Build compiled package
+    Stop
+    Live log
+    Open output
+
+Transformations
+
+    Mode: None, Normal, Extended, Regex
+    Find
+    Replace
+    Case-sensitive
+    Preview only
+    Preview limit
+    Copy preview report
+
+PSL host review
+
+    Load verified candidate scan
+    Show exact source matches
+    Show network evidence
+    Search candidates
+    Approve as exact host
+    Reject candidate
+    Never automatically convert to a label override
+    Export approved exact hosts
+
+Package
+
+    Select approved compiled build
+    Select approved PSL-host list
+    Generate unified package
+    Verify every hash
+    Show active versus review-only files
+    Open package
+    Back up package
+
+7. What not to do during the scan
+
+    Do not rerun Find-PslHostCandidates.ps1.
+    Do not alter top100110millions.txt.
+    Do not edit the scanner's current candidate or metadata files.
+    Do not test network status against the unfinished candidate output.
+    Do not regenerate the production package with a partial candidate file.
+    Do not add github as a broad PSL override merely because github.io is found.
+
+Once the scan finishes, the next operation is to verify its metadata hash, check for github.io, and copy the verified candidate file into the Raw-Candidates review folder.",
+2026.07.27 15:44:"If it prints github.io, add it as an exact-host block only:
+powershell
+
+$approved = "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\PSL-Host-Review\Approved-Exact-Hosts\approved-psl-exact-hosts.txt"
+$hosts = @(
+    Get-Content -LiteralPath $approved -ErrorAction SilentlyContinue
+    "github.io"
+) |
+    ForEach-Object { $_.Trim().ToLowerInvariant() } |
+    Where-Object { $_ } |
+    Sort-Object -Unique
+[System.IO.File]::WriteAllLines(
+    $approved,
+    [string[]]$hosts,
+    [System.Text.UTF8Encoding]::new($false)
+)
+Write-Host "github.io added as an approved exact-host block." -ForegroundColor Green
+
+Then rerun the validator:
+powershell
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\Test-LeanSerpApprovedHosts.ps1"
+
+Expected after approval:
+text
+
+Approved hosts: 1
+Candidate hosts loaded: 3005
+Approved hosts absent from candidates: 0
+
+This approval hides exactly github.io. It does not automatically hide subdomains such as username.github.io, and it does not create the broad label override github. Those would require separate rule types.",
+2026.07.27 15:47:"t remains exact at hostname boundaries, so unrelated names containing the text github are unaffected.
+Create the approved host-subdomain file
+
+Run this PowerShell block:
+powershell
+
+$directory = "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\PSL-Host-Review\Approved-Host-Subdomains"
+$path = Join-Path $directory "approved-psl-host-subdomains.txt"
+New-Item -ItemType Directory -Path $directory -Force | Out-Null
+$hosts = @(
+    Get-Content -LiteralPath $path -ErrorAction SilentlyContinue
+    "github.io"
+) |
+    ForEach-Object { $_.Trim().ToLowerInvariant() } |
+    Where-Object { $_ } |
+    Sort-Object -Unique
+[System.IO.File]::WriteAllLines(
+    $path,
+    [string[]]$hosts,
+    [System.Text.UTF8Encoding]::new($false)
+)
+Write-Host "Approved host-and-subdomains rule created." -ForegroundColor Green
+Write-Host "Path: $path"
+Write-Host "Rules: $($hosts.Count)"
+
+Expected output includes:
+text
+
+Approved host-and-subdomains rule created.
+Rules: 1
+
+Do not also approve it as an exact-host rule
+
+If you previously added github.io to approved-psl-exact-hosts.txt, remove it because the host-subdomain rule already includes the base hostname:
+powershell
+
+$path = "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\PSL-Host-Review\Approved-Exact-Hosts\approved-psl-exact-hosts.txt"
+$hosts = @(
+    Get-Content -LiteralPath $path -ErrorAction SilentlyContinue |
+    ForEach-Object { $_.Trim().ToLowerInvariant() } |
+    Where-Object { $_ -and $_ -ne "github.io" } |
+    Sort-Object -Unique
+)
+[System.IO.File]::WriteAllLines(
+    $path,
+    [string[]]$hosts,
+    [System.Text.UTF8Encoding]::new($false)
+)
+Write-Host "github.io removed from the exact-host list if it was present." -ForegroundColor",
+2026.07.27 15:50:"Validate the new rule
+powershell
+
+$path = "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\PSL-Host-Review\Approved-Host-Subdomains\approved-psl-host-subdomains.txt"
+$rules = @(
+    Get-Content -LiteralPath $path |
+    ForEach-Object { $_.Trim().ToLowerInvariant() } |
+    Where-Object { $_ } |
+    Sort-Object -Unique
+)
+if ($rules -notcontains "github.io") {
+    throw "github.io is missing from the host-subdomain rules."
+}
+foreach ($hostname in @(
+    "github.io",
+    "username.github.io",
+    "project.username.github.io"
+)) {
+    $matches = (
+        $hostname -eq "github.io" -or
+        $hostname.EndsWith(".github.io", [System.StringComparison]::OrdinalIgnoreCase)
+    )
+    Write-Host "$hostname hidden=$matches"
+}
+Write-Host "github.io host-subdomain rule passed validation." -ForegroundColor Green",
+2026-07-27 15:56:"github.io host-and-subdomains rule is working correctly:
+Destination hostname	Hidden
+github.io	Yes
+username.github.io	Yes
+project.username.github.io	Yes
+github.com	No
+mygithub.io	No",
+2026.07.27 16:04: "It must use the dot boundary. A plain EndsWith("github.io") check would incorrectly match names such as notgithub.io.",
+2026.07.27 19:35: "Use this command whenever you want to start the compiled Studio:
+powershell
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\LeanSERP-Compiled-GUI.ps1"
+
+To start it without a visible PowerShell console:
+powershell
+
+$arguments = @(
+    "-NoProfile"
+    "-ExecutionPolicy"
+    "Bypass"
+    "-STA"
+    "-WindowStyle"
+    "Hidden"
+    "-File"
+    "C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\LeanSERP-Compiled-GUI.ps1"
+)
+Start-Process `
+    -FilePath "powershell.exe" `
+    -ArgumentList $arguments `
+    -WindowStyle Hidden"
+2026.07.27 19:41: "The compiled normalizer removes http:// and https:// before extracting the hostname and main label.
+Input	Resulting label
+[example.com](http://example.com/page)	example
+[example.com](https://www.example.com?q=1)	example
+[www54.example.co.uk](https://www54.example.co.uk/path)	example
+[subdomain.wikipedia.org](http://subdomain.wikipedia.org)	wikipedia
+
+It also removes:
+
+    Leading www, www1, www54, etc. when Remove www-number labels is checked.
+    Paths, queries, and fragments, such as /page, ?q=1, and #section.
+    Ports and credentials, where supported.
+    Public suffixes such as com, co.uk, and org.
+
+The original source file is not modified. These transformations apply only while generating the normalized package. Exact approved hosts and PSL overrides remain in their separate rule files.",
+2026-07-27 19:44:"The compiled normalizer creates two diagnostic reports inside each compiled-build-* directory:
+File	Purpose
+rejected-lines.tsv	Records the rejection reason, source file, line number, and original input.
+public-suffix-only.tsv	Records hostnames rejected because the complete hostname is a Public Suffix List entry.
+
+For example:
+text
+
+reason	source	line	originalpublic-suffix-only	...\input.txt	113	amplifyapp.cominvalid-url	...\input.txt	250	https://[invalidempty-comment-or-directive	...\input.txt	400	#comment
+
+The public-suffix report contains:
+text
+
+hostname	publicSuffix	source	linegithub.io	github.io	...\input.txt	1234cloudfront.net	cloudfront.net	...\input.txt	5678
+
+Important package distinction
+
+These reports currently remain in the intermediate compiled build, such as:
+text
+
+C:\Users\PC\Downloads\LeanSERP-Compiled-Output\compiled-build-...\rejected-lines.tsvC:\Users\PC\Downloads\LeanSERP-Compiled-Output\compiled-build-...\public-suffix-only.tsv
+
+Your final unified package currently includes rejected-lines.tsv, but the GUI pipeline does not appear to pass the compiled rejection report to New-LeanSerpPackage.ps1. Therefore, the final package's rejected-lines.tsv is probably empty. public-suffix-only.tsv is not currently part of the unified package manifest.
+
+You can inspect the latest compiled rejection reasons with:
+powershell
+
+$root = "C:\Users\PC\Downloads\LeanSERP-Compiled-Output"$build = Get-ChildItem -LiteralPath $root -Directory |    Where-Object { $_.Name -like "compiled-build-*" } |    Sort-Object LastWriteTime -Descending |    Select-Object -First 1if ($null -eq $build) {    throw "No compiled build was found."}$rejections = Join-Path $build.FullName "rejected-lines.tsv"if (-not (Test-Path -LiteralPath $rejections -PathType Leaf)) {    throw "The rejection report was not found: $rejections"}$rows = @(Import-Csv -LiteralPath $rejections -Delimiter "`t")Write-Host "Build: $($build.FullName)"Write-Host "Rejected rows: $($rows.Count)"$rows |    Group-Object -Property reason |    Sort-Object -Property Count -Descending |    Select-Object Count, Name |    Format-Table -AutoSize
+
+To view the first 30 rejected entries:
+powershell
+
+$rows |    Select-Object -First 30 reason, source, line, original |    Format-Table -Wrap -AutoSize
+
+The next Studio improvement should copy both diagnostic files into the unified package as review-only files, without activating either one in LeanSERP Filter.",
+2026.07.27 19:49: C:\Users\PC\Downloads\LeanSERP-Studio-URL-Mode\PSL-Host-Review\Reviewed\final-psl-approval-validation.txt : "hostname	ruleType	presentInCandidates	active
+github.io	host-and-subdomains-block	True	True
+"
