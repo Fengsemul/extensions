@@ -371,44 +371,66 @@
         }
     }
 
-    async function countValidRules(
-        file,
-        category
+async function countValidRules(
+    file,
+    category
+) {
+    let valid = 0;
+    let rejected = 0;
+    let duplicates = 0;
+    let previousRule = null;
+
+    for await (
+        const record of readLines(file)
     ) {
-        let valid = 0;
-        let rejected = 0;
+        const rawLine =
+            String(record.line || "");
 
-        for await (
-            const record of readLines(file)
+        if (
+            rawLine.length === 0 ||
+            rawLine.trim().startsWith("#")
         ) {
-            const rawLine =
-                String(record.line || "");
-
-            if (
-                rawLine.length === 0 ||
-                rawLine.trim().startsWith("#")
-            ) {
-                rejected += 1;
-                continue;
-            }
-
-            if (
-                normalizeRule(
-                    rawLine,
-                    category
-                )
-            ) {
-                valid += 1;
-            } else {
-                rejected += 1;
-            }
+            rejected += 1;
+            continue;
         }
 
-        return {
-            valid,
-            rejected
-        };
+        const normalized =
+            normalizeRule(
+                rawLine,
+                category
+            );
+
+        if (!normalized) {
+            rejected += 1;
+            continue;
+        }
+
+        if (normalized === previousRule) {
+            duplicates += 1;
+            continue;
+        }
+
+        if (
+            previousRule !== null &&
+            normalized < previousRule
+        ) {
+            throw new Error(
+                file.name +
+                " is not sorted after normalization. " +
+                "Rebuild it in LeanSERP Studio before importing."
+            );
+        }
+
+        previousRule = normalized;
+        valid += 1;
     }
+
+    return {
+        valid,
+        rejected,
+        duplicates
+    };
+}
 
     function setOperationRunning(running) {
         operationRunning = running;
@@ -788,100 +810,121 @@
             );
     }
 
-    async function importProductionFile(
-        slot,
-        category,
-        file,
-        progressStart,
-        progressShare
+ 
+async function importProductionFile(
+    slot,
+    category,
+    file,
+    progressStart,
+    progressShare
+) {
+    const ruleType =
+        RULE_FILES[category].ruleType;
+
+    let valid = 0;
+    let rejected = 0;
+    let duplicates = 0;
+    let previousRule = null;
+    let batch = [];
+
+    for await (
+        const record of readLines(file)
     ) {
-        const ruleType =
-            RULE_FILES[category].ruleType;
+        const rawLine =
+            String(record.line || "");
 
-        let valid = 0;
-        let rejected = 0;
-        let batch = [];
-
-        for await (
-            const record of readLines(file)
+        if (
+            rawLine.length === 0 ||
+            rawLine.trim().startsWith("#")
         ) {
-            const rawLine =
-                String(record.line || "");
-
-            if (
-                rawLine.length === 0 ||
-                rawLine.trim().startsWith("#")
-            ) {
-                rejected += 1;
-                continue;
-            }
-
-            const normalized =
-                normalizeRule(
-                    rawLine,
-                    category
-                );
-
-            if (!normalized) {
-                rejected += 1;
-                continue;
-            }
-
-            batch.push(normalized);
-            valid += 1;
-
-            if (
-                batch.length >=
-                PRODUCTION_BATCH_SIZE
-            ) {
-                await send({
-                    type: "putProductionBatch",
-                    slot,
-                    ruleType,
-                    rules: batch
-                });
-
-                batch = [];
-
-                const fileFraction =
-                    file.size > 0
-                        ? record.bytesRead /
-                            file.size
-                        : 0;
-
-                elements.productionProgress.value =
-                    Math.min(
-                        99,
-                        Math.floor(
-                            progressStart +
-                            fileFraction *
-                                progressShare
-                        )
-                    );
-
-                setStatus(
-                    elements.productionStatus,
-                    `Importing ${file.name}: ` +
-                        `${valid.toLocaleString()} accepted, ` +
-                        `${rejected.toLocaleString()} rejected.`
-                );
-            }
+            rejected += 1;
+            continue;
         }
 
-        if (batch.length > 0) {
+        const normalized =
+            normalizeRule(
+                rawLine,
+                category
+            );
+
+        if (!normalized) {
+            rejected += 1;
+            continue;
+        }
+
+        if (normalized === previousRule) {
+            duplicates += 1;
+            continue;
+        }
+
+        if (
+            previousRule !== null &&
+            normalized < previousRule
+        ) {
+            throw new Error(
+                file.name +
+                " is not sorted after normalization."
+            );
+        }
+
+        previousRule = normalized;
+        batch.push(normalized);
+        valid += 1;
+
+        if (
+            batch.length >=
+            PRODUCTION_BATCH_SIZE
+        ) {
             await send({
                 type: "putProductionBatch",
                 slot,
                 ruleType,
                 rules: batch
             });
-        }
 
-        return {
-            valid,
-            rejected
-        };
+            batch = [];
+
+            const fileFraction =
+                file.size > 0
+                    ? record.bytesRead /
+                        file.size
+                    : 0;
+
+            elements.productionProgress.value =
+                Math.min(
+                    99,
+                    Math.floor(
+                        progressStart +
+                        fileFraction *
+                            progressShare
+                    )
+                );
+
+            setStatus(
+                elements.productionStatus,
+                `Importing ${file.name}: ` +
+                    `${valid.toLocaleString()} unique, ` +
+                    `${duplicates.toLocaleString()} duplicates, ` +
+                    `${rejected.toLocaleString()} rejected.`
+            );
+        }
     }
+
+    if (batch.length > 0) {
+        await send({
+            type: "putProductionBatch",
+            slot,
+            ruleType,
+            rules: batch
+        });
+    }
+
+    return {
+        valid,
+        rejected,
+        duplicates
+    };
+}
 
     async function importProductionPackage() {
         if (operationRunning) {
