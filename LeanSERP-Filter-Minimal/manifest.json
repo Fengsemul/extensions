@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Low-overhead, public-suffix-aware SERP filtering with bounded local lookups.",
   "permissions": [
+"storage",
     "unlimitedStorage",
     "tabs"
   ],
