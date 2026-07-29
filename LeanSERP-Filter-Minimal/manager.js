@@ -121,6 +121,22 @@
             document.getElementById(
                 "manual-import-rows"
             ),
+		diagnosticsTab:
+			document.getElementById(
+				"diagnostics-tab"
+			),
+		refreshDiagnosticsTabs:
+			document.getElementById(
+				"refresh-diagnostics-tabs"
+			),
+		collectDiagnostics:
+			document.getElementById(
+				"collect-diagnostics"
+			),
+		diagnosticsOutput:
+			document.getElementById(
+				"diagnostics-output"
+			),
         clearCaches:
             document.getElementById(
                 "clear-caches"
@@ -435,6 +451,15 @@ async function countValidRules(
     function setOperationRunning(running) {
         operationRunning = running;
 
+		elements.diagnosticsTab.disabled =
+			running;
+			
+		elements.refreshDiagnosticsTabs.disabled =
+			running;
+			
+		elements.collectDiagnostics.disabled =
+			running;
+			
         elements.refreshStatus.disabled =
             running;
 
@@ -458,6 +483,7 @@ async function countValidRules(
 
         elements.clearCaches.disabled =
             running;
+			
 
         for (
             const name of
@@ -1404,7 +1430,202 @@ async function importProductionFile(
             setOperationRunning(false);
         }
     }
-
+	function isSupportedDiagnosticUrl(value) {
+    try {
+        const url = new URL(value);
+        if (
+            url.protocol !== "http:" &&
+            url.protocol !== "https:"
+        ) {
+            return false;
+        }
+        const hostname =
+            url.hostname.toLowerCase();
+        return (
+            /(^|\.)google\./.test(hostname) ||
+            /(^|\.)bing\.com$/.test(hostname) ||
+            /(^|\.)duckduckgo\.com$/.test(
+                hostname
+            ) ||
+            hostname ===
+                "search.brave.com" ||
+            hostname === "etools.ch" ||
+            hostname.endsWith(
+                ".etools.ch"
+            ) ||
+            hostname === "wiby.org" ||
+            hostname.endsWith(
+                ".wiby.org"
+            ) ||
+            hostname ===
+                "secretsearchenginelabs.com" ||
+            hostname.endsWith(
+                ".secretsearchenginelabs.com"
+            ) ||
+            hostname === "rawweb.org" ||
+            hostname.endsWith(
+                ".rawweb.org"
+            ) ||
+            hostname ===
+                "slsearch.eu.org" ||
+            hostname.endsWith(
+                ".slsearch.eu.org"
+            ) ||
+            hostname ===
+                "searchthis.ch" ||
+            hostname.endsWith(
+                ".searchthis.ch"
+            ) ||
+            hostname === "degoog.org" ||
+            hostname.endsWith(
+                ".degoog.org"
+            )
+        );
+    } catch {
+        return false;
+    }
+}
+async function refreshDiagnosticTabs() {
+    const previousValue =
+        elements.diagnosticsTab.value;
+    const tabs =
+        await browser.tabs.query({});
+    const supportedTabs =
+        tabs
+            .filter(tab =>
+                Number.isInteger(tab.id) &&
+                typeof tab.url === "string" &&
+                isSupportedDiagnosticUrl(
+                    tab.url
+                )
+            )
+            .sort(
+                (left, right) =>
+                    Number(
+                        right.lastAccessed || 0
+                    ) -
+                    Number(
+                        left.lastAccessed || 0
+                    )
+            );
+    elements.diagnosticsTab
+        .replaceChildren();
+    if (supportedTabs.length === 0) {
+        const option =
+            document.createElement(
+                "option"
+            );
+        option.value = "";
+        option.textContent =
+            "No supported tabs found";
+        elements.diagnosticsTab
+            .appendChild(option);
+        return;
+    }
+    for (const tab of supportedTabs) {
+        const option =
+            document.createElement(
+                "option"
+            );
+        option.value =
+            String(tab.id);
+        let hostname = "";
+        try {
+            hostname =
+                new URL(tab.url).hostname;
+        } catch {
+            hostname = tab.url;
+        }
+        option.textContent =
+            `${hostname} - ` +
+            `${tab.title || tab.url}`;
+        elements.diagnosticsTab
+            .appendChild(option);
+    }
+    if (
+        Array.from(
+            elements.diagnosticsTab.options
+        ).some(
+            option =>
+                option.value ===
+                previousValue
+        )
+    ) {
+        elements.diagnosticsTab.value =
+            previousValue;
+    }
+}
+async function collectDiagnostics() {
+    if (operationRunning) {
+        return;
+    }
+    const tabId =
+        Number(
+            elements.diagnosticsTab.value
+        );
+    if (
+        !Number.isInteger(tabId) ||
+        tabId < 0
+    ) {
+        setStatus(
+            elements.actionStatus,
+            "Select a supported search-results tab.",
+            "error"
+        );
+        return;
+    }
+    setOperationRunning(true);
+    setStatus(
+        elements.actionStatus,
+        "Requesting diagnostics from the selected tab..."
+    );
+    try {
+        const response =
+            await send({
+                type:
+                    "collectTabDiagnostics",
+                tabId
+            });
+        const text =
+            JSON.stringify(
+                response.diagnostics,
+                null,
+                2
+            );
+        elements.diagnosticsOutput.value =
+            text;
+        try {
+            await navigator.clipboard
+                .writeText(text);
+            setStatus(
+                elements.actionStatus,
+                "Diagnostics captured and copied to the clipboard.",
+                "success"
+            );
+        } catch {
+            setStatus(
+                elements.actionStatus,
+                "Diagnostics captured. Copy them from the text box.",
+                "success"
+            );
+        }
+    } catch (error) {
+        elements.diagnosticsOutput.value =
+            "";
+        setStatus(
+            elements.actionStatus,
+            "Diagnostic capture failed: " +
+                (
+                    error && error.message
+                        ? error.message
+                        : String(error)
+                ),
+            "error"
+        );
+    } finally {
+        setOperationRunning(false);
+    }
+}
     async function deleteDatabase() {
         if (operationRunning) {
             return;
@@ -1501,7 +1722,27 @@ async function importProductionFile(
             void importManualFile();
         }
     );
-
+	elements.refreshDiagnosticsTabs
+    .addEventListener(
+        "click",
+        () => {
+            void refreshDiagnosticTabs()
+                .catch(error => {
+                    setStatus(
+                        elements.actionStatus,
+                        "Could not refresh the tab list: " +
+                            error.message,
+                        "error"
+                    );
+                });
+        }
+    );
+	elements.collectDiagnostics.addEventListener(
+		"click",
+		() => {
+        void collectDiagnostics();
+		}
+	);
     elements.clearCaches.addEventListener(
         "click",
         async () => {
@@ -1540,6 +1781,15 @@ async function importProductionFile(
         setStatus(
             elements.actionStatus,
             "Could not load database status: " +
+                error.message,
+            "error"
+        );
+    });
+	void refreshDiagnosticTabs()
+    .catch(error => {
+        setStatus(
+            elements.actionStatus,
+            "Could not load the tab list: " +
                 error.message,
             "error"
         );
