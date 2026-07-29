@@ -500,4 +500,598 @@ $path = "C:\Users\PC\Downloads\LeanSERP-Compiled-Approved-Output\approved-build-
 
 If the file has since moved, replace $path with its current location.
 
-After the database reset and manager fix, re-import the package. The expected unique label count should be 17,849,469, with 1 duplicate reported and no activation mismatch."
+After the database reset and manager fix, re-import the package. The expected unique label count should be 17,849,469, with 1 duplicate reported and no activation mismatch.";
+2026.07.28 21:41: "I need the actual result markup and destination-link attributes from each failing engine. The empty href="" shown after filtering is not enough; it may be a redirect URL stored in another attribute or populated by JavaScript.
+
+For each engine, collect data for:
+
+    One result that should be blocked, such as Wikipedia.
+    One result that should remain.
+    The pagination control, if present.
+    The nearest shared parent containing exactly one result.
+
+Run this collector
+
+Open the search-results page, then run this in that page's console:
+javascript
+
+(() => {    const terms = [        "wikipedia",        "fast.com",        "fast com"    ];    function normalizeText(element) {        return String(element?.textContent || "")            .replace(/\s+/g, " ")            .trim();    }    function describeElement(element) {        if (!element) {            return null;        }        const attributes = {};        for (const attribute of element.attributes || []) {            attributes[attribute.name] =                attribute.value;        }        return {            tag: element.tagName,            id: element.id || "",            className:                typeof element.className === "string"                    ? element.className                    : "",            text: normalizeText(element).slice(0, 500),            attributes,            outerHTML:                element.outerHTML.slice(0, 12000)        };    }    const matchingElements = Array.from(        document.querySelectorAll(            "a, h1, h2, h3, h4, article, li, " +            "[class*='result'], [id*='result']"        )    ).filter(element => {        const text =            normalizeText(element).toLowerCase();        const attributes = Array.from(            element.attributes || [],            attribute =>                `${attribute.name}=${attribute.value}`                    .toLowerCase()        ).join(" ");        return terms.some(            term =>                text.includes(term) ||                attributes.includes(term)        );    }).slice(0, 20);    const report = matchingElements.map(element => {        const ancestors = [];        let current = element;        for (            let depth = 0;            current &&            depth < 7 &&            current !== document.documentElement;            depth += 1        ) {            ancestors.push(                describeElement(current)            );            current = current.parentElement;        }        const links = Array.from(            element.matches("a")                ? [element]                : element.querySelectorAll("a")        ).slice(0, 10).map(link => ({            text: normalizeText(link),            hrefAttribute:                link.getAttribute("href"),            resolvedHref: link.href || "",            dataHref:                link.getAttribute("data-href"),            dataUrl:                link.getAttribute("data-url"),            dataTarget:                link.getAttribute("data-target"),            onclick:                link.getAttribute("onclick"),            rel:                link.getAttribute("rel"),            className:                typeof link.className === "string"                    ? link.className                    : "",            outerHTML:                link.outerHTML.slice(0, 4000)        }));        return {            element: describeElement(element),            links,            ancestors        };    });    console.log(report);    copy(JSON.stringify({        page: {            url: location.href,            hostname: location.hostname,            pathname: location.pathname,            title: document.title        },        report    }, null, 2));    return {        matches: report.length,        copied: true    };})();
+
+Paste the copied JSON for these two pages:
+
+    secretsearchenginelabs.com/find/...
+    slsearch.eu.org/search?...
+
+Also collect the untouched markup
+
+Because the extension may already remove or modify the useful node, temporarily disable LeanSERP Filter Minimal, reload the result page, and run the collector again. Label the outputs:
+
+    SecretSearch enabled
+    SecretSearch disabled
+    SLSearch enabled
+    SLSearch disabled
+
+The disabled output is the most important one.
+Information needed from DevTools
+
+For each blocked target, the useful structure is:
+Data	Why it is needed
+Full result container outerHTML	Defines exactly which node should be removed.
+Title link and all URL-related attributes	Reveals where the real destination is stored.
+Up to seven ancestors	Prevents deleting only the title or the entire page.
+One allowed result	Confirms the selector applies to all results safely.
+Pagination markup	Prevents navigation controls from being classified as results.
+Enabled and disabled versions	Shows whether the extension or site script creates href="".
+
+Do not include cookies, request headers, local-storage contents, or account information. Only the result-page DOM structure is needed.";
+2026.07.28 22:32: "browser is not defined occurs because you ran extension API code in the website's ordinary page console. Websites such as degoog.org and slsearch.eu.org cannot access browser.runtime.
+
+Use the manager page to request diagnostics from the active search tab. Make these three exact edits."...
+"7. Capture degoog.org or slsearch.eu.org
+
+    Reload the temporary extension in about:debugging.
+    Reload the target search-results page so the updated content script is injected.
+    Keep the target page open.
+    Open the extension manager.
+    Click Capture active search tab.
+    The report should appear in the text box and be copied to the clipboard.
+
+Do not run browser.runtime.sendMessage(...) in the website console. The manager button now performs that operation from an extension context.
+
+One limitation remains: the manager is the active tab when you click the button, so the code selects the most recently accessed ordinary tab. Keep the desired search page as the last ordinary tab visited immediately before opening the manager.";
+2026.07.28 22:42:"Capture a report
+
+    Reload LeanSERP Filter Minimal in about:debugging.
+    Reload the target results page, such as:
+        [slsearch.eu.org](https://slsearch.eu.org/search?q=wikipedia)
+        a DeGoog results page
+        a Secret Search Engine Labs results page
+    Make that results tab the most recently visited ordinary tab.
+    Open the extension manager.
+    Click Capture active search tab.
+    Copy the JSON from the diagnostics box if it was not copied automatically.
+
+The report should identify the result link, URL-bearing attributes, and surrounding container hierarchy. It can then be used to create precise engine-specific selectors without risking pagination, forms, or entire page containers.
+
+Before sharing a report, check it for search queries, personalized result text, tracking URLs, or account information, since the collector intentionally captures bounded page markup.",
+2026.07.28 23:10: "pasted-text.txt
+
+TXT
+
+Now use the report to identify safe result and destination selectors for each failing engine. Do not paste the entire report if it is huge or contains private queries.
+Extract a smaller report
+
+In the manager console, run this after a capture:
+javascript
+
+const diagnostics = JSON.parse(
+    document.getElementById(
+        "diagnostics-output"
+    ).value
+);
+const compact = {
+    page: diagnostics.page,
+    engine: diagnostics.engine,
+    entries: diagnostics.report.map(
+        (entry, index) => ({
+            index,
+            element: {
+                tag: entry.element?.tag,
+                id: entry.element?.id,
+                className:
+                    entry.element?.className,
+                text:
+                    entry.element?.text
+                        ?.slice(0, 180)
+            },
+            links: entry.links.map(link => ({
+                text:
+                    link.text?.slice(0, 140),
+                hrefAttribute:
+                    link.hrefAttribute,
+                resolvedHref:
+                    link.resolvedHref,
+                dataHref:
+                    link.dataHref,
+                dataUrl:
+                    link.dataUrl,
+                dataTarget:
+                    link.dataTarget,
+                rel: link.rel,
+                className:
+                    link.className
+            })),
+            ancestors:
+                entry.ancestors.map(
+                    ancestor => ({
+                        tag: ancestor?.tag,
+                        id: ancestor?.id,
+                        className:
+                            ancestor?.className,
+                        text:
+                            ancestor?.text
+                                ?.slice(0, 180)
+                    })
+                )
+        })
+    )
+};
+const text = JSON.stringify(
+    compact,
+    null,
+    2
+);
+console.log(text);
+copy(text);
+
+This removes the large outerHTML fields while retaining the structural information needed to build an adapter.
+Find relevant entries only
+
+For a query such as wikipedia, filter the report before copying it:
+javascript
+
+const diagnostics = JSON.parse(
+    document.getElementById(
+        "diagnostics-output"
+    ).value
+);
+const term = "wikipedia";
+const matches = diagnostics.report
+    .map((entry, index) => ({
+        index,
+        entry
+    }))
+    .filter(({ entry }) =>
+        JSON.stringify(entry)
+            .toLowerCase()
+            .includes(term)
+    )
+    .map(({ index, entry }) => ({
+        index,
+        element: {
+            tag: entry.element?.tag,
+            id: entry.element?.id,
+            className:
+                entry.element?.className,
+            text:
+                entry.element?.text
+                    ?.slice(0, 300),
+            attributes:
+                entry.element?.attributes
+        },
+        links: entry.links,
+        ancestors:
+            entry.ancestors.map(
+                ancestor => ({
+                    tag: ancestor?.tag,
+                    id: ancestor?.id,
+                    className:
+                        ancestor?.className,
+                    text:
+                        ancestor?.text
+                            ?.slice(0, 300),
+                    attributes:
+                        ancestor?.attributes
+                })
+            )
+    }));
+const text = JSON.stringify(
+    {
+        page: diagnostics.page,
+        engine: diagnostics.engine,
+        matches
+    },
+    null,
+    2
+);
+console.log(text);
+copy(text);
+
+Paste that filtered output for one failing engine at a time. Start with:
+
+    [degoog.org](https://degoog.org/search?q=wikipedia)
+    [slsearch.eu.org](https://slsearch.eu.org/search?q=wikipedia)
+    [secretsearchenginelabs.com](http://www.secretsearchenginelabs.com/find/wikipedia)
+    Brave, if it still fails
+
+What the report must reveal
+
+For each result, we need to identify:
+Required fact	Example
+Result container	.search-result
+Title or destination link	.result-title a
+Real URL source	href, data-url, or ancestor attribute
+Pagination container	.pagination
+Safe pathname	/search or /find/
+
+If an engine uses an empty href, the most important fields are attributes on the link and its ancestors. If none contains the destination, the URL may be encoded in a sibling element or script state, requiring a more targeted collector.
+
+Do not auto-save or auto-adopt the captured selectors yet. First use the report to create a fixed, declarative adapter and test that it removes one result without touching the search form, pagination, or page shell.
+";
+2026.07.28 23:14:"The first command succeeded. The second failed only because const diagnostics was already declared in the same console scope.
+
+More importantly, the collector captured BODY as entry 0, which is too broad. Extract only entries containing the target term and exclude page-level elements. Run this with different variable names and an isolated scope:
+javascript
+
+(() => {
+    const captured = JSON.parse(
+        document.getElementById(
+            "diagnostics-output"
+        ).value
+    );
+    const term = "wikipedia";
+    const matches = captured.report
+        .map((entry, index) => ({
+            index,
+            entry
+        }))
+        .filter(({ entry }) => {
+            const tag = String(
+                entry.element?.tag || ""
+            ).toUpperCase();
+            if (
+                tag === "HTML" ||
+                tag === "BODY"
+            ) {
+                return false;
+            }
+            return JSON.stringify(entry)
+                .toLowerCase()
+                .includes(term);
+        })
+        .map(({ index, entry }) => ({
+            index,
+            element: {
+                tag: entry.element?.tag,
+                id: entry.element?.id,
+                className:
+                    entry.element?.className,
+                text:
+                    entry.element?.text
+                        ?.slice(0, 300),
+                attributes:
+                    entry.element?.attributes
+            },
+            links: entry.links.map(link => ({
+                text:
+                    link.text?.slice(0, 200),
+                hrefAttribute:
+                    link.hrefAttribute,
+                resolvedHref:
+                    link.resolvedHref,
+                dataHref:
+                    link.dataHref,
+                dataUrl:
+                    link.dataUrl,
+                dataTarget:
+                    link.dataTarget,
+                rel:
+                    link.rel,
+                className:
+                    link.className
+            })),
+            ancestors:
+                entry.ancestors
+                    .filter(ancestor => {
+                        const tag = String(
+                            ancestor?.tag || ""
+                        ).toUpperCase();
+                        return (
+                            tag !== "HTML" &&
+                            tag !== "BODY"
+                        );
+                    })
+                    .map(ancestor => ({
+                        tag: ancestor?.tag,
+                        id: ancestor?.id,
+                        className:
+                            ancestor?.className,
+                        text:
+                            ancestor?.text
+                                ?.slice(0, 300),
+                        attributes:
+                            ancestor?.attributes
+                    }))
+        }));
+    const output = JSON.stringify(
+        {
+            page: captured.page,
+            engine: captured.engine,
+            matches
+        },
+        null,
+        2
+    );
+    console.log(output);
+    copy(output);
+    return {
+        matches: matches.length,
+        copied: true
+    };
+})();
+
+Your captured page was [degoog.org](https://degoog.org/search?q=a), so a Wikipedia-specific report may contain zero matches. First search for:
+text
+
+[degoog.org](https://degoog.org/search?q=wikipedia)
+
+Then capture that tab again and run the extraction command.
+
+If matches is still zero, use this broader extractor to locate likely result structures without relying on the word "wikipedia":
+javascript
+
+(() => {
+    const captured = JSON.parse(
+        document.getElementById(
+            "diagnostics-output"
+        ).value
+    );
+    const entries = captured.report
+        .map((entry, index) => ({
+            index,
+            tag: entry.element?.tag,
+            id: entry.element?.id,
+            className:
+                entry.element?.className,
+            text:
+                entry.element?.text
+                    ?.slice(0, 240),
+            links: entry.links
+                .filter(link => {
+                    try {
+                        const url = new URL(
+                            link.resolvedHref
+                        );
+                        return (
+                            url.protocol === "http:" ||
+                            url.protocol === "https:"
+                        ) &&
+                        url.hostname !==
+                            captured.page.hostname;
+                    } catch {
+                        return false;
+                    }
+                })
+                .map(link => ({
+                    text:
+                        link.text?.slice(0, 160),
+                    href:
+                        link.resolvedHref,
+                    className:
+                        link.className,
+                    rel:
+                        link.rel
+                }))
+        }))
+        .filter(entry =>
+            entry.tag !== "HTML" &&
+            entry.tag !== "BODY" &&
+            entry.links.length > 0
+        );
+    const output = JSON.stringify(
+        {
+            page: captured.page,
+            engine: captured.engine,
+            entries
+        },
+        null,
+        2
+    );
+    console.log(output);
+    copy(output);
+    return {
+        entries: entries.length,
+        copied: true
+    };
+})();
+
+This should expose the degoog result container class, destination link, and real external URL without copying the full report.";
+2026.07.28 23:17:"The capture identifies degoog's destination link:
+html
+
+<a class="result-title degoog-result--title"
+   href="[en.wikipedia.org](https://en.wikipedia.org/wiki/A)">
+
+The current adapter finds .title a[href], but not this class. We still need the smallest enclosing result container. Run this in the manager console without redeclaring diagnostics:
+javascript
+
+(() => {
+    const captured = JSON.parse(
+        document.getElementById(
+            "diagnostics-output"
+        ).value
+    );
+    const matches = [];
+    for (
+        let entryIndex = 0;
+        entryIndex < captured.report.length;
+        entryIndex += 1
+    ) {
+        const entry =
+            captured.report[entryIndex];
+        for (const link of entry.links || []) {
+            if (
+                !String(link.className || "")
+                    .split(/\s+/)
+                    .includes("degoog-result--title")
+            ) {
+                continue;
+            }
+            matches.push({
+                entryIndex,
+                link: {
+                    text: link.text,
+                    href: link.resolvedHref,
+                    className: link.className
+                },
+                ancestors:
+                    (entry.ancestors || [])
+                        .map(
+                            (
+                                ancestor,
+                                depth
+                            ) => ({
+                                depth,
+                                tag: ancestor?.tag,
+                                id: ancestor?.id,
+                                className:
+                                    ancestor?.className,
+                                text:
+                                    ancestor?.text
+                                        ?.slice(
+                                            0,
+                                            240
+                                        ),
+                                attributes:
+                                    ancestor?.attributes
+                            })
+                        )
+            });
+        }
+    }
+    const output = JSON.stringify(
+        {
+            page: captured.page,
+            matches
+        },
+        null,
+        2
+    );
+    console.log(output);
+    copy(output);
+    return {
+        matches: matches.length,
+        copied: true
+    };
+})();
+
+Look for a repeated ancestor surrounding exactly one result, likely a class containing result. Avoid #results-page, since that contains the entire interface.";
+2026.07.28 23:21: "The capture identifies degoog's destination link:
+html
+
+<a class="result-title degoog-result--title"
+   href="[en.wikipedia.org](https://en.wikipedia.org/wiki/A)">
+
+The current adapter finds .title a[href], but not this class. We still need the smallest enclosing result container. Run this in the manager console without redeclaring diagnostics:
+javascript
+
+(() => {
+    const captured = JSON.parse(
+        document.getElementById(
+            "diagnostics-output"
+        ).value
+    );
+    const matches = [];
+    for (
+        let entryIndex = 0;
+        entryIndex < captured.report.length;
+        entryIndex += 1
+    ) {
+        const entry =
+            captured.report[entryIndex];
+        for (const link of entry.links || []) {
+            if (
+                !String(link.className || "")
+                    .split(/\s+/)
+                    .includes("degoog-result--title")
+            ) {
+                continue;
+            }
+            matches.push({
+                entryIndex,
+                link: {
+                    text: link.text,
+                    href: link.resolvedHref,
+                    className: link.className
+                },
+                ancestors:
+                    (entry.ancestors || [])
+                        .map(
+                            (
+                                ancestor,
+                                depth
+                            ) => ({
+                                depth,
+                                tag: ancestor?.tag,
+                                id: ancestor?.id,
+                                className:
+                                    ancestor?.className,
+                                text:
+                                    ancestor?.text
+                                        ?.slice(
+                                            0,
+                                            240
+                                        ),
+                                attributes:
+                                    ancestor?.attributes
+                            })
+                        )
+            });
+        }
+    }
+    const output = JSON.stringify(
+        {
+            page: captured.page,
+            matches
+        },
+        null,
+        2
+    );
+    console.log(output);
+    copy(output);
+    return {
+        matches: matches.length,
+        copied: true
+    };
+})();
+
+Look for a repeated ancestor surrounding exactly one result, likely a class containing result. Avoid #results-page, since that contains the entire interface.
+Immediate degoog link fix
+
+You can safely add the confirmed title selector now.
+
+File:
+text
+
+C:\Users\PC\Downloads\LeanSERP-Filter-Minimal\content.js
+
+Inside ENGINE_RULES, find the degoog entry and its links array:
+javascript
+
+links: [
+    "h2 a[href]",
+    "h3 a[href]",
+    ".title a[href]"
+],
+
+Replace it with:
+javascript
+
+links: [
+    "a.result-title.degoog-result--title[href]",
+    "h2 a[href]",
+    "h3 a[href]",
+    ".title a[href]"
+],
+
+This makes the result discoverable, but do not add #results-page as a root. Reload the extension and degoog page. If the existing generic-container logic selects a safe individual result wrapper, Wikipedia should disappear. If it removes only the title or nothing, the ancestor report above will provide the exact root selector needed."
