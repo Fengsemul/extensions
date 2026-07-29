@@ -8,3 +8,13 @@ html.leanserp-disable-animations *::after {
     transition-delay: 0ms !important;
     transition-duration: 0.001ms !important;
 }
+[data-leanserp-adapter-preview="true"] {
+    outline: 3px solid #ff8c00 !important;
+    outline-offset: -3px !important;
+    background-color: rgba(
+        255,
+        140,
+        0,
+        0.08
+    ) !important;
+}
