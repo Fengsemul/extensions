@@ -1095,7 +1095,7 @@ links: [
 ],
 
 This makes the result discoverable, but do not add #results-page as a root. Reload the extension and degoog page. If the existing generic-container logic selects a safe individual result wrapper, Wikipedia should disappear. If it removes only the title or nothing, the ancestor report above will provide the exact root selector needed.";
-2026.07.29 12:30: "7. Do not auto-adopt yet
+[2026.07.29 12:30: Auto instead ChatGPT 5.6 Sol: "7. Do not auto-adopt yet
 
 The safe automation boundary is:
 text
@@ -1137,4 +1137,4 @@ json
   "urlSources": ["href", "data-href", "data-url"],
   "enabled": true
 }
-The exact resultSelector should be the one that previewed correctly."
+The exact resultSelector should be the one that previewed correctly."]
