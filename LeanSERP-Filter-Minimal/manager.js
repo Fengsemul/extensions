@@ -121,22 +121,46 @@
             document.getElementById(
                 "manual-import-rows"
             ),
-		diagnosticsTab:
-			document.getElementById(
-				"diagnostics-tab"
-			),
-		refreshDiagnosticsTabs:
-			document.getElementById(
-				"refresh-diagnostics-tabs"
-			),
-		collectDiagnostics:
-			document.getElementById(
-				"collect-diagnostics"
-			),
-		diagnosticsOutput:
-			document.getElementById(
-				"diagnostics-output"
-			),
+        diagnosticsTab:
+            document.getElementById(
+                "diagnostics-tab"
+            ),
+        refreshDiagnosticsTabs:
+            document.getElementById(
+                "refresh-diagnostics-tabs"
+            ),
+        collectDiagnostics:
+            document.getElementById(
+                "collect-diagnostics"
+            ),
+        diagnosticsOutput:
+            document.getElementById(
+                "diagnostics-output"
+            ),
+        proposeAdapter:
+            document.getElementById(
+                "propose-adapter"
+            ),
+        previewAdapter:
+            document.getElementById(
+                "preview-adapter"
+            ),
+        clearAdapterPreview:
+            document.getElementById(
+                "clear-adapter-preview"
+            ),
+        adapterStatus:
+            document.getElementById(
+                "adapter-status"
+            ),
+        adapterOutput:
+            document.getElementById(
+                "adapter-output"
+            ),
+        saveAdapter:
+            document.getElementById(
+                "save-adapter"
+            ),
         clearCaches:
             document.getElementById(
                 "clear-caches"
@@ -152,6 +176,21 @@
     });
 
     let operationRunning = false;
+    let proposedAdapter = null;
+    let adapterPreviewActive = false;
+
+    function assertElements() {
+        for (
+            const [name, element] of
+            Object.entries(elements)
+        ) {
+            if (!element) {
+                throw new Error(
+                    `manager.html is missing element: ${name}`
+                );
+            }
+        }
+    }
 
     function formatCount(value) {
         return Number(value || 0)
@@ -160,24 +199,20 @@
 
     function formatSize(value) {
         const bytes = Number(value || 0);
-
         if (bytes < 1024) {
             return `${bytes} B`;
         }
-
         if (bytes < 1024 * 1024) {
             return (
                 bytes / 1024
             ).toFixed(1) + " KiB";
         }
-
         if (bytes < 1024 * 1024 * 1024) {
             return (
                 bytes /
                 (1024 * 1024)
             ).toFixed(1) + " MiB";
         }
-
         return (
             bytes /
             (1024 * 1024 * 1024)
@@ -188,12 +223,16 @@
         if (!value) {
             return "";
         }
-
         const date = new Date(value);
-
         return Number.isNaN(date.getTime())
             ? String(value)
             : date.toLocaleString();
+    }
+
+    function getErrorMessage(error) {
+        return error && error.message
+            ? error.message
+            : String(error);
     }
 
     function setStatus(
@@ -202,7 +241,6 @@
         state = ""
     ) {
         element.textContent = message;
-
         if (state) {
             element.dataset.state = state;
         } else {
@@ -217,26 +255,19 @@
     ) {
         const cell =
             document.createElement("td");
-
-        cell.textContent = String(
-            text ?? ""
-        );
-
+        cell.textContent =
+            String(text ?? "");
         if (className) {
             cell.className = className;
         }
-
         row.appendChild(cell);
-
         return cell;
     }
 
     function createActionCell(row) {
         const cell =
             document.createElement("td");
-
         row.appendChild(cell);
-
         return cell;
     }
 
@@ -297,7 +328,6 @@
         }
 
         const labels = hostname.split(".");
-
         for (const label of labels) {
             if (
                 label.length === 0 ||
@@ -328,7 +358,6 @@
     async function* readLines(file) {
         const reader =
             file.stream().getReader();
-
         const decoder =
             new TextDecoder(
                 "utf-8",
@@ -362,7 +391,6 @@
 
                 const lines =
                     remainder.split(/\r?\n/);
-
                 remainder =
                     lines.pop() || "";
 
@@ -387,103 +415,90 @@
         }
     }
 
-async function countValidRules(
-    file,
-    category
-) {
-    let valid = 0;
-    let rejected = 0;
-    let duplicates = 0;
-    let previousRule = null;
-
-    for await (
-        const record of readLines(file)
+    async function countValidRules(
+        file,
+        category
     ) {
-        const rawLine =
-            String(record.line || "");
+        let valid = 0;
+        let rejected = 0;
 
-        if (
-            rawLine.length === 0 ||
-            rawLine.trim().startsWith("#")
+        for await (
+            const record of readLines(file)
         ) {
-            rejected += 1;
-            continue;
+            const rawLine =
+                String(record.line || "");
+
+            if (
+                rawLine.length === 0 ||
+                rawLine.trim().startsWith("#")
+            ) {
+                rejected += 1;
+                continue;
+            }
+
+            if (
+                normalizeRule(
+                    rawLine,
+                    category
+                )
+            ) {
+                valid += 1;
+            } else {
+                rejected += 1;
+            }
         }
 
-        const normalized =
-            normalizeRule(
-                rawLine,
-                category
-            );
-
-        if (!normalized) {
-            rejected += 1;
-            continue;
-        }
-
-        if (normalized === previousRule) {
-            duplicates += 1;
-            continue;
-        }
-
-        if (
-            previousRule !== null &&
-            normalized < previousRule
-        ) {
-            throw new Error(
-                file.name +
-                " is not sorted after normalization. " +
-                "Rebuild it in LeanSERP Studio before importing."
-            );
-        }
-
-        previousRule = normalized;
-        valid += 1;
+        return {
+            valid,
+            rejected
+        };
     }
 
-    return {
-        valid,
-        rejected,
-        duplicates
-    };
-}
+    function updateAdapterButtons() {
+        const hasProposal =
+            proposedAdapter !== null;
+
+        elements.proposeAdapter.disabled =
+            operationRunning;
+
+        elements.previewAdapter.disabled =
+            operationRunning ||
+            !hasProposal;
+
+        elements.clearAdapterPreview.disabled =
+            operationRunning ||
+            !adapterPreviewActive;
+
+        elements.saveAdapter.disabled =
+            operationRunning ||
+            !hasProposal;
+    }
 
     function setOperationRunning(running) {
         operationRunning = running;
 
-		elements.diagnosticsTab.disabled =
-			running;
-			
-		elements.refreshDiagnosticsTabs.disabled =
-			running;
-			
-		elements.collectDiagnostics.disabled =
-			running;
-			
         elements.refreshStatus.disabled =
             running;
-
         elements.importProduction.disabled =
             running;
-
         elements.importManual.disabled =
             running;
-
         elements.manualCategory.disabled =
             running;
-
         elements.manualFile.disabled =
             running;
-
         elements.productionPackageName.disabled =
             running;
-
         elements.deleteDatabase.disabled =
             running;
-
         elements.clearCaches.disabled =
             running;
-			
+        elements.diagnosticsTab.disabled =
+            running;
+        elements.refreshDiagnosticsTabs.disabled =
+            running;
+        elements.collectDiagnostics.disabled =
+            running;
 
         for (
             const name of
@@ -502,6 +517,8 @@ async function countValidRules(
         ) {
             button.disabled = running;
         }
+
+        updateAdapterButtons();
     }
 
     async function send(message) {
@@ -519,6 +536,201 @@ async function countValidRules(
         }
 
         return response;
+    }
+
+    function renderPackages(records) {
+        elements.packageRows
+            .replaceChildren();
+
+        if (records.length === 0) {
+            const row =
+                document.createElement("tr");
+            const cell = createCell(
+                row,
+                "No production packages."
+            );
+            cell.colSpan = 8;
+            elements.packageRows
+                .appendChild(row);
+            return;
+        }
+
+        for (const record of records) {
+            const row =
+                document.createElement("tr");
+
+            createCell(
+                row,
+                record.slot
+            );
+            createCell(
+                row,
+                record.packageName ||
+                    "(unnamed)"
+            );
+            createCell(
+                row,
+                record.state || "",
+                `state-${record.state || ""}`
+            );
+            createCell(
+                row,
+                formatCount(
+                    record.importedCounts
+                        ?.labels
+                ),
+                "numeric"
+            );
+            createCell(
+                row,
+                formatCount(
+                    record.importedCounts
+                        ?.exactHosts
+                ),
+                "numeric"
+            );
+            createCell(
+                row,
+                formatCount(
+                    record.importedCounts
+                        ?.pslOverrides
+                ),
+                "numeric"
+            );
+            createCell(
+                row,
+                formatDate(
+                    record.createdAt
+                )
+            );
+
+            const actionCell =
+                createActionCell(row);
+
+            if (record.state !== "active") {
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+                button.type = "button";
+                button.textContent = "Delete";
+                button.className = "danger";
+                button.dataset.slotDelete =
+                    record.slot;
+                button.addEventListener(
+                    "click",
+                    () => {
+                        void deleteProductionSlot(
+                            record.slot
+                        );
+                    }
+                );
+                actionCell.appendChild(button);
+            } else {
+                actionCell.textContent =
+                    "Active";
+            }
+
+            elements.packageRows
+                .appendChild(row);
+        }
+    }
+
+    function renderManualImports(records) {
+        elements.manualImportRows
+            .replaceChildren();
+
+        if (records.length === 0) {
+            const row =
+                document.createElement("tr");
+            const cell = createCell(
+                row,
+                "No manual imports."
+            );
+            cell.colSpan = 9;
+            elements.manualImportRows
+                .appendChild(row);
+            return;
+        }
+
+        for (const record of records) {
+            const row =
+                document.createElement("tr");
+
+            createCell(
+                row,
+                record.fileName ||
+                    "(unnamed)"
+            );
+            createCell(
+                row,
+                CATEGORY_NAMES[
+                    record.category
+                ] || record.category
+            );
+            createCell(
+                row,
+                record.state || ""
+            );
+            createCell(
+                row,
+                formatCount(
+                    record.validRules
+                ),
+                "numeric"
+            );
+            createCell(
+                row,
+                formatCount(
+                    record.uniqueRules
+                ),
+                "numeric"
+            );
+            createCell(
+                row,
+                formatCount(
+                    record.rejectedRules
+                ),
+                "numeric"
+            );
+            createCell(
+                row,
+                formatSize(
+                    record.fileSize
+                ),
+                "numeric"
+            );
+            createCell(
+                row,
+                formatDate(
+                    record.importedAt
+                )
+            );
+
+            const actionCell =
+                createActionCell(row);
+            const button =
+                document.createElement("button");
+
+            button.type = "button";
+            button.textContent = "Remove";
+            button.className = "danger";
+            button.dataset.manualImportDelete =
+                record.importId;
+
+            button.addEventListener(
+                "click",
+                () => {
+                    void removeManualImport(
+                        record
+                    );
+                }
+            );
+
+            actionCell.appendChild(button);
+            elements.manualImportRows
+                .appendChild(row);
+        }
     }
 
     async function refreshStatus() {
@@ -588,227 +800,6 @@ async function countValidRules(
         );
     }
 
-    function renderPackages(records) {
-        elements.packageRows
-            .replaceChildren();
-
-        if (records.length === 0) {
-            const row =
-                document.createElement("tr");
-
-            const cell = createCell(
-                row,
-                "No production packages."
-            );
-
-            cell.colSpan = 8;
-
-            elements.packageRows
-                .appendChild(row);
-
-            return;
-        }
-
-        for (const record of records) {
-            const row =
-                document.createElement("tr");
-
-            createCell(
-                row,
-                record.slot
-            );
-
-            createCell(
-                row,
-                record.packageName ||
-                    "(unnamed)"
-            );
-
-            createCell(
-                row,
-                record.state,
-                `state-${record.state}`
-            );
-
-            createCell(
-                row,
-                formatCount(
-                    record.importedCounts
-                        ?.labels
-                ),
-                "numeric"
-            );
-
-            createCell(
-                row,
-                formatCount(
-                    record.importedCounts
-                        ?.exactHosts
-                ),
-                "numeric"
-            );
-
-            createCell(
-                row,
-                formatCount(
-                    record.importedCounts
-                        ?.pslOverrides
-                ),
-                "numeric"
-            );
-
-            createCell(
-                row,
-                formatDate(
-                    record.createdAt
-                )
-            );
-
-            const actionCell =
-                createActionCell(row);
-
-            if (record.state !== "active") {
-                const button =
-                    document.createElement(
-                        "button"
-                    );
-
-                button.type = "button";
-                button.textContent = "Delete";
-                button.className = "danger";
-                button.dataset.slotDelete =
-                    record.slot;
-
-                button.addEventListener(
-                    "click",
-                    () => {
-                        void deleteProductionSlot(
-                            record.slot
-                        );
-                    }
-                );
-
-                actionCell.appendChild(button);
-            } else {
-                actionCell.textContent =
-                    "Active";
-            }
-
-            elements.packageRows
-                .appendChild(row);
-        }
-    }
-
-    function renderManualImports(records) {
-        elements.manualImportRows
-            .replaceChildren();
-
-        if (records.length === 0) {
-            const row =
-                document.createElement("tr");
-
-            const cell = createCell(
-                row,
-                "No manual imports."
-            );
-
-            cell.colSpan = 9;
-
-            elements.manualImportRows
-                .appendChild(row);
-
-            return;
-        }
-
-        for (const record of records) {
-            const row =
-                document.createElement("tr");
-
-            createCell(
-                row,
-                record.fileName ||
-                    "(unnamed)"
-            );
-
-            createCell(
-                row,
-                CATEGORY_NAMES[
-                    record.category
-                ] || record.category
-            );
-
-            createCell(
-                row,
-                record.state || ""
-            );
-
-            createCell(
-                row,
-                formatCount(
-                    record.validRules
-                ),
-                "numeric"
-            );
-
-            createCell(
-                row,
-                formatCount(
-                    record.uniqueRules
-                ),
-                "numeric"
-            );
-
-            createCell(
-                row,
-                formatCount(
-                    record.rejectedRules
-                ),
-                "numeric"
-            );
-
-            createCell(
-                row,
-                formatSize(
-                    record.fileSize
-                ),
-                "numeric"
-            );
-
-            createCell(
-                row,
-                formatDate(
-                    record.importedAt
-                )
-            );
-
-            const actionCell =
-                createActionCell(row);
-
-            const button =
-                document.createElement("button");
-
-            button.type = "button";
-            button.textContent = "Remove";
-            button.className = "danger";
-            button.dataset.manualImportDelete =
-                record.importId;
-
-            button.addEventListener(
-                "click",
-                () => {
-                    void removeManualImport(
-                        record
-                    );
-                }
-            );
-
-            actionCell.appendChild(button);
-
-            elements.manualImportRows
-                .appendChild(row);
-        }
-    }
-
     function updateProductionSelections() {
         for (
             const name of
@@ -816,7 +807,6 @@ async function countValidRules(
         ) {
             const input =
                 getProductionInput(name);
-
             const output =
                 getProductionSelection(name);
 
@@ -831,126 +821,105 @@ async function countValidRules(
         elements.manualFileSelection
             .textContent =
             describeFile(
-                elements.manualFile.files[0] ||
-                    null
+                elements.manualFile
+                    .files[0] || null
             );
     }
 
- 
-async function importProductionFile(
-    slot,
-    category,
-    file,
-    progressStart,
-    progressShare
-) {
-    const ruleType =
-        RULE_FILES[category].ruleType;
-
-    let valid = 0;
-    let rejected = 0;
-    let duplicates = 0;
-    let previousRule = null;
-    let batch = [];
-
-    for await (
-        const record of readLines(file)
+    async function importProductionFile(
+        slot,
+        category,
+        file,
+        progressStart,
+        progressShare
     ) {
-        const rawLine =
-            String(record.line || "");
+        const ruleType =
+            RULE_FILES[category].ruleType;
 
-        if (
-            rawLine.length === 0 ||
-            rawLine.trim().startsWith("#")
+        let valid = 0;
+        let rejected = 0;
+        let batch = [];
+
+        for await (
+            const record of readLines(file)
         ) {
-            rejected += 1;
-            continue;
+            const rawLine =
+                String(record.line || "");
+
+            if (
+                rawLine.length === 0 ||
+                rawLine.trim().startsWith("#")
+            ) {
+                rejected += 1;
+                continue;
+            }
+
+            const normalized =
+                normalizeRule(
+                    rawLine,
+                    category
+                );
+
+            if (!normalized) {
+                rejected += 1;
+                continue;
+            }
+
+            batch.push(normalized);
+            valid += 1;
+
+            if (
+                batch.length >=
+                PRODUCTION_BATCH_SIZE
+            ) {
+                await send({
+                    type: "putProductionBatch",
+                    slot,
+                    ruleType,
+                    rules: batch
+                });
+
+                batch = [];
+
+                const fileFraction =
+                    file.size > 0
+                        ? record.bytesRead /
+                            file.size
+                        : 0;
+
+                elements.productionProgress.value =
+                    Math.min(
+                        99,
+                        Math.floor(
+                            progressStart +
+                            fileFraction *
+                                progressShare
+                        )
+                    );
+
+                setStatus(
+                    elements.productionStatus,
+                    `Importing ${file.name}: ` +
+                        `${valid.toLocaleString()} accepted, ` +
+                        `${rejected.toLocaleString()} rejected.`
+                );
+            }
         }
 
-        const normalized =
-            normalizeRule(
-                rawLine,
-                category
-            );
-
-        if (!normalized) {
-            rejected += 1;
-            continue;
-        }
-
-        if (normalized === previousRule) {
-            duplicates += 1;
-            continue;
-        }
-
-        if (
-            previousRule !== null &&
-            normalized < previousRule
-        ) {
-            throw new Error(
-                file.name +
-                " is not sorted after normalization."
-            );
-        }
-
-        previousRule = normalized;
-        batch.push(normalized);
-        valid += 1;
-
-        if (
-            batch.length >=
-            PRODUCTION_BATCH_SIZE
-        ) {
+        if (batch.length > 0) {
             await send({
                 type: "putProductionBatch",
                 slot,
                 ruleType,
                 rules: batch
             });
-
-            batch = [];
-
-            const fileFraction =
-                file.size > 0
-                    ? record.bytesRead /
-                        file.size
-                    : 0;
-
-            elements.productionProgress.value =
-                Math.min(
-                    99,
-                    Math.floor(
-                        progressStart +
-                        fileFraction *
-                            progressShare
-                    )
-                );
-
-            setStatus(
-                elements.productionStatus,
-                `Importing ${file.name}: ` +
-                    `${valid.toLocaleString()} unique, ` +
-                    `${duplicates.toLocaleString()} duplicates, ` +
-                    `${rejected.toLocaleString()} rejected.`
-            );
         }
-    }
 
-    if (batch.length > 0) {
-        await send({
-            type: "putProductionBatch",
-            slot,
-            ruleType,
-            rules: batch
-        });
+        return {
+            valid,
+            rejected
+        };
     }
-
-    return {
-        valid,
-        rejected,
-        duplicates
-    };
-}
 
     async function importProductionPackage() {
         if (operationRunning) {
@@ -973,7 +942,6 @@ async function importProductionFile(
                     `Select the ${name} production file.`,
                     "error"
                 );
-
                 return;
             }
 
@@ -1018,9 +986,11 @@ async function importProductionFile(
                     labels:
                         countResults.labels.valid,
                     exactHosts:
-                        countResults.exactHosts.valid,
+                        countResults
+                            .exactHosts.valid,
                     pslOverrides:
-                        countResults.pslOverrides.valid
+                        countResults
+                            .pslOverrides.valid
                 },
                 files: {
                     labels: {
@@ -1034,20 +1004,26 @@ async function importProductionFile(
                     },
                     exactHosts: {
                         name:
-                            selected.exactHosts.name,
+                            selected
+                                .exactHosts.name,
                         size:
-                            selected.exactHosts.size,
+                            selected
+                                .exactHosts.size,
                         rejected:
-                            countResults.exactHosts
+                            countResults
+                                .exactHosts
                                 .rejected
                     },
                     pslOverrides: {
                         name:
-                            selected.pslOverrides.name,
+                            selected
+                                .pslOverrides.name,
                         size:
-                            selected.pslOverrides.size,
+                            selected
+                                .pslOverrides.size,
                         rejected:
-                            countResults.pslOverrides
+                            countResults
+                                .pslOverrides
                                 .rejected
                     }
                 }
@@ -1055,7 +1031,8 @@ async function importProductionFile(
 
             const beginResponse =
                 await send({
-                    type: "beginProductionImport",
+                    type:
+                        "beginProductionImport",
                     metadata
                 });
 
@@ -1090,7 +1067,8 @@ async function importProductionFile(
             );
 
             await send({
-                type: "activateProductionSlot",
+                type:
+                    "activateProductionSlot",
                 slot
             });
 
@@ -1108,13 +1086,11 @@ async function importProductionFile(
             if (slot !== null) {
                 try {
                     await send({
-                        type: "failProductionSlot",
+                        type:
+                            "failProductionSlot",
                         slot,
                         error:
-                            error &&
-                            error.message
-                                ? error.message
-                                : String(error)
+                            getErrorMessage(error)
                     });
                 } catch {
                 }
@@ -1123,12 +1099,7 @@ async function importProductionFile(
             setStatus(
                 elements.productionStatus,
                 "Production import failed: " +
-                    (
-                        error &&
-                        error.message
-                            ? error.message
-                            : String(error)
-                    ),
+                    getErrorMessage(error),
                 "error"
             );
 
@@ -1154,7 +1125,6 @@ async function importProductionFile(
                 "Select a manual rule file.",
                 "error"
             );
-
             return;
         }
 
@@ -1177,7 +1147,8 @@ async function importProductionFile(
         try {
             const beginResponse =
                 await send({
-                    type: "beginManualImport",
+                    type:
+                        "beginManualImport",
                     metadata: {
                         category,
                         fileName: file.name,
@@ -1223,7 +1194,8 @@ async function importProductionFile(
                     MANUAL_BATCH_SIZE
                 ) {
                     await send({
-                        type: "putManualBatch",
+                        type:
+                            "putManualBatch",
                         importId,
                         category,
                         rules: batch
@@ -1239,8 +1211,7 @@ async function importProductionFile(
                                     (
                                         record.bytesRead /
                                         file.size
-                                    ) *
-                                    100
+                                    ) * 100
                                 )
                             )
                             : 0;
@@ -1263,7 +1234,8 @@ async function importProductionFile(
             }
 
             await send({
-                type: "completeManualImport",
+                type:
+                    "completeManualImport",
                 importId,
                 result: {
                     validRules,
@@ -1280,7 +1252,7 @@ async function importProductionFile(
 
             setStatus(
                 elements.manualStatus,
-                `Manual import completed: ` +
+                "Manual import completed: " +
                     `${validRules.toLocaleString()} valid, ` +
                     `${rejectedRules.toLocaleString()} rejected.`,
                 "success"
@@ -1288,19 +1260,16 @@ async function importProductionFile(
 
             elements.manualFile.value = "";
             updateManualSelection();
-
             await refreshStatus();
         } catch (error) {
             if (importId !== null) {
                 try {
                     await send({
-                        type: "failManualImport",
+                        type:
+                            "failManualImport",
                         importId,
                         error:
-                            error &&
-                            error.message
-                                ? error.message
-                                : String(error)
+                            getErrorMessage(error)
                     });
                 } catch {
                 }
@@ -1309,12 +1278,7 @@ async function importProductionFile(
             setStatus(
                 elements.manualStatus,
                 "Manual import failed: " +
-                    (
-                        error &&
-                        error.message
-                            ? error.message
-                            : String(error)
-                    ),
+                    getErrorMessage(error),
                 "error"
             );
 
@@ -1331,12 +1295,11 @@ async function importProductionFile(
             return;
         }
 
-        const confirmed =
-            window.confirm(
+        if (
+            !window.confirm(
                 `Delete production slot ${slot}?`
-            );
-
-        if (!confirmed) {
+            )
+        ) {
             return;
         }
 
@@ -1350,7 +1313,8 @@ async function importProductionFile(
         try {
             const response =
                 await send({
-                    type: "deleteProductionSlot",
+                    type:
+                        "deleteProductionSlot",
                     slot
                 });
 
@@ -1371,7 +1335,7 @@ async function importProductionFile(
             setStatus(
                 elements.actionStatus,
                 "Production-slot deletion failed: " +
-                    error.message,
+                    getErrorMessage(error),
                 "error"
             );
         } finally {
@@ -1384,13 +1348,12 @@ async function importProductionFile(
             return;
         }
 
-        const confirmed =
-            window.confirm(
+        if (
+            !window.confirm(
                 `Remove manual import "${record.fileName}" from ` +
                     `${CATEGORY_NAMES[record.category] || record.category}?`
-            );
-
-        if (!confirmed) {
+            )
+        ) {
             return;
         }
 
@@ -1404,7 +1367,8 @@ async function importProductionFile(
         try {
             const response =
                 await send({
-                    type: "removeManualImport",
+                    type:
+                        "removeManualImport",
                     importId:
                         record.importId
                 });
@@ -1412,253 +1376,514 @@ async function importProductionFile(
             setStatus(
                 elements.actionStatus,
                 `Removed ${response.result.removedLinks.toLocaleString()} ` +
-                    `ownership links and ` +
+                    "ownership links and " +
                     `${response.result.removedRules.toLocaleString()} ` +
-                    `unreferenced rules.`,
+                    "unreferenced rules.",
                 "success"
             );
 
             await refreshStatus();
-        } catch (error) {
+               } catch (error) {
             setStatus(
                 elements.actionStatus,
                 "Manual import removal failed: " +
-                    error.message,
+                    getErrorMessage(error),
                 "error"
             );
         } finally {
             setOperationRunning(false);
         }
     }
-	function isSupportedDiagnosticUrl(value) {
-    try {
-        const url = new URL(value);
-        if (
-            url.protocol !== "http:" &&
-            url.protocol !== "https:"
-        ) {
+    function isSupportedDiagnosticUrl(value) {
+        try {
+            const url = new URL(value);
+            if (
+                url.protocol !== "http:" &&
+                url.protocol !== "https:"
+            ) {
+                return false;
+            }
+            const hostname =
+                url.hostname.toLowerCase();
+            return (
+                /(^|\.)google\./.test(
+                    hostname
+                ) ||
+                /(^|\.)bing\.com$/.test(
+                    hostname
+                ) ||
+                /(^|\.)duckduckgo\.com$/.test(
+                    hostname
+                ) ||
+                hostname ===
+                    "search.brave.com" ||
+                hostname === "etools.ch" ||
+                hostname.endsWith(
+                    ".etools.ch"
+                ) ||
+                hostname === "wiby.org" ||
+                hostname.endsWith(
+                    ".wiby.org"
+                ) ||
+                hostname ===
+                    "secretsearchenginelabs.com" ||
+                hostname.endsWith(
+                    ".secretsearchenginelabs.com"
+                ) ||
+                hostname === "rawweb.org" ||
+                hostname.endsWith(
+                    ".rawweb.org"
+                ) ||
+                hostname ===
+                    "slsearch.eu.org" ||
+                hostname.endsWith(
+                    ".slsearch.eu.org"
+                ) ||
+                hostname ===
+                    "searchthis.ch" ||
+                hostname.endsWith(
+                    ".searchthis.ch"
+                ) ||
+                hostname === "degoog.org" ||
+                hostname.endsWith(
+                    ".degoog.org"
+                )
+            );
+        } catch {
             return false;
         }
-        const hostname =
-            url.hostname.toLowerCase();
-        return (
-            /(^|\.)google\./.test(hostname) ||
-            /(^|\.)bing\.com$/.test(hostname) ||
-            /(^|\.)duckduckgo\.com$/.test(
-                hostname
-            ) ||
-            hostname ===
-                "search.brave.com" ||
-            hostname === "etools.ch" ||
-            hostname.endsWith(
-                ".etools.ch"
-            ) ||
-            hostname === "wiby.org" ||
-            hostname.endsWith(
-                ".wiby.org"
-            ) ||
-            hostname ===
-                "secretsearchenginelabs.com" ||
-            hostname.endsWith(
-                ".secretsearchenginelabs.com"
-            ) ||
-            hostname === "rawweb.org" ||
-            hostname.endsWith(
-                ".rawweb.org"
-            ) ||
-            hostname ===
-                "slsearch.eu.org" ||
-            hostname.endsWith(
-                ".slsearch.eu.org"
-            ) ||
-            hostname ===
-                "searchthis.ch" ||
-            hostname.endsWith(
-                ".searchthis.ch"
-            ) ||
-            hostname === "degoog.org" ||
-            hostname.endsWith(
-                ".degoog.org"
-            )
-        );
-    } catch {
-        return false;
     }
-}
-async function refreshDiagnosticTabs() {
-    const previousValue =
-        elements.diagnosticsTab.value;
-    const tabs =
-        await browser.tabs.query({});
-    const supportedTabs =
-        tabs
-            .filter(tab =>
-                Number.isInteger(tab.id) &&
-                typeof tab.url === "string" &&
-                isSupportedDiagnosticUrl(
-                    tab.url
-                )
-            )
-            .sort(
-                (left, right) =>
-                    Number(
-                        right.lastAccessed || 0
-                    ) -
-                    Number(
-                        left.lastAccessed || 0
+    async function refreshDiagnosticTabs() {
+        const previousValue =
+            elements.diagnosticsTab.value;
+        const tabs =
+            await browser.tabs.query({});
+        const supportedTabs =
+            tabs
+                .filter(tab =>
+                    Number.isInteger(tab.id) &&
+                    typeof tab.url ===
+                        "string" &&
+                    isSupportedDiagnosticUrl(
+                        tab.url
                     )
-            );
-    elements.diagnosticsTab
-        .replaceChildren();
-    if (supportedTabs.length === 0) {
-        const option =
-            document.createElement(
-                "option"
-            );
-        option.value = "";
-        option.textContent =
-            "No supported tabs found";
+                )
+                .sort(
+                    (left, right) =>
+                        Number(
+                            right.lastAccessed ||
+                                0
+                        ) -
+                        Number(
+                            left.lastAccessed ||
+                                0
+                        )
+                );
         elements.diagnosticsTab
-            .appendChild(option);
-        return;
-    }
-    for (const tab of supportedTabs) {
-        const option =
-            document.createElement(
-                "option"
-            );
-        option.value =
-            String(tab.id);
-        let hostname = "";
-        try {
-            hostname =
-                new URL(tab.url).hostname;
-        } catch {
-            hostname = tab.url;
+            .replaceChildren();
+        if (supportedTabs.length === 0) {
+            const option =
+                document.createElement(
+                    "option"
+                );
+            option.value = "";
+            option.textContent =
+                "No supported search tabs found";
+            elements.diagnosticsTab
+                .appendChild(option);
+            return;
         }
-        option.textContent =
-            `${hostname} - ` +
-            `${tab.title || tab.url}`;
-        elements.diagnosticsTab
-            .appendChild(option);
+        for (const tab of supportedTabs) {
+            const option =
+                document.createElement(
+                    "option"
+                );
+            option.value =
+                String(tab.id);
+            let hostname = "";
+            try {
+                hostname =
+                    new URL(tab.url).hostname;
+            } catch {
+                hostname = tab.url;
+            }
+            option.textContent =
+                `${hostname} - ` +
+                `${tab.title || tab.url}`;
+            elements.diagnosticsTab
+                .appendChild(option);
+        }
+        if (
+            Array.from(
+                elements.diagnosticsTab.options
+            ).some(
+                option =>
+                    option.value ===
+                    previousValue
+            )
+        ) {
+            elements.diagnosticsTab.value =
+                previousValue;
+        }
     }
-    if (
-        Array.from(
-            elements.diagnosticsTab.options
-        ).some(
-            option =>
-                option.value ===
-                previousValue
-        )
-    ) {
-        elements.diagnosticsTab.value =
-            previousValue;
+    function getSelectedDiagnosticTabId() {
+        const tabId =
+            Number(
+                elements.diagnosticsTab.value
+            );
+        if (
+            !Number.isInteger(tabId) ||
+            tabId < 0
+        ) {
+            throw new Error(
+                "Select a supported search-results tab."
+            );
+        }
+        return tabId;
     }
-}
-async function collectDiagnostics() {
-    if (operationRunning) {
-        return;
-    }
-    const tabId =
-        Number(
-            elements.diagnosticsTab.value
-        );
-    if (
-        !Number.isInteger(tabId) ||
-        tabId < 0
-    ) {
+    async function collectDiagnostics() {
+        if (operationRunning) {
+            return;
+        }
+        setOperationRunning(true);
         setStatus(
             elements.actionStatus,
-            "Select a supported search-results tab.",
-            "error"
+            "Requesting diagnostics from the selected tab..."
         );
-        return;
+        try {
+            const tabId =
+                getSelectedDiagnosticTabId();
+            const response =
+                await send({
+                    type:
+                        "collectTabDiagnostics",
+                    tabId
+                });
+            const text =
+                JSON.stringify(
+                    response.diagnostics,
+                    null,
+                    2
+                );
+            elements.diagnosticsOutput.value =
+                text;
+            try {
+                await navigator.clipboard
+                    .writeText(text);
+                setStatus(
+                    elements.actionStatus,
+                    "Diagnostics captured and copied to the clipboard.",
+                    "success"
+                );
+            } catch {
+                setStatus(
+                    elements.actionStatus,
+                    "Diagnostics captured. Copy them from the text box.",
+                    "success"
+                );
+            }
+        } catch (error) {
+            elements.diagnosticsOutput.value =
+                "";
+            setStatus(
+                elements.actionStatus,
+                "Diagnostic capture failed: " +
+                    getErrorMessage(error),
+                "error"
+            );
+        } finally {
+            setOperationRunning(false);
+        }
     }
-    setOperationRunning(true);
-    setStatus(
-        elements.actionStatus,
-        "Requesting diagnostics from the selected tab..."
-    );
-    try {
-        const response =
+    async function proposeAdapter() {
+        if (operationRunning) {
+            return;
+        }
+        proposedAdapter = null;
+        adapterPreviewActive = false;
+        elements.adapterOutput.value = "";
+        updateAdapterButtons();
+        setOperationRunning(true);
+        try {
+            const tabId =
+                getSelectedDiagnosticTabId();
+            setStatus(
+                elements.adapterStatus,
+                "Analyzing repeated result structures..."
+            );
+            const response =
+                await send({
+                    type:
+                        "proposeTabAdapter",
+                    tabId
+                });
+            const result =
+                response.result;
+            if (
+                !result ||
+                typeof result !== "object"
+            ) {
+                throw new Error(
+                    "The page did not return adapter analysis."
+                );
+            }
+            elements.adapterOutput.value =
+                JSON.stringify(
+                    result,
+                    null,
+                    2
+                );
+            const proposal =
+                result.proposal;
+            if (!proposal) {
+                const candidateCount =
+                    Number(
+                        result.candidateLinks ||
+                            0
+                    );
+                const alternativeCount =
+                    Array.isArray(
+                        result.alternatives
+                    )
+                        ? result.alternatives
+                            .length
+                        : 0;
+                throw new Error(
+                    "No safe proposal passed the thresholds. " +
+                    `${candidateCount} external links were examined; ` +
+                    `${alternativeCount} alternatives were retained.`
+                );
+            }
+            if (
+                !result.page ||
+                typeof result.page.hostname !==
+                    "string" ||
+                typeof result.page.pathname !==
+                    "string"
+            ) {
+                throw new Error(
+                    "The adapter proposal lacks page information."
+                );
+            }
+            proposedAdapter = {
+                hostname:
+                    result.page.hostname
+                        .trim()
+                        .toLowerCase(),
+                pathPattern:
+                    "^" +
+                    result.page.pathname
+                        .replace(
+                            /[.*+?^${}()|[\]\\]/g,
+                            "\\$&"
+                        ) +
+                    "$",
+                resultSelector:
+                    proposal.resultSelector,
+                linkSelector:
+                    proposal.linkSelector,
+                urlSources: [
+                    "href",
+                    "data-href",
+                    "data-url"
+                ],
+                enabled: false,
+                evidence: {
+                    supportingLinks:
+                        proposal
+                            .supportingLinks,
+                    resultMatches:
+                        proposal
+                            .resultMatches,
+                    averageScore:
+                        proposal
+                            .averageScore
+                }
+            };
+            elements.adapterOutput.value =
+                JSON.stringify(
+                    {
+                        adapter:
+                            proposedAdapter,
+                        analysis: result
+                    },
+                    null,
+                    2
+                );
+            setStatus(
+                elements.adapterStatus,
+                `Proposed ${proposal.resultSelector} with ` +
+                    `${proposal.resultMatches} matches. ` +
+                    "Preview the outlined containers before saving.",
+                "success"
+            );
+        } catch (error) {
+            proposedAdapter = null;
+            adapterPreviewActive = false;
+            setStatus(
+                elements.adapterStatus,
+                getErrorMessage(error),
+                "error"
+            );
+        } finally {
+            setOperationRunning(false);
+        }
+    }
+    async function previewAdapter() {
+        if (
+            operationRunning ||
+            proposedAdapter === null
+        ) {
+            return;
+        }
+        setOperationRunning(true);
+        try {
+            const tabId =
+                getSelectedDiagnosticTabId();
+            const response =
+                await send({
+                    type:
+                        "previewTabAdapter",
+                    tabId,
+                    proposal:
+                        proposedAdapter
+                });
+            adapterPreviewActive = true;
+            setStatus(
+                elements.adapterStatus,
+                `Previewing ${response.result.matches} result containers. ` +
+                    "Confirm that only individual results are outlined.",
+                "success"
+            );
+        } catch (error) {
+            adapterPreviewActive = false;
+            setStatus(
+                elements.adapterStatus,
+                "Preview failed: " +
+                    getErrorMessage(error),
+                "error"
+            );
+        } finally {
+            setOperationRunning(false);
+        }
+    }
+    async function clearAdapterPreview() {
+        if (
+            operationRunning ||
+            !adapterPreviewActive
+        ) {
+            return;
+        }
+        setOperationRunning(true);
+        try {
+            const tabId =
+                getSelectedDiagnosticTabId();
             await send({
                 type:
-                    "collectTabDiagnostics",
+                    "clearTabAdapterPreview",
                 tabId
             });
-        const text =
-            JSON.stringify(
-                response.diagnostics,
-                null,
-                2
-            );
-        elements.diagnosticsOutput.value =
-            text;
-        try {
-            await navigator.clipboard
-                .writeText(text);
+            adapterPreviewActive = false;
             setStatus(
-                elements.actionStatus,
-                "Diagnostics captured and copied to the clipboard.",
+                elements.adapterStatus,
+                "Adapter preview cleared.",
                 "success"
             );
-        } catch {
+        } catch (error) {
             setStatus(
-                elements.actionStatus,
-                "Diagnostics captured. Copy them from the text box.",
-                "success"
+                elements.adapterStatus,
+                "Could not clear preview: " +
+                    getErrorMessage(error),
+                "error"
             );
+        } finally {
+            setOperationRunning(false);
         }
-    } catch (error) {
-        elements.diagnosticsOutput.value =
-            "";
-        setStatus(
-            elements.actionStatus,
-            "Diagnostic capture failed: " +
-                (
-                    error && error.message
-                        ? error.message
-                        : String(error)
-                ),
-            "error"
-        );
-    } finally {
-        setOperationRunning(false);
     }
-}
+    async function saveApprovedAdapter() {
+        if (
+            operationRunning ||
+            proposedAdapter === null
+        ) {
+            return;
+        }
+        if (!adapterPreviewActive) {
+            setStatus(
+                elements.adapterStatus,
+                "Preview the proposal before saving it.",
+                "error"
+            );
+            return;
+        }
+        if (
+            !window.confirm(
+                "Save this adapter? Only approve it if the preview outlines individual result containers and leaves navigation, forms, and pagination untouched."
+            )
+        ) {
+            return;
+        }
+        setOperationRunning(true);
+        try {
+            const response =
+                await send({
+                    type: "saveAdapter",
+                    adapter: {
+                        ...proposedAdapter,
+                        enabled: true
+                    }
+                });
+            proposedAdapter = {
+                ...response.adapter,
+                enabled: true
+            };
+            elements.adapterOutput.value =
+                JSON.stringify(
+                    proposedAdapter,
+                    null,
+                    2
+                );
+            setStatus(
+                elements.adapterStatus,
+                "Approved adapter saved. Reload the search page to test normal filtering.",
+                "success"
+            );
+        } catch (error) {
+            setStatus(
+                elements.adapterStatus,
+                "Could not save adapter: " +
+                    getErrorMessage(error),
+                "error"
+            );
+        } finally {
+            setOperationRunning(false);
+        }
+    }
     async function deleteDatabase() {
         if (operationRunning) {
             return;
         }
-
-        const confirmed =
-            window.confirm(
+        if (
+            !window.confirm(
                 "Delete the entire LeanSERP Filter Minimal database? " +
                     "Both production slots and all manual imports will be removed."
-            );
-
-        if (!confirmed) {
+            )
+        ) {
             return;
         }
-
         setOperationRunning(true);
-
         setStatus(
             elements.actionStatus,
             "Deleting the minimal database..."
         );
-
         try {
             await send({
                 type: "clearAllDatabase"
             });
-
             setStatus(
                 elements.actionStatus,
                 "The database was deleted. Reloading manager...",
                 "success"
             );
-
             window.setTimeout(
                 () => {
                     location.reload();
@@ -1669,129 +1894,211 @@ async function collectDiagnostics() {
             setStatus(
                 elements.actionStatus,
                 "Database deletion failed: " +
-                    error.message,
+                    getErrorMessage(error),
                 "error"
             );
-
             setOperationRunning(false);
         }
     }
-
-    for (
-        const name of
-        Object.keys(RULE_FILES)
-    ) {
-        getProductionInput(name)
+    function installEventListeners() {
+        for (
+            const name of
+            Object.keys(RULE_FILES)
+        ) {
+            getProductionInput(name)
+                .addEventListener(
+                    "change",
+                    updateProductionSelections
+                );
+        }
+        elements.manualFile.addEventListener(
+            "change",
+            updateManualSelection
+        );
+        elements.refreshStatus
             .addEventListener(
-                "change",
-                updateProductionSelections
-            );
-    }
-
-    elements.manualFile.addEventListener(
-        "change",
-        updateManualSelection
-    );
-
-    elements.refreshStatus.addEventListener(
-        "click",
-        () => {
-            void refreshStatus().catch(
-                error => {
-                    setStatus(
-                        elements.actionStatus,
-                        "Refresh failed: " +
-                            error.message,
-                        "error"
-                    );
+                "click",
+                () => {
+                    void refreshStatus()
+                        .catch(error => {
+                            setStatus(
+                                elements.actionStatus,
+                                "Refresh failed: " +
+                                    getErrorMessage(
+                                        error
+                                    ),
+                                "error"
+                            );
+                        });
                 }
             );
-        }
-    );
-
-    elements.importProduction.addEventListener(
-        "click",
-        () => {
-            void importProductionPackage();
-        }
-    );
-
-    elements.importManual.addEventListener(
-        "click",
-        () => {
-            void importManualFile();
-        }
-    );
-	elements.refreshDiagnosticsTabs
-    .addEventListener(
-        "click",
-        () => {
-            void refreshDiagnosticTabs()
-                .catch(error => {
+        elements.importProduction
+            .addEventListener(
+                "click",
+                () => {
+                    void importProductionPackage();
+                }
+            );
+        elements.importManual
+            .addEventListener(
+                "click",
+                () => {
+                    void importManualFile();
+                }
+            );
+        elements.refreshDiagnosticsTabs
+            .addEventListener(
+                "click",
+                () => {
+                    void refreshDiagnosticTabs()
+                        .catch(error => {
+                            setStatus(
+                                elements.actionStatus,
+                                "Could not refresh the tab list: " +
+                                    getErrorMessage(
+                                        error
+                                    ),
+                                "error"
+                            );
+                        });
+                }
+            );
+        elements.collectDiagnostics
+            .addEventListener(
+                "click",
+                () => {
+                    void collectDiagnostics();
+                }
+            );
+        elements.proposeAdapter
+            .addEventListener(
+                "click",
+                () => {
+                    void proposeAdapter();
+                }
+            );
+        elements.previewAdapter
+            .addEventListener(
+                "click",
+                () => {
+                    void previewAdapter();
+                }
+            );
+        elements.clearAdapterPreview
+            .addEventListener(
+                "click",
+                () => {
+                    void clearAdapterPreview();
+                }
+            );
+        elements.saveAdapter
+            .addEventListener(
+                "click",
+                () => {
+                    void saveApprovedAdapter();
+                }
+            );
+        elements.clearCaches
+            .addEventListener(
+                "click",
+                async () => {
+                    try {
+                        await send({
+                            type: "clearCaches"
+                        });
+                        setStatus(
+                            elements.actionStatus,
+                            "Lookup caches cleared.",
+                            "success"
+                        );
+                    } catch (error) {
+                        setStatus(
+                            elements.actionStatus,
+                            "Cache clearing failed: " +
+                                getErrorMessage(
+                                    error
+                                ),
+                            "error"
+                        );
+                    }
+                }
+            );
+        elements.deleteDatabase
+            .addEventListener(
+                "click",
+                () => {
+                    void deleteDatabase();
+                }
+            );
+        elements.diagnosticsTab
+            .addEventListener(
+                "change",
+                () => {
+                    proposedAdapter = null;
+                    adapterPreviewActive = false;
+                    elements.adapterOutput.value =
+                        "";
                     setStatus(
-                        elements.actionStatus,
-                        "Could not refresh the tab list: " +
-                            error.message,
-                        "error"
+                        elements.adapterStatus,
+                        "No adapter proposed."
                     );
-                });
-        }
-    );
-	elements.collectDiagnostics.addEventListener(
-		"click",
-		() => {
-        void collectDiagnostics();
-		}
-	);
-    elements.clearCaches.addEventListener(
-        "click",
-        async () => {
-            try {
-                await send({
-                    type: "clearCaches"
-                });
-
-                setStatus(
-                    elements.actionStatus,
-                    "Lookup caches cleared.",
-                    "success"
-                );
-            } catch (error) {
-                setStatus(
-                    elements.actionStatus,
-                    "Cache clearing failed: " +
-                        error.message,
-                    "error"
-                );
-            }
-        }
-    );
-
-    elements.deleteDatabase.addEventListener(
-        "click",
-        () => {
-            void deleteDatabase();
-        }
-    );
-
-    updateProductionSelections();
-    updateManualSelection();
-
-    void refreshStatus().catch(error => {
-        setStatus(
-            elements.actionStatus,
-            "Could not load database status: " +
-                error.message,
-            "error"
-        );
-    });
-	void refreshDiagnosticTabs()
-    .catch(error => {
+                    updateAdapterButtons();
+                }
+            );
+    }
+    function showTabLoadingError(error) {
+        elements.diagnosticsTab
+            .replaceChildren();
+        const option =
+            document.createElement(
+                "option"
+            );
+        option.value = "";
+        option.textContent =
+            "Could not load browser tabs";
+        elements.diagnosticsTab
+            .appendChild(option);
         setStatus(
             elements.actionStatus,
             "Could not load the tab list: " +
-                error.message,
+                getErrorMessage(error),
             "error"
         );
+    }
+    async function initializeManager() {
+        assertElements();
+        installEventListeners();
+        updateProductionSelections();
+        updateManualSelection();
+        updateAdapterButtons();
+        await Promise.allSettled([
+            refreshDiagnosticTabs()
+                .catch(error => {
+                    showTabLoadingError(error);
+                }),
+            refreshStatus()
+                .catch(error => {
+                    setStatus(
+                        elements.actionStatus,
+                        "Could not load database status: " +
+                            getErrorMessage(error),
+                        "error"
+                    );
+                })
+        ]);
+    }
+    void initializeManager().catch(error => {
+        console.error(
+            "LeanSERP manager initialization failed.",
+            error
+        );
+        if (elements.actionStatus) {
+            setStatus(
+                elements.actionStatus,
+                "Manager initialization failed: " +
+                    getErrorMessage(error),
+                "error"
+            );
+        }
     });
 })();
