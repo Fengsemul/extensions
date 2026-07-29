@@ -282,6 +282,40 @@
 
         <section>
             <h2>Actions</h2>
+			<p>
+    Open a supported search-results tab, return here without
+    activating another normal webpage, and capture its bounded
+    result structure.
+</p>
+<label for="diagnostics-tab">
+    Search-results tab
+</label>
+<select id="diagnostics-tab">
+    <option value="">
+        Loading browser tabs...
+    </option>
+</select>
+<div class="button-row">
+    <button
+        id="refresh-diagnostics-tabs"
+        type="button"
+    >
+        Refresh tab list
+    </button>
+    <button
+        id="collect-diagnostics"
+        type="button"
+    >
+        Capture selected tab
+    </button>
+</div>
+<textarea
+    id="diagnostics-output"
+    rows="18"
+    readonly
+    spellcheck="false"
+    aria-label="Captured result diagnostics"
+></textarea>
             <div class="button-row">
                 <button
                     id="clear-caches"
