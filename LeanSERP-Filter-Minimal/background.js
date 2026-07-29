@@ -22,12 +22,9 @@ class BoundedLru {
         if (!this.map.has(key)) {
             return undefined;
         }
-
         const value = this.map.get(key);
-
         this.map.delete(key);
         this.map.set(key, value);
-
         return value;
     }
 
@@ -35,13 +32,10 @@ class BoundedLru {
         if (this.map.has(key)) {
             this.map.delete(key);
         }
-
         this.map.set(key, value);
-
         while (this.map.size > this.limit) {
             const oldestKey =
                 this.map.keys().next().value;
-
             this.map.delete(oldestKey);
         }
     }
@@ -52,12 +46,106 @@ class BoundedLru {
 }
 
 const hostnameCache =
-    new BoundedLru(        
-	MAX_HOSTNAME_CACHE_ENTRIES
+    new BoundedLru(
+        MAX_HOSTNAME_CACHE_ENTRIES
     );
+
 const pendingRequests = new Set();
+
 let publicSuffixListPromise = null;
 let activeSlotCache = undefined;
+const ADAPTER_STORAGE_KEY =
+    "searchEngineAdapters";
+
+async function getStoredAdapters() {
+    const stored =
+        await browser.storage.local.get(
+            ADAPTER_STORAGE_KEY
+        );
+    return Array.isArray(
+        stored[ADAPTER_STORAGE_KEY]
+    )
+        ? stored[ADAPTER_STORAGE_KEY]
+        : [];
+}
+
+async function saveStoredAdapters(adapters) {
+    await browser.storage.local.set({
+        [ADAPTER_STORAGE_KEY]: adapters
+    });
+}
+
+function normalizeAdapter(value) {
+    const adapter =
+        value &&
+        typeof value === "object"
+            ? value
+            : null;
+    if (!adapter) {
+        throw new Error(
+            "Adapter must be an object."
+        );
+    }
+    const hostname = String(
+        adapter.hostname || ""
+    )
+        .trim()
+        .toLowerCase();
+    const pathPattern = String(
+        adapter.pathPattern || ""
+    ).trim();
+    const resultSelector = String(
+        adapter.resultSelector || ""
+    ).trim();
+    const linkSelector = String(
+        adapter.linkSelector || ""
+    ).trim();
+    const urlSources = Array.isArray(
+        adapter.urlSources
+    )
+        ? Array.from(
+            new Set(
+                adapter.urlSources.map(
+                    item =>
+                        String(item || "").trim()
+                )
+            )
+          ).filter(Boolean)
+        : [];
+    if (!hostname) {
+        throw new Error(
+            "Adapter hostname is required."
+        );
+    }
+    if (!pathPattern) {
+        throw new Error(
+            "Adapter pathPattern is required."
+        );
+    }
+    if (!resultSelector) {
+        throw new Error(
+            "Adapter resultSelector is required."
+        );
+    }
+    if (!linkSelector) {
+        throw new Error(
+            "Adapter linkSelector is required."
+        );
+    }
+    if (urlSources.length === 0) {
+        throw new Error(
+            "Adapter urlSources are required."
+        );
+    }
+    return {
+        hostname,
+        pathPattern,
+        resultSelector,
+        linkSelector,
+        urlSources,
+        enabled: adapter.enabled !== false
+    };
+}
 
 function normalizeHostname(value) {
     const hostname = String(value || "")
@@ -77,7 +165,6 @@ function normalizeHostname(value) {
     }
 
     const labels = hostname.split(".");
-
     for (const label of labels) {
         if (
             label.length === 0 ||
@@ -112,7 +199,6 @@ function parsePublicSuffixList(text) {
 
         const commentIndex =
             line.indexOf(" //");
-
         if (commentIndex >= 0) {
             line = line
                 .slice(0, commentIndex)
@@ -164,7 +250,6 @@ async function loadPublicSuffixList() {
                         "Could not load the Public Suffix List."
                     );
                 }
-
                 return response.text();
             })
             .then(parsePublicSuffixList)
@@ -219,13 +304,11 @@ function getPublicSuffixLength(
         if (index < labels.length - 1) {
             const firstDot =
                 candidate.indexOf(".");
-
             if (firstDot >= 0) {
                 const wildcardBase =
                     candidate.slice(
                         firstDot + 1
                     );
-
                 if (
                     rules.wildcards.has(
                         wildcardBase
@@ -259,23 +342,19 @@ async function analyzeHostname(hostname) {
 
     const cached =
         hostnameCache.get(normalized);
-
     if (cached) {
         return cached;
     }
 
     const rules =
         await loadPublicSuffixList();
-
     const labels =
         normalized.split(".");
-
     const suffixLength =
         getPublicSuffixLength(
             normalized,
             rules
         );
-
     const suffixStart = Math.max(
         0,
         labels.length - suffixLength
@@ -316,7 +395,7 @@ async function getActiveSlot() {
 function normalizeKeys(values) {
     return Array.from(
         new Set(
-            values
+            (Array.isArray(values) ? values : [])
                 .map(value =>
                     String(value || "")
                         .trim()
@@ -334,7 +413,6 @@ async function lookupProduction(
 ) {
     const uniqueKeys =
         normalizeKeys(keys);
-
     const result = Object.create(null);
 
     for (const key of uniqueKeys) {
@@ -356,7 +434,6 @@ async function lookupProduction(
                 offset +
                     LeanDb.MAX_LOOKUP_BATCH
             );
-
         Object.assign(
             result,
             await LeanDb.hasProductionBatch(
@@ -376,7 +453,6 @@ async function lookupManual(
 ) {
     const uniqueKeys =
         normalizeKeys(keys);
-
     const result = Object.create(null);
 
     for (const key of uniqueKeys) {
@@ -394,7 +470,6 @@ async function lookupManual(
                 offset +
                     LeanDb.MAX_LOOKUP_BATCH
             );
-
         Object.assign(
             result,
             await LeanDb.hasManualBatch(
@@ -494,7 +569,6 @@ async function confirmHostnames(hostnames) {
 
     const activeSlot =
         await getActiveSlot();
-
     const analyses = [];
 
     for (const hostname of normalizedHosts) {
@@ -510,7 +584,6 @@ async function confirmHostnames(hostnames) {
         searchableLabels.push(
             ...analysis.searchableLabels
         );
-
         suffixLabels.push(
             ...analysis.suffixLabels
         );
@@ -566,12 +639,10 @@ async function confirmHostnames(hostnames) {
                 matchedRule: hostname,
                 matchedType: "exact-host"
             };
-
             continue;
         }
 
         let ordinaryMatch = "";
-
         for (
             const label of
             analysis.searchableLabels
@@ -588,7 +659,6 @@ async function confirmHostnames(hostnames) {
                 matchedRule: ordinaryMatch,
                 matchedType: "label"
             };
-
             continue;
         }
 
@@ -606,7 +676,6 @@ async function confirmHostnames(hostnames) {
                     matchedType:
                         "psl-override"
                 };
-
                 break;
             }
         }
@@ -617,6 +686,53 @@ async function confirmHostnames(hostnames) {
 
 async function getDatabaseStatus() {
     return LeanDb.getDatabaseStatus();
+}
+
+async function sendTabMessage(
+    tabId,
+    payload,
+    contactErrorMessage
+) {
+    try {
+        return await browser.tabs.sendMessage(
+            tabId,
+            payload
+        );
+    } catch (error) {
+        throw new Error(
+            contactErrorMessage +
+                " " +
+                (
+                    error && error.message
+                        ? error.message
+                        : String(error)
+                )
+        );
+    }
+}
+
+async function pingContentScript(tabId) {
+    const response =
+        await sendTabMessage(
+            tabId,
+            {
+                type:
+                    "pingLeanSerpContent"
+            },
+            "LeanSERP content.js is not responding in the selected tab. Reload that search-results tab after reloading the extension."
+        );
+
+    if (
+        !response ||
+        !response.ok ||
+        !response.injected
+    ) {
+        throw new Error(
+            "The selected tab responded, but not from the LeanSERP content script."
+        );
+    }
+
+    return response;
 }
 
 browser.runtime.onMessage.addListener(
@@ -644,7 +760,6 @@ browser.runtime.onMessage.addListener(
                     }
 
                     const token = {};
-
                     pendingRequests.add(token);
 
                     try {
@@ -662,92 +777,325 @@ browser.runtime.onMessage.addListener(
                     }
                 }
 
-case "collectTabDiagnostics": {
-    const tabId =
-        Number(message.tabId);
-    if (
-        !Number.isInteger(tabId) ||
-        tabId < 0
-    ) {
-        throw new Error(
-            "A valid tab ID is required."
-        );
-    }
-    let ping;
-    try {
-        ping =
-            await browser.tabs.sendMessage(
-                tabId,
-                {
-                    type:
-                        "pingLeanSerpContent"
+                case "proposeTabAdapter": {
+                    const tabId =
+                        Number(message.tabId);
+
+                    if (
+                        !Number.isInteger(tabId) ||
+                        tabId < 0
+                    ) {
+                        throw new Error(
+                            "A valid tab ID is required."
+                        );
+                    }
+
+                    await pingContentScript(tabId);
+
+                    const response =
+                        await sendTabMessage(
+                            tabId,
+                            {
+                                type:
+                                    "proposeResultAdapter"
+                            },
+                            "Could not contact the adapter proposer in content.js. Reload the selected search page after reloading the extension."
+                        );
+
+                    if (!response) {
+                        throw new Error(
+                            "The page returned no adapter-proposal response."
+                        );
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(
+                            response.error ||
+                            "The page rejected adapter analysis."
+                        );
+                    }
+
+                    if (
+                        !response.result ||
+                        typeof response.result !==
+                            "object"
+                    ) {
+                        throw new Error(
+                            "The page returned an incomplete adapter-proposal response."
+                        );
+                    }
+
+                    return {
+                        ok: true,
+                        result: response.result
+                    };
                 }
-            );
-    } catch (error) {
-        throw new Error(
-            "LeanSERP content.js is not responding in the selected tab. " +
-            "Check the manifest match pattern and reload that tab. " +
-            (
-                error &&
-                error.message
-                    ? error.message
-                    : String(error)
-            )
-        );
-    }
-    if (
-        !ping ||
-        !ping.ok ||
-        !ping.injected
-    ) {
-        throw new Error(
-            "The selected tab responded, but not from the LeanSERP content script."
-        );
-    }
-    let response;
-    try {
-        response =
-            await browser.tabs.sendMessage(
-                tabId,
-                {
-                    type:
-                        "collectResultDiagnostics"
+
+                case "previewTabAdapter": {
+                    const tabId =
+                        Number(message.tabId);
+
+                    if (
+                        !Number.isInteger(tabId) ||
+                        tabId < 0
+                    ) {
+                        throw new Error(
+                            "A valid tab ID is required."
+                        );
+                    }
+
+                    await pingContentScript(tabId);
+
+                    const response =
+                        await sendTabMessage(
+                            tabId,
+                            {
+                                type:
+                                    "previewResultAdapter",
+                                proposal:
+                                    message.proposal
+                            },
+                            "Could not contact the adapter preview in content.js."
+                        );
+
+                    if (!response) {
+                        throw new Error(
+                            "The page returned no adapter-preview response."
+                        );
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(
+                            response.error ||
+                            "The page rejected the adapter preview."
+                        );
+                    }
+
+                    if (
+                        !response.result ||
+                        typeof response.result !==
+                            "object"
+                    ) {
+                        throw new Error(
+                            "The page returned an incomplete adapter-preview response."
+                        );
+                    }
+
+                    return {
+                        ok: true,
+                        result: response.result
+                    };
                 }
-            );
-    } catch (error) {
-        throw new Error(
-            "The content script responded to the ping, but diagnostic collection failed: " +
-            (
-                error &&
-                error.message
-                    ? error.message
-                    : String(error)
-            )
-        );
-    }
-    if (!response) {
-        throw new Error(
-            "The diagnostic listener returned no response."
-        );
-    }
-    if (!response.ok) {
-        throw new Error(
-            response.error ||
-            "The selected page rejected diagnostic collection."
-        );
-    }
-    if (!response.diagnostics) {
-        throw new Error(
-            "The selected page returned an incomplete diagnostic report."
-        );
-    }
+
+                case "clearTabAdapterPreview": {
+                    const tabId =
+                        Number(message.tabId);
+
+                    if (
+                        !Number.isInteger(tabId) ||
+                        tabId < 0
+                    ) {
+                        throw new Error(
+                            "A valid tab ID is required."
+                        );
+                    }
+
+                    await pingContentScript(tabId);
+
+                    const response =
+                        await sendTabMessage(
+                            tabId,
+                            {
+                                type:
+                                    "clearResultAdapterPreview"
+                            },
+                            "Could not contact content.js to clear the adapter preview."
+                        );
+
+                    if (
+                        !response ||
+                        !response.ok
+                    ) {
+                        throw new Error(
+                            response &&
+                            response.error
+                                ? response.error
+                                : "The page did not clear the adapter preview."
+                        );
+                    }
+
+                    return {
+                        ok: true,
+                        result:
+                            response.result || {
+                                cleared: true
+                            }
+                    };
+                }
+
+                case "collectTabDiagnostics": {
+                    const tabId =
+                        Number(message.tabId);
+
+                    if (
+                        !Number.isInteger(tabId) ||
+                        tabId < 0
+                    ) {
+                        throw new Error(
+                            "A valid tab ID is required."
+                        );
+                    }
+
+                    const ping =
+                        await pingContentScript(
+                            tabId
+                        );
+
+                    const response =
+                        await sendTabMessage(
+                            tabId,
+                            {
+                                type:
+                                    "collectResultDiagnostics"
+                            },
+                            "The content script responded to the ping, but diagnostic collection failed."
+                        );
+
+                    if (!response) {
+                        throw new Error(
+                            "The diagnostic listener returned no response."
+                        );
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(
+                            response.error ||
+                            "The selected page rejected diagnostic collection."
+                        );
+                    }
+
+                    if (!response.diagnostics) {
+                        throw new Error(
+                            "The selected page returned an incomplete diagnostic report."
+                        );
+                    }
+
+                    return {
+                        ok: true,
+                        contentScript: ping,
+                        diagnostics:
+                            response.diagnostics
+                    };
+                }
+				case "listAdapters": {
     return {
         ok: true,
-        contentScript: ping,
-        diagnostics:
-            response.diagnostics
+        adapters:
+            await getStoredAdapters()
     };
 }
+case "saveAdapter": {
+    const adapter =
+        normalizeAdapter(
+            message.adapter
+        );
+    const adapters =
+        await getStoredAdapters();
+    const filtered =
+        adapters.filter(existing => {
+            return !(
+                String(
+                    existing.hostname || ""
+                ).toLowerCase() ===
+                    adapter.hostname &&
+                String(
+                    existing.pathPattern || ""
+                ) ===
+                    adapter.pathPattern
+            );
+        });
+    filtered.push(adapter);
+    await saveStoredAdapters(filtered);
+    return {
+        ok: true,
+        adapter
+    };
+}
+case "deleteAdapter": {
+    const hostname = String(
+        message.hostname || ""
+    )
+        .trim()
+        .toLowerCase();
+    const pathPattern = String(
+        message.pathPattern || ""
+    ).trim();
+    const adapters =
+        await getStoredAdapters();
+    const filtered =
+        adapters.filter(existing => {
+            return !(
+                String(
+                    existing.hostname || ""
+                ).toLowerCase() ===
+                    hostname &&
+                String(
+                    existing.pathPattern || ""
+                ) ===
+                    pathPattern
+            );
+        });
+    await saveStoredAdapters(filtered);
+    return {
+        ok: true
+    };
+}
+case "getAdaptersForLocation": {
+    const url = new URL(
+        String(message.url || "")
+    );
+    const hostname =
+        url.hostname.toLowerCase();
+    const pathname =
+        url.pathname;
+    const adapters =
+        await getStoredAdapters();
+    const matches =
+        adapters.filter(adapter => {
+            if (
+                !adapter ||
+                adapter.enabled === false
+            ) {
+                return false;
+            }
+            if (
+                String(
+                    adapter.hostname || ""
+                ).toLowerCase() !== hostname
+            ) {
+                return false;
+            }
+            try {
+                return new RegExp(
+                    String(
+                        adapter.pathPattern ||
+                            ""
+                    )
+                ).test(pathname);
+            } catch {
+                return false;
+            }
+        });
+    return {
+        ok: true,
+        adapters: matches
+    };
+}
+                case "clearCaches":
+                    clearLookupCaches();
+                    return {
+                        ok: true
+                    };
 
                 case "databaseStatus":
                     return {
@@ -761,7 +1109,6 @@ case "collectTabDiagnostics": {
                         await LeanDb.beginProductionImport(
                             message.metadata || {}
                         );
-
                     return {
                         ok: true,
                         slot: result.slot,
@@ -786,9 +1133,7 @@ case "collectTabDiagnostics": {
                         await LeanDb.activateProductionSlot(
                             message.slot
                         );
-
                     clearLookupCaches();
-
                     return {
                         ok: true,
                         result
@@ -800,7 +1145,6 @@ case "collectTabDiagnostics": {
                         message.slot,
                         message.error || ""
                     );
-
                     return {
                         ok: true
                     };
@@ -810,9 +1154,7 @@ case "collectTabDiagnostics": {
                         await LeanDb.deleteProductionSlot(
                             message.slot
                         );
-
                     clearLookupCaches();
-
                     return {
                         ok: true,
                         result
@@ -854,7 +1196,6 @@ case "collectTabDiagnostics": {
                         message.importId,
                         message.error || ""
                     );
-
                     return {
                         ok: true
                     };
@@ -864,9 +1205,7 @@ case "collectTabDiagnostics": {
                         await LeanDb.removeManualImport(
                             message.importId
                         );
-
                     clearLookupCaches();
-
                     return {
                         ok: true,
                         result
@@ -875,9 +1214,7 @@ case "collectTabDiagnostics": {
 
                 case "clearAllDatabase":
                     await LeanDb.clearAll();
-
                     clearLookupCaches();
-
                     return {
                         ok: true
                     };
@@ -900,5 +1237,3 @@ case "collectTabDiagnostics": {
         }
     }
 );
-
-       
