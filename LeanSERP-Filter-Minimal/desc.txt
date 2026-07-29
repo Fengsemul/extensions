@@ -1094,4 +1094,47 @@ links: [
     ".title a[href]"
 ],
 
-This makes the result discoverable, but do not add #results-page as a root. Reload the extension and degoog page. If the existing generic-container logic selects a safe individual result wrapper, Wikipedia should disappear. If it removes only the title or nothing, the ancestor report above will provide the exact root selector needed."
+This makes the result discoverable, but do not add #results-page as a root. Reload the extension and degoog page. If the existing generic-container logic selects a safe individual result wrapper, Wikipedia should disappear. If it removes only the title or nothing, the ancestor report above will provide the exact root selector needed.";
+2026.07.29 12:30: "7. Do not auto-adopt yet
+
+The safe automation boundary is:
+text
+
+Capture -> Propose -> Preview -> Approve -> Save
+
+Do not make it:
+text
+
+Capture -> Automatically delete using learned selector
+
+A malicious or unusual result page could otherwise train the extension to remove the entire interface.
+
+The next safe addition is an outline-only preview: highlight every node matched by a proposed resultSelector, show the match count, and require approval before storing the adapter. That provides most of the convenience of automatic adaptation without allowing a page to silently teach destructive behavior.";
+2026.07.29 13:20: "The safe architecture is:
+
+    Universal proposer
+        works on unknown search engines
+        discovers likely result containers and title links
+
+    Human preview
+        outlines matches only
+        never deletes during learning
+
+    Approval
+        you confirm the proposal is sane
+
+    Saved adapter
+        hostname/path-specific declarative rule is stored
+        runtime uses that adapter later
+"..."Use a simple declarative shape like this:
+json
+
+{
+  "hostname": "degoog.org",
+  "pathPattern": "^/search$",
+  "resultSelector": "YOUR_PROPOSED_RESULT_SELECTOR",
+  "linkSelector": "a.result-title.degoog-result--title[href]",
+  "urlSources": ["href", "data-href", "data-url"],
+  "enabled": true
+}
+The exact resultSelector should be the one that previewed correctly."
