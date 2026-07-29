@@ -316,6 +316,49 @@
     spellcheck="false"
     aria-label="Captured result diagnostics"
 ></textarea>
+			<div class="button-row">
+    <button
+        id="propose-adapter"
+        type="button"
+    >
+        Propose adapter
+    </button>
+    <button
+        id="preview-adapter"
+        type="button"
+        disabled
+    >
+        Preview proposal
+    </button>
+    <button
+        id="clear-adapter-preview"
+        type="button"
+        disabled
+    >
+        Clear preview
+    </button>
+</div>
+<p
+    id="adapter-status"
+    class="operation-status"
+    aria-live="polite"
+>
+    No adapter proposed.
+</p>
+<textarea
+    id="adapter-output"
+    rows="12"
+    readonly
+    spellcheck="false"
+    aria-label="Proposed result adapter"
+></textarea>
+<button
+    id="save-adapter"
+    type="button"
+    disabled
+>
+    Save approved adapter
+</button>
             <div class="button-row">
                 <button
                     id="clear-caches"
