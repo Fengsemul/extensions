@@ -354,3 +354,25 @@ table button {
         width: 100%;
     }
 }
+#diagnostics-output {
+    width: 100%;
+    min-height: 280px;
+    margin-top: 10px;
+    border: 1px solid color-mix(
+        in srgb,
+        CanvasText 28%,
+        transparent
+    );
+    border-radius: 7px;
+    padding: 10px;
+    resize: vertical;
+    background: Field;
+    color: FieldText;
+    font-family:
+        ui-monospace,
+        "Cascadia Mono",
+        Consolas,
+        monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
