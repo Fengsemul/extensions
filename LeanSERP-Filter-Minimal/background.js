@@ -662,12 +662,92 @@ browser.runtime.onMessage.addListener(
                     }
                 }
 
-                case "clearCaches":
-                    clearLookupCaches();
-
-                    return {
-                        ok: true
-                    };
+case "collectTabDiagnostics": {
+    const tabId =
+        Number(message.tabId);
+    if (
+        !Number.isInteger(tabId) ||
+        tabId < 0
+    ) {
+        throw new Error(
+            "A valid tab ID is required."
+        );
+    }
+    let ping;
+    try {
+        ping =
+            await browser.tabs.sendMessage(
+                tabId,
+                {
+                    type:
+                        "pingLeanSerpContent"
+                }
+            );
+    } catch (error) {
+        throw new Error(
+            "LeanSERP content.js is not responding in the selected tab. " +
+            "Check the manifest match pattern and reload that tab. " +
+            (
+                error &&
+                error.message
+                    ? error.message
+                    : String(error)
+            )
+        );
+    }
+    if (
+        !ping ||
+        !ping.ok ||
+        !ping.injected
+    ) {
+        throw new Error(
+            "The selected tab responded, but not from the LeanSERP content script."
+        );
+    }
+    let response;
+    try {
+        response =
+            await browser.tabs.sendMessage(
+                tabId,
+                {
+                    type:
+                        "collectResultDiagnostics"
+                }
+            );
+    } catch (error) {
+        throw new Error(
+            "The content script responded to the ping, but diagnostic collection failed: " +
+            (
+                error &&
+                error.message
+                    ? error.message
+                    : String(error)
+            )
+        );
+    }
+    if (!response) {
+        throw new Error(
+            "The diagnostic listener returned no response."
+        );
+    }
+    if (!response.ok) {
+        throw new Error(
+            response.error ||
+            "The selected page rejected diagnostic collection."
+        );
+    }
+    if (!response.diagnostics) {
+        throw new Error(
+            "The selected page returned an incomplete diagnostic report."
+        );
+    }
+    return {
+        ok: true,
+        contentScript: ping,
+        diagnostics:
+            response.diagnostics
+    };
+}
 
                 case "databaseStatus":
                     return {
