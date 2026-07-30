@@ -1,12 +1,17 @@
-||wp-content^$all
+*/google-*$all
+*/wp-content/*$all
+*/wp-includes/*$all
+*/wp-admin/*$all
+*/wp-login.php*$all
+*/wp-json/*$all
 ||wp-includes^$all
-||wp-admin^$all
-||wp-login.php^$all
-||wp-json^$all
+*/wp-*$all
+||wp-includes^$all
 ||wp.json^$all
 ||gitapp.si^$all
 ||gitpage.si^$all
 ||gitlab.io^$all
+||gitlab.com^$all
 ||github.app^$all
 ||githubusercontent.com^$all
 ||githubpreview.dev^$all
@@ -7339,3 +7344,4 @@
 ||yy.com^$all
 ||zhihu.com^$all
 ||zhimg.com^$all
+
