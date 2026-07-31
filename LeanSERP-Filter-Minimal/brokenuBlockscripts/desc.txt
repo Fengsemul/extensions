@@ -1,4 +1,6 @@
-If Google behaves incorrectly, disable this line first:
+before 2026.07.28:"If Google behaves incorrectly, disable this line first:
 text
 
-||google.com/gen_204^$xhr
+||google.com/gen_204^$xhr"
+
+Removing mainstream sources: https://www.google.com/search?q=-%22imgur.%22%20-%22apple.%22%20-%22walmart.%22%20-%22amazon.%22%20-%22microsoft.%22%20-%22google.%22%20-%22gstatic.%22%20-%22wp.com%22%20-%22instagram%22%20-%22wordpress%22%20-%22youtube%22%20-%22x.%22%20-%22reddit.%22%20&gl=us&hl=en&brd_json=1&start=1&pws=0&udm=14
