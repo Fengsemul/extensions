@@ -1095,7 +1095,7 @@ links: [
 ],
 
 This makes the result discoverable, but do not add #results-page as a root. Reload the extension and degoog page. If the existing generic-container logic selects a safe individual result wrapper, Wikipedia should disappear. If it removes only the title or nothing, the ancestor report above will provide the exact root selector needed.";
-[2026.07.29 12:30: Auto instead ChatGPT 5.6 Sol: "7. Do not auto-adopt yet
+2026.07.29 12:30: "7. Do not auto-adopt yet
 
 The safe automation boundary is:
 text
@@ -1137,19 +1137,5 @@ json
   "urlSources": ["href", "data-href", "data-url"],
   "enabled": true
 }
-The exact resultSelector should be the one that previewed correctly."]
-
-similarly related extensions:v
-2026.07.31 00:10: https://addons.mozilla.org/en-US/firefox/addon/host-block/ : "Host Block is a small, privacy-oriented browser extension that blocks network requests to listed domains using Manifest V3 and the declarativeNetRequest (DNR) API.";<
-Inside extension: 
-"Host Block
-
-List
-    Ultimate
-Updated
-    31 Jul, 00:11
-Version
-    2026.0730.0748.45
-Domains
-    637,522 "
-similarly related extensions:a
+The exact resultSelector should be the one that previewed correctly.";
+2026.07.31 17:41: "The filtering core is working, but these failures have different causes. Do not train adapters on Google, Bing, or DuckDuckGo. They need built-in engine rules, while learned adapters remain appropriate for engines such as degoog."
