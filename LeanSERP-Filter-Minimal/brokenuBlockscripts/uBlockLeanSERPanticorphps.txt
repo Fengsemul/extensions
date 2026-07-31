@@ -1,3 +1,12 @@
+||i0.wp.com^$all
+||fonts.googleapis.com^$all
+||c0.wp.com^$all
+||fonts.gstatic.com^$all
+||play.google.com^$all
+||google.com^$all
+||gstatic.com^$all
+||csp.withgoogle.com^$all
+||s.w.org^$all
 */google-*$all
 */wp-content/*$all
 */wp-includes/*$all
