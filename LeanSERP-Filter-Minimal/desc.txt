@@ -1138,3 +1138,18 @@ json
   "enabled": true
 }
 The exact resultSelector should be the one that previewed correctly."]
+
+similarly related extensions:v
+2026.07.31 00:10: https://addons.mozilla.org/en-US/firefox/addon/host-block/ : "Host Block is a small, privacy-oriented browser extension that blocks network requests to listed domains using Manifest V3 and the declarativeNetRequest (DNR) API.";<
+Inside extension: 
+"Host Block
+
+List
+    Ultimate
+Updated
+    31 Jul, 00:11
+Version
+    2026.0730.0748.45
+Domains
+    637,522 "
+similarly related extensions:a
