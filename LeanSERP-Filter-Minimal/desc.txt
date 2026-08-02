@@ -1139,3 +1139,280 @@ json
 }
 The exact resultSelector should be the one that previewed correctly.";
 2026.07.31 17:41: "The filtering core is working, but these failures have different causes. Do not train adapters on Google, Bing, or DuckDuckGo. They need built-in engine rules, while learned adapters remain appropriate for engines such as degoog."
+2026-07.31 19:33: "The adapter system can safely automate discovery, preview, and approved reuse, but not every SERP has one repeated result container:
+
+    DuckDuckGo Lite may split one result across multiple rows.
+    Google may nest result cards inside .MjjYud.
+    Bing may return sparse or challenge layouts.
+    Image results may use separate sibling nodes.
+    React engines may replace links without replacing containers.
+
+Therefore, keep stable built-in adapters for Google, Bing, DuckDuckGo, and Brave. Use learned adapters for conventional engines such as degoog where one selector safely identifies each complete result card."
+2026.07.31 19:42: "The approved degoog adapter should be:
+json
+
+{
+  "hostname": "degoog.org",
+  "pathPattern": "^/search$",
+  "resultSelector": "div.result-item.degoog-result",
+  "linkSelector": "a.result-title.degoog-result--title[href]",
+  "urlSources": [
+    "href",
+    "data-href",
+    "data-url"
+  ],
+  "enabled": true
+}
+
+Delete or replace the existing saved adapter. If your background implements saveAdapter, run this from the manager console:
+javascript
+
+await browser.runtime.sendMessage({
+    type: "saveAdapter",
+    adapter: {
+        hostname: "degoog.org",
+        pathPattern: "^/search$",
+        resultSelector:
+            "div.result-item.degoog-result",
+        linkSelector:
+            "a.result-title.degoog-result--title[href]",
+        urlSources: [
+            "href",
+            "data-href",
+            "data-url"
+        ],
+        enabled: true
+    }
+});
+
+Expected:
+javascript
+
+{
+    ok: true,
+    adapter: {
+        ...
+    }
+}
+
+Then remove the temporary degoog CSS workaround:
+css
+
+.degoog-result:has(
+    > .degoog-result--image
+):not(:has(
+    .degoog-result--body
+)) {
+    display: none !important;
+}
+
+Reload degoog. Removing div.result-item.degoog-result should delete the image and text together and collapse the gap.";
+2026.07.31 21:43: "Also note that the search engine's own hostname is currently excluded by getHostname():
+javascript
+
+hostname === location.hostname.toLowerCase()
+
+That prevents navigation and internal DuckDuckGo controls from being treated as external results. A result linking to another DuckDuckGo subdomain may still be eligible, which is usually correct.",
+2026.07.31 21:47:"LeanSERP currently blocks a hostname by splitting it into DNS labels, excluding the Public Suffix List portion, and checking every remaining label independently. It does not focus only on the registrable, second-level domain.
+
+For example:
+Hostname	Searchable labels	PSL labels
+www.tiktok.com	www, tiktok	com
+help.duckduckgo.com	help, duckduckgo	com
+sub.example.co.uk	sub, example	co, uk
+
+The background code effectively does this:
+javascript
+
+const labels = normalized.split(".");
+const suffixStart =
+    labels.length - publicSuffixLength;
+const searchableLabels =
+    labels.slice(0, suffixStart);
+
+It then checks all searchableLabels against the production and manual label stores. The first matching label blocks the hostname:
+javascript
+
+for (const label of analysis.searchableLabels) {
+    if (ordinaryMatches[label]) {
+        ordinaryMatch = label;
+        break;
+    }
+}
+
+That explains this result:
+json
+
+"www.tiktok.com": {
+  "blocked": true,
+  "matchedRule": "www",
+  "matchedType": "label"
+}
+
+Because www is in the database, nearly every www.* result becomes blocked, regardless of the actual registrable domain."
+2026.07.31 21:48: "The three rule categories
+
+LeanSERP has three distinct matching mechanisms:
+Category	Matching behavior	Example
+Label	Any non-PSL label equals the rule	blog blocks blog.example.com and example.blog.com
+Exact host	Entire hostname equals the rule	help.duckduckgo.com blocks only that exact host
+PSL override	Allows selected suffix labels to participate in label blocking	Specialized handling for otherwise excluded PSL labels
+
+Matching is equality-based, not substring-based. A tiktok label blocks www.tiktok.com, but it does not block mytiktok.example.com.
+Why the current package is dangerous
+
+Your audit found all these generic labels:
+Label	Likely impact
+www	Blocks most conventional websites
+mail	Blocks webmail and mail subdomains across unrelated domains
+cdn, static, img, images	Blocks common asset and infrastructure subdomains
+api	Blocks API subdomains across unrelated organizations
+help, support	Blocks support sites such as help.duckduckgo.com
+blog	Blocks every hostname having a separate blog label
+shop, store, app, web	Produces broad false positives
+
+Deleting only www is insufficient under the current any-label semantics. All the listed generic labels can cause unrelated hosts to be blocked.",
+2026.07.31 21:51: "That is the label immediately before the public suffix. In analyzeHostname(), replace:
+javascript
+
+const analysis = Object.freeze({    hostname: normalized,    searchableLabels:        labels.slice(0, suffixStart),    suffixLabels:        labels.slice(suffixStart)});
+
+with:
+javascript
+
+const registrableLabel =    suffixStart > 0        ? labels[suffixStart - 1]        : "";const analysis = Object.freeze({    hostname: normalized,    searchableLabels:        registrableLabel            ? [registrableLabel]            : [],    suffixLabels:        labels.slice(suffixStart)});
+
+This changes ordinary label behavior as follows:
+Hostname	Checked label
+www.tiktok.com	tiktok
+help.duckduckgo.com	duckduckgo
+cdn.example.com	example
+a.b.example.co.uk	example
+
+Then generic labels such as www, help, and cdn no longer block arbitrary subdomains. They would block only registrable domains whose registrable label is literally www, help, or cdn.
+
+Exact-host rules remain the correct mechanism when you specifically want to block something such as help.duckduckgo.com.
+Important cache step
+
+After changing the matching semantics:
+
+    Reload the extension.
+    Click Clear lookup caches.
+    Reload every open search page.",
+2026.07.31 22:13 : "The DuckDuckGo markup is valid and the title selector is correct. The likely bug is root scanning: when React adds the <article> or <li>, getCandidateLinks() can find descendants, but getDuckDuckGoResultContainer() returns the inner <article>. That should still work, so verify whether the failure is matching, discovery, or stale caching.",
+
+2026.08.02 18:35: "To update the saved adapter directly, run this in the rebuild manager console:
+javascript
+
+await browser.runtime.sendMessage({
+    type: "saveAdapter",
+    adapter: {
+        hostname: "www.startpage.com",
+        pathPattern: "^/sp/search$",
+        resultSelector: "div.result.css-o7i03b",
+        linkSelector: "a.favicon-link[href]",
+        urlSources: [
+            "href",
+            "data-href",
+            "data-url"
+        ],
+        enabled: true
+    }
+});
+
+This replaces the existing adapter with the same hostname and path pattern. A successful response should contain:
+javascript
+
+{
+    ok: true,
+    adapter: {
+        hostname: "www.startpage.com",
+        pathPattern: "^/sp/search$",
+        resultSelector: "div.result.css-o7i03b",
+        linkSelector: "a.favicon-link[href]",
+        enabled: true
+    }
+}
+
+Then:
+
+    Reload the extension.
+    Open a new Startpage results tab.
+    Confirm blocked cards disappear without using proposal or preview.
+",
+2026.08.02 18:41: "Under Import manual rule file, select Blocked labels.
+Select the file containing www.
+Click Import manual file.
+Click Clear lookup caches.
+Close and reopen the Startpage results tab.",
+2026.08.02 18:44: "If the hostname decision becomes blocked but the card remains, then the failure is in adapter loading or DOM discovery. If both counts become zero, the entire pipeline works",
+2026.08.02 19:30: "Keep this stable adapter:
+json
+
+{
+  "hostname": "www.startpage.com",
+  "pathPattern": "^/(?:sp|do)/search$",
+  "resultSelector": "div.result",
+  "linkSelector": "a[data-testid='gl-title-link'][href]",
+  "urlSources": [
+    "href",
+    "data-href",
+    "data-url"
+  ],
+  "enabled": true
+}
+
+Delete the older adapter by its exact hostname and path pattern. If the old one uses ^/sp/search$, run:
+javascript
+
+await browser.runtime.sendMessage({
+    type: "deleteAdapter",
+    hostname: "www.startpage.com",
+    pathPattern: "^/sp/search$"
+});
+
+Then save the stable adapter again:
+javascript
+
+await browser.runtime.sendMessage({
+    type: "saveAdapter",
+    adapter: {
+        hostname: "www.startpage.com",
+        pathPattern:
+            "^/(?:sp|do)/search$",
+        resultSelector:
+            "div.result",
+        linkSelector:
+            "a[data-testid='gl-title-link'][href]",
+        urlSources: [
+            "href",
+            "data-href",
+            "data-url"
+        ],
+        enabled: true
+    }
+});
+
+Because refreshAdapterTabs() is now wired, the open Startpage tab should refresh its adapter list automatically. A subsequent health check should show:
+javascript
+
+{
+    adapterLoadOk: true,
+    adapterCount: 1,
+    engine: "startpage"
+}
+
+The hidden-tab observer behavior is also correct and resource-efficient: no mutation observer remains connected while Startpage is in the background.",
+2026.08.02 20:15: "Because refreshAdapterTabs() is working, no extension reload should be required after saving. Reloading the Startpage results page once is still useful to test the complete startup path and confirm the saved adapter persists."
+2026.08.02 20:17: "Your resilient adapter pipeline is now:
+text
+
+Saved adapter
+-> pushed to matching open tabs
+-> validated in content.js
+-> merged with built-in selectors
+-> hostname extracted
+-> background decision confirmed
+-> full result card deleted
+,
+The hidden-tab health result is also correct: visible: false and observerConnected: false means the extension is avoiding mutation-observer CPU work while the tab is inactive.",
