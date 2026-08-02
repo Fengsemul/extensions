@@ -734,7 +734,52 @@ async function pingContentScript(tabId) {
 
     return response;
 }
-
+async function refreshAdapterTabs(
+    hostname
+) {
+    const tabs =
+        await browser.tabs.query({});
+    const normalizedHostname =
+        String(hostname || "")
+            .trim()
+            .toLowerCase();
+    const tasks = [];
+    for (const tab of tabs) {
+        if (
+            !Number.isInteger(tab.id) ||
+            typeof tab.url !== "string"
+        ) {
+            continue;
+        }
+        let tabHostname = "";
+        try {
+            tabHostname =
+                new URL(tab.url)
+                    .hostname
+                    .toLowerCase();
+        } catch {
+            continue;
+        }
+        if (
+            tabHostname !==
+                normalizedHostname
+        ) {
+            continue;
+        }
+        tasks.push(
+            browser.tabs.sendMessage(
+                tab.id,
+                {
+                    type:
+                        "refreshDynamicAdapters"
+                }
+            ).catch(
+                () => undefined
+            )
+        );
+    }
+    await Promise.all(tasks);
+}
 browser.runtime.onMessage.addListener(
     async message => {
         if (
@@ -994,62 +1039,91 @@ browser.runtime.onMessage.addListener(
             await getStoredAdapters()
     };
 }
-case "saveAdapter": {
-    const adapter =
-        normalizeAdapter(
-            message.adapter
-        );
-    const adapters =
-        await getStoredAdapters();
-    const filtered =
-        adapters.filter(existing => {
-            return !(
-                String(
-                    existing.hostname || ""
-                ).toLowerCase() ===
-                    adapter.hostname &&
-                String(
-                    existing.pathPattern || ""
-                ) ===
-                    adapter.pathPattern
-            );
-        });
-    filtered.push(adapter);
-    await saveStoredAdapters(filtered);
-    return {
-        ok: true,
-        adapter
-    };
-}
-case "deleteAdapter": {
-    const hostname = String(
-        message.hostname || ""
-    )
-        .trim()
-        .toLowerCase();
-    const pathPattern = String(
-        message.pathPattern || ""
-    ).trim();
-    const adapters =
-        await getStoredAdapters();
-    const filtered =
-        adapters.filter(existing => {
-            return !(
-                String(
-                    existing.hostname || ""
-                ).toLowerCase() ===
-                    hostname &&
-                String(
-                    existing.pathPattern || ""
-                ) ===
-                    pathPattern
-            );
-        });
-    await saveStoredAdapters(filtered);
-    return {
-        ok: true
-    };
-}
+                case "saveAdapter": {
+                    const adapter =
+                        normalizeAdapter(
+                            message.adapter
+                        );
+                    const adapters =
+                        await getStoredAdapters();
+                    const filtered =
+                        adapters.filter(
+                            existing =>
+                                !(
+                                    String(
+                                        existing
+                                            .hostname ||
+                                            ""
+                                    )
+                                        .toLowerCase() ===
+                                        adapter
+                                            .hostname &&
+                                    String(
+                                        existing
+                                            .pathPattern ||
+                                            ""
+                                    ) ===
+                                        adapter
+                                            .pathPattern
+                                )
+                        );
+                    filtered.push(adapter);
+                    await saveStoredAdapters(
+                        filtered
+                    );
+                    await refreshAdapterTabs(
+                        adapter.hostname
+                    );
+                    return {
+                        ok: true,
+                        adapter
+                    };
+                }
+                case "deleteAdapter": {
+                    const hostname =
+                        String(
+                            message.hostname ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+                    const pathPattern =
+                        String(
+                            message
+                                .pathPattern ||
+                            ""
+                        ).trim();
+                    const adapters =
+                        await getStoredAdapters();
+                    const filtered =
+                        adapters.filter(
+                            existing =>
+                                !(
+                                    String(
+                                        existing
+                                            .hostname ||
+                                            ""
+                                    )
+                                        .toLowerCase() ===
+                                        hostname &&
+                                    String(
+                                        existing
+                                            .pathPattern ||
+                                            ""
+                                    ) ===
+                                        pathPattern
+                                )
+                        );
+                    await saveStoredAdapters(
+                        filtered
+                    );
+                    await refreshAdapterTabs(
+                        hostname
+                    );
+                    return {
+                        ok: true
+                    };
+                }
 case "getAdaptersForLocation": {
     const url = new URL(
         String(message.url || "")
