@@ -7367,3 +7367,7 @@
 ||zhimg.com^$all
 ||baidu.com^$all
 ||yandex.com^$all
+||alicdn.com^$all
+||alibaba.com^$all
+||umeng.com^$all
+||cnzz.com^$all
