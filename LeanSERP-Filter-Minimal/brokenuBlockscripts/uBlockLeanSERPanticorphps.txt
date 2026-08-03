@@ -1,3 +1,15 @@
+||cloudflare.app^$all
+||cf-ipfs.com^$all
+||cloudflare-ipfs.com^$all
+||trycloudflare.com^$all
+||pages.dev^$all
+||r2.dev^$all
+||workers.dev^$all
+||cloudflare.net^$all
+||cdn.cloudflare.net^$all
+||cdn.cloudflareanycast.net^$all
+||cdn.cloudflarecn.net^$all
+||cdn.cloudflareglobal.net^$all
 ||i0.wp.com^$all
 ||fonts.googleapis.com^$all
 ||c0.wp.com^$all
@@ -7353,4 +7365,5 @@
 ||yy.com^$all
 ||zhihu.com^$all
 ||zhimg.com^$all
-
+||baidu.com^$all
+||yandex.com^$all
