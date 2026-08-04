@@ -7371,3 +7371,4 @@
 ||alibaba.com^$all
 ||umeng.com^$all
 ||cnzz.com^$all
+||hotjar.com^$all
