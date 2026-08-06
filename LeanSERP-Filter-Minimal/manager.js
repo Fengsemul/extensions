@@ -1343,57 +1343,51 @@
         }
     }
 
-    async function removeManualImport(record) {
-        if (operationRunning) {
-            return;
-        }
-
-        if (
-            !window.confirm(
-                `Remove manual import "${record.fileName}" from ` +
-                    `${CATEGORY_NAMES[record.category] || record.category}?`
-            )
-        ) {
-            return;
-        }
-
-        setOperationRunning(true);
-
+async function removeManualImport(record) {
+    if (operationRunning) {
+        return;
+    }
+    if (
+        !window.confirm(
+            `Remove manual import "${record.fileName}" from ` +
+                `${CATEGORY_NAMES[record.category] || record.category}?`
+        )
+    ) {
+        return;
+    }
+    setOperationRunning(true);
+    setStatus(
+        elements.actionStatus,
+        `Removing ${record.fileName}...`
+    );
+    try {
+        const response =
+            await send({
+                type:
+                    "removeManualImport",
+                importId:
+                    record.importId
+            });
         setStatus(
             elements.actionStatus,
-            `Removing ${record.fileName}...`
+            `Removed ${response.result.removedLinks.toLocaleString()} ` +
+                "ownership links and " +
+                `${response.result.removedRules.toLocaleString()} ` +
+                "unreferenced rules.",
+            "success"
         );
-
-        try {
-            const response =
-                await send({
-                    type:
-                        "removeManualImport",
-                    importId:
-                        record.importId
-                });
-
-            setStatus(
-                elements.actionStatus,
-                `Removed ${response.result.removedLinks.toLocaleString()} ` +
-                    "ownership links and " +
-                    `${response.result.removedRules.toLocaleString()} ` +
-                    "unreferenced rules.",
-                "success"
-            );
-
-            await refreshStatus();
-               } catch (error) {
-            setStatus(
-                elements.actionStatus,
-                "Manual import removal failed: " +
-                    getErrorMessage(error),
-                "error"
-            );
-        } finally {
-            setOperationRunning(false);
-        }
+        await refreshStatus();
+    } catch (error) {
+        setStatus(
+            elements.actionStatus,
+            "Manual import removal failed: " +
+                getErrorMessage(error),
+            "error"
+        );
+    } finally {
+        setOperationRunning(false);
     }
+}
     function isSupportedDiagnosticUrl(value) {
         try {
             const url = new URL(value);
@@ -1417,6 +1411,26 @@
                 ) ||
                 hostname ===
                     "search.brave.com" ||
+                hostname ===
+                    "startpage.com" ||
+                hostname.endsWith(
+                    ".startpage.com"
+                ) ||
+                hostname ===
+                    "searx.org" ||
+                hostname.endsWith(
+                    ".searx.org"
+                ) ||
+                hostname ===
+                    "xka.cz" ||
+                hostname.endsWith(
+                    ".xka.cz"
+                ) ||
+                hostname ===
+                    "searx.tiekoetter.com" ||
+                hostname.endsWith(
+                    ".searx.tiekoetter.com"
+                ) ||
                 hostname === "etools.ch" ||
                 hostname.endsWith(
                     ".etools.ch"
