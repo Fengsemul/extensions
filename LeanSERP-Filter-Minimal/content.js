@@ -31,6 +31,24 @@
                 ".startpage.com"
             ),
 
+        searx: hostname =>
+            hostname === "searx.org" ||
+            hostname.endsWith(
+                ".searx.org"
+            ),
+			
+        xka: hostname =>
+            hostname === "xka.cz" ||
+            hostname.endsWith(
+                ".xka.cz"
+            ),
+			
+        tiekoetter: hostname =>
+            hostname === "searx.tiekoetter.com" ||
+            hostname.endsWith(
+                ".searx.tiekoetter.com"
+            ),
+
         etools: hostname =>
             hostname === "etools.ch" ||
             hostname.endsWith(".etools.ch"),
@@ -184,7 +202,79 @@
             allowGenericRoot: false
         }),
 
-        startpage: Object.freeze({
+        searx: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		tiekoetter: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		xka: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+        
+		startpage: Object.freeze({
             roots: [
                 ".w-gl__result",
                 ".result",
@@ -444,6 +534,33 @@
             );
         }
 
+        if (engine === "searx") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "tiekoetter") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "xka") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
         if (engine === "wiby") {
             return (
                 location.pathname === "/" ||
