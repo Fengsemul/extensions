@@ -1415,4 +1415,19 @@ Saved adapter
 -> background decision confirmed
 -> full result card deleted
 ,
-The hidden-tab health result is also correct: visible: false and observerConnected: false means the extension is avoiding mutation-observer CPU work while the tab is inactive.",
+The hidden-tab health result is also correct: visible: false and observerConnected: false means the extension is avoiding mutation-observer CPU work while the tab is inactive.";
+2026.05.08 19:46: How to add some search engines:
+  C:\Users\PC\Downloads\LeanSERP-Filter-Minimal-Rebuild\content.js (5 hits)
+	Line   34:         searx: hostname =>
+	Line   35:             hostname === "searx.org" ||
+	Line   37:                 ".searx.org"
+	Line  193:         searx: Object.freeze({
+	Line  477:         if (engine === "searx") {
+  C:\Users\PC\Downloads\LeanSERP-Filter-Minimal-Rebuild\manager.js (2 hits)
+	Line 1420:                     "searx.org" ||
+	Line 1422:                     ".searx.org"
+  C:\Users\PC\Downloads\LeanSERP-Filter-Minimal-Rebuild\manifest.json (4 hits)
+	Line  43: 	"*://searx.org/*",
+	Line  44: 	"*://*.searx.org/*"
+	Line  86: 		"*://searx.org/*",
+	Line  87: 		"*://*.searx.org/*"
