@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "LeanSERP Filter Minimal",
+  "name": "LeanSERP Filter Minimal Rebuild",
   "version": "1.0.0",
   "description": "Low-overhead, public-suffix-aware SERP filtering with bounded local lookups.",
   "permissions": [
@@ -37,7 +37,15 @@
     "*://searchthis.ch/*",
     "*://*.searchthis.ch/*",
     "*://degoog.org/*",
-    "*://*.degoog.org/*"
+    "*://*.degoog.org/*",
+	"*://startpage.com/*",
+	"*://*.startpage.com/*",
+	"*://searx.org/*",
+	"*://*.searx.org/*",
+	"*://xka.cz/*",
+	"*://*.xka.cz/*",
+	"*://searx.tiekoetter.com/*",
+	"*://*.searx.tiekoetter.com/*"
   ],
   "background": {
     "scripts": [
@@ -76,7 +84,15 @@
         "*://searchthis.ch/*",
         "*://*.searchthis.ch/*",
         "*://degoog.org/*",
-        "*://*.degoog.org/*"
+        "*://*.degoog.org/*",
+		"*://startpage.com/*",
+		"*://*.startpage.com/*",
+		"*://xka.cz/*",
+		"*://*.xka.cz/*",
+		"*://searx.tiekoetter.com/*",
+		"*://*.searx.tiekoetter.com/*",
+		"*://searx.org/*",
+		"*://*.searx.org/*"
       ],
       "js": [
         "content.js"
@@ -84,7 +100,7 @@
       "css": [
         "content.css"
       ],
-      "run_at": "document_idle",
+      "run_at": "document_start",
       "all_frames": false
     }
   ],
@@ -104,7 +120,7 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "leanserp-filter-minimal@local.invalid",
+      "id": "leanserp-filter-minimal-rebuild@local.invalid",
       "strict_min_version": "109.0"
     }
   }
