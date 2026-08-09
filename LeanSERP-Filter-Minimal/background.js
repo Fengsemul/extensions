@@ -342,31 +342,52 @@ async function analyzeHostname(hostname) {
 
     const cached =
         hostnameCache.get(normalized);
-    if (cached) {
+
+    if (
+        cached &&
+        cached.hostname === normalized &&
+        Array.isArray(
+            cached.searchableLabels
+        ) &&
+        Array.isArray(
+            cached.suffixLabels
+        )
+    ) {
         return cached;
     }
 
     const rules =
         await loadPublicSuffixList();
+
     const labels =
         normalized.split(".");
+
     const suffixLength =
         getPublicSuffixLength(
             normalized,
             rules
         );
-    const suffixStart = Math.max(
-        0,
-        labels.length - suffixLength
-    );
 
-    const analysis = Object.freeze({
-        hostname: normalized,
-        searchableLabels:
-            labels.slice(0, suffixStart),
-        suffixLabels:
-            labels.slice(suffixStart)
-    });
+    const suffixStart =
+        Math.max(
+            0,
+            labels.length -
+                suffixLength
+        );
+
+    const analysis =
+        Object.freeze({
+            hostname: normalized,
+            searchableLabels:
+                labels.slice(
+                    0,
+                    suffixStart
+                ),
+            suffixLabels:
+                labels.slice(
+                    suffixStart
+                )
+        });
 
     hostnameCache.set(
         normalized,
@@ -734,6 +755,35 @@ async function pingContentScript(tabId) {
 
     return response;
 }
+
+async function clearContentCaches() {
+    const tabs =
+        await browser.tabs.query({});
+
+    await Promise.all(
+        tabs.map(tab => {
+            if (
+                !Number.isInteger(tab.id)
+            ) {
+                return undefined;
+            }
+
+            return browser.tabs
+                .sendMessage(
+                    tab.id,
+                    {
+                        type:
+                            "clearLeanSerpContentCaches"
+                    }
+                )
+                .catch(
+                    () => undefined
+                );
+        })
+    );
+}
+
+
 async function refreshAdapterTabs(
     hostname
 ) {
@@ -1165,11 +1215,95 @@ case "getAdaptersForLocation": {
         adapters: matches
     };
 }
-                case "clearCaches":
-                    clearLookupCaches();
-                    return {
-                        ok: true
-                    };
+case "debugHostnameAnalysis": {
+    const hostname =
+        normalizeHostname(
+            message.hostname
+        );
+
+    if (!hostname) {
+        throw new Error(
+            "A valid hostname is required."
+        );
+    }
+
+    clearLookupCaches();
+
+    const analysis =
+        await analyzeHostname(
+            hostname
+        );
+
+    return {
+        ok: true,
+        analysis
+    };
+}
+case "debugRuleLookup": {
+    const category =
+        String(
+            message.category || "labels"
+        );
+    const keys =
+        Array.isArray(message.keys)
+            ? message.keys
+            : [];
+
+    const manual =
+        await lookupManual(
+            category,
+            keys
+        );
+
+    const activeSlot =
+        await getActiveSlot();
+
+    let ruleType;
+
+    if (category === "labels") {
+        ruleType =
+            LeanDb.RULE_TYPES.label;
+    } else if (
+        category === "exactHosts"
+    ) {
+        ruleType =
+            LeanDb.RULE_TYPES.exactHost;
+    } else if (
+        category === "pslOverrides"
+    ) {
+        ruleType =
+            LeanDb.RULE_TYPES.pslOverride;
+    } else {
+        throw new Error(
+            "Unknown diagnostic category."
+        );
+    }
+
+    const production =
+        await lookupProduction(
+            activeSlot,
+            ruleType,
+            keys
+        );
+
+    return {
+        ok: true,
+        activeSlot,
+        manual,
+        production,
+        combined:
+            mergeMatches(
+                production,
+                manual
+            )
+    };
+}
+case "clearCaches":
+    clearLookupCaches();
+    await clearContentCaches();
+    return {
+        ok: true
+    };
 
                 case "databaseStatus":
                     return {
@@ -1202,17 +1336,20 @@ case "getAdaptersForLocation": {
                             )
                     };
 
-                case "activateProductionSlot": {
-                    const result =
-                        await LeanDb.activateProductionSlot(
-                            message.slot
-                        );
-                    clearLookupCaches();
-                    return {
-                        ok: true,
-                        result
-                    };
-                }
+case "activateProductionSlot": {
+    const result =
+        await LeanDb.activateProductionSlot(
+            message.slot
+        );
+
+    clearLookupCaches();
+    await clearContentCaches();
+
+    return {
+        ok: true,
+        result
+    };
+}
 
                 case "failProductionSlot":
                     await LeanDb.markProductionSlotFailed(
@@ -1244,47 +1381,94 @@ case "getAdaptersForLocation": {
                             )
                     };
 
-                case "putManualBatch":
-                    return {
-                        ok: true,
-                        result:
-                            await LeanDb.putManualBatch(
-                                message.importId,
-                                message.category,
-                                message.rules || []
-                            )
-                    };
+case "putManualBatch": {
+    const rules =
+        Array.isArray(message.rules)
+            ? message.rules
+            : [];
 
-                case "completeManualImport":
-                    return {
-                        ok: true,
-                        record:
-                            await LeanDb.completeManualImport(
-                                message.importId,
-                                message.result || {}
-                            )
-                    };
+    const result =
+        await LeanDb.putManualBatch(
+            message.importId,
+            message.category,
+            rules
+        );
 
-                case "failManualImport":
-                    await LeanDb.failManualImport(
-                        message.importId,
-                        message.error || ""
-                    );
-                    return {
-                        ok: true
-                    };
+    const normalizedRules =
+        Array.from(
+            new Set(
+                rules
+                    .map(value =>
+                        String(value || "")
+                            .trim()
+                            .toLowerCase()
+                    )
+                    .filter(Boolean)
+            )
+        );
 
-                case "removeManualImport": {
-                    const result =
-                        await LeanDb.removeManualImport(
-                            message.importId
-                        );
-                    clearLookupCaches();
-                    return {
-                        ok: true,
-                        result
-                    };
-                }
+    const verification =
+        await LeanDb.hasManualBatch(
+            message.category,
+            normalizedRules
+        );
+
+    const missing =
+        normalizedRules.filter(
+            rule => !verification[rule]
+        );
+
+    if (missing.length > 0) {
+        throw new Error(
+            "Manual rules were written but could not be verified: " +
+                missing
+                    .slice(0, 10)
+                    .join(", ")
+        );
+    }
+
+    clearLookupCaches();
+    await clearContentCaches();
+
+    return {
+        ok: true,
+        result,
+        verified:
+            normalizedRules.length
+    };
+}
+
+case "completeManualImport": {
+    const record =
+        await LeanDb.completeManualImport(
+            message.importId,
+            message.result || {}
+        );
+
+    clearLookupCaches();
+    await clearContentCaches();
+
+    return {
+        ok: true,
+        record
+    };
+}
+
+
+case "removeManualImport": {
+    const result =
+        await LeanDb.removeManualImport(
+            message.importId
+        );
+
+    clearLookupCaches();
+    await clearContentCaches();
+
+    return {
+        ok: true,
+        result
+    };
+}
 
                 case "clearAllDatabase":
                     await LeanDb.clearAll();
