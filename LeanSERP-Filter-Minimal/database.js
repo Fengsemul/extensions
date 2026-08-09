@@ -2052,6 +2052,21 @@ globalThis.LeanDb = (() => {
             );
         });
     }
+	    async function close() {
+        if (!openPromise) {
+            return;
+        }
+
+        try {
+            const database =
+                await openPromise;
+
+            database.close();
+        } catch {
+        } finally {
+            openPromise = null;
+        }
+    }
     return Object.freeze({
         DATABASE_NAME,
         DATABASE_VERSION,
@@ -2092,8 +2107,7 @@ globalThis.LeanDb = (() => {
         countManualRules,
         getCombinedCounts,
         getDatabaseStatus,
+        close,
         clearAll
     });
 })();
-
-
