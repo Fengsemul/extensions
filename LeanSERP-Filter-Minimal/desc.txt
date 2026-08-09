@@ -1430,4 +1430,186 @@ The hidden-tab health result is also correct: visible: false and observerConnect
 	Line  43: 	"*://searx.org/*",
 	Line  44: 	"*://*.searx.org/*"
 	Line  86: 		"*://searx.org/*",
-	Line  87: 		"*://*.searx.org/*"
+	Line  87: 		"*://*.searx.org/*";
+2026.08.06 21:25: "It does not hide results primarily because public_suffix_list.dat is empty. confirmHostnames() calls loadPublicSuffixList(), and parsePublicSuffixList() deliberately rejects an empty or incomplete list";
+2026.08.07: 21:30: "Also, removing and re-adding temporary Firefox extensions can create a new extension origin and therefore an empty IndexedDB database. That explains why the 18-million-label generation disappeared.";
+2026.08.07: 21:32: In the one extension you intend to keep:
+
+    Open the manager.
+    Under Import manual rule file, choose Blocked labels.
+    Select pythonanywhere-test.txt.
+    Import it.
+    Click Clear lookup caches.
+    Fully reload the search-results page.
+
+From the manager console, verify:
+javascript
+
+JSON.stringify(
+    await browser.runtime.sendMessage({
+        type: "confirmHostnames",
+        hostnames: [
+            "www.pythonanywhere.com",
+            "eu.pythonanywhere.com",
+            "pythonanywhere.com"
+        ]
+    }),
+    null,
+    2
+);
+2026.08.07: 21:54: "This remains bounded in RAM and prevents the expected 21, found 20 activation failure.
+4. Inspect and repair the actual PSL override file
+
+Use the real path:
+powershell
+
+
+$path = "C:\Users\PC\Downloads\LeanSERP-Packages\LeanSERP-Package-20260728-120213\approved_psl_overrides.txt"
+if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {    throw "File not found: $path"}
+$entries = @(    Get-Content -LiteralPath $path |    ForEach-Object {        $_.Trim().ToLowerInvariant()    } |    Where-Object {        $_ -ne "" -and        -not $_.StartsWith("#")    })
+$groups = @(    $entries |    Group-Object |    Sort-Object Name)
+$duplicates = @(    $groups |    Where-Object {        $_.Count -gt 1    })
+[pscustomobject]@{    ValidLines = $entries.Count    UniqueRules = $groups.Count    DuplicateGroups = $duplicates.Count} | Format-List
+if ($duplicates.Count -gt 0) {    Write-Host "Duplicates:" -ForegroundColor Yellow
+    $duplicates |        Select-Object Name, Count |        Format-Table -AutoSize}
+
+Create a cleaned replacement while preserving the original:
+powershell
+
+
+$source = "C:\Users\PC\Downloads\LeanSERP-Packages\LeanSERP-Package-20260728-120213\approved_psl_overrides.txt"$backup = "$source.before-dedup"$target = "$source.deduplicated"
+Copy-Item `    -LiteralPath $source `    -Destination $backup `    -Force
+$unique = @(    Get-Content -LiteralPath $source |    ForEach-Object {        $_.Trim().ToLowerInvariant()    } |    Where-Object {        $_ -ne "" -and        -not $_.StartsWith("#")    } |    Sort-Object -Unique)
+[System.IO.File]::WriteAllLines(    $target,    $unique,    [System.Text.UTF8Encoding]::new($false))
+Write-Host "Original backup: $backup" -ForegroundColor YellowWrite-Host "Deduplicated file: $target" -ForegroundColor GreenWrite-Host "Unique entries: $($unique.Count)" -ForegroundColor Green
+
+Do not put pythonanywhere in this override file. It belongs in labels.txt or a manual blocked-label file.",
+2026.08.07: 22:34: "One important distinction: LeanDb.hasManualBatch() returning true proves the database layer works. confirmHostnames() returning false before the reload indicates the background context had stale state or belonged to an older extension instance. Reloading the single consolidated extension after adding cross-context invalidation resolves both paths.",
+2026.08.09: 20:21: "PS C:\WINDOWS\system32> $paths = @(
+>>     "C:\Users\PC\Downloads\LeanSERP-Filter-Minimal\public_suffix_list.dat",
+>>     "C:\Users\PC\Downloads\LeanSERP-Filter-Minimal_backup_1\public_suffix_list.dat"
+>> )
+>>
+>> foreach ($path in $paths) {
+>>     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+>>         Write-Host "Missing: $path" -ForegroundColor Yellow
+>>         continue
+>>     }
+>>
+>>     Write-Host "`n$path" -ForegroundColor Cyan
+>>
+>>     Select-String `
+>>         -LiteralPath $path `
+>>         -Pattern 'pythonanywhere' `
+>>         -CaseSensitive:$false |
+>>         ForEach-Object {
+>>             "{0}: {1}" -f $_.LineNumber, $_.Line
+>>         }
+>> }
+>>
+
+C:\Users\PC\Downloads\LeanSERP-Filter-Minimal\public_suffix_list.dat
+15302: // PythonAnywhere LLP : https://www.pythonanywhere.com
+15303: // Submitted by Giles Thomas <giles@pythonanywhere.com>
+15304: pythonanywhere.com
+15305: eu.pythonanywhere.com
+Missing: C:\Users\PC\Downloads\LeanSERP-Filter-Minimal_backup_1\public_suffix_list.dat
+PS C:\WINDOWS\system32> $path = "C:\Users\PC\Downloads\LeanSERP-Filter-Minimal\public_suffix_list.dat"
+>> $backup = "$path.before-pythonanywhere-fix"
+>>
+>> if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+>>     throw "public_suffix_list.dat was not found."
+>> }
+>>
+>> Copy-Item `
+>>     -LiteralPath $path `
+>>     -Destination $backup `
+>>     -Force
+>>
+>> $lines = @(
+>>     Get-Content -LiteralPath $path |
+>>     Where-Object {
+>>         $normalized = $_.Trim().ToLowerInvariant()
+>>
+>>         $normalized -ne "pythonanywhere.com" -and
+>>         $normalized -ne "eu.pythonanywhere.com"
+>>     }
+>> )
+>>
+>> [System.IO.File]::WriteAllLines(
+>>     $path,
+>>     $lines,
+>>     [System.Text.UTF8Encoding]::new($false)
+>> )
+>>
+>> $remaining = @(
+>>     Select-String `
+>>         -LiteralPath $path `
+>>         -Pattern 'pythonanywhere' `
+>>         -CaseSensitive:$false
+>> )
+>>
+>> if ($remaining.Count -gt 0) {
+>>     $remaining |
+>>         Select-Object LineNumber, Line |
+>>         Format-Table -AutoSize
+>>
+>>     throw "PythonAnywhere entries remain in the PSL."
+>> }
+>>
+>> Write-Host "PythonAnywhere PSL entries removed." -ForegroundColor Green
+>> Write-Host "Backup: $backup" -ForegroundColor Yellow
+>>
+
+LineNumber Line
+---------- ----
+     15302 // PythonAnywhere LLP : https://www.pythonanywhere.com
+     15303 // Submitted by Giles Thomas <giles@pythonanywhere.com>
+
+
+PythonAnywhere entries remain in the PSL.
+At line:41 char:5
++     throw "PythonAnywhere entries remain in the PSL."
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (PythonAnywhere ...ain in the PSL.:String) [], RuntimeException
+    + FullyQualifiedErrorId : PythonAnywhere entries remain in the PSL.
+
+PS C:\WINDOWS\system32> $path = "C:\Users\PC\Downloads\LeanSERP-Filter-Minimal\public_suffix_list.dat"
+>>
+>> $lines = @(
+>>     Get-Content -LiteralPath $path |
+>>     Where-Object {
+>>         $_ -notmatch '(?i)pythonanywhere'
+>>     }
+>> )
+>>
+>> [System.IO.File]::WriteAllLines(
+>>     $path,
+>>     $lines,
+>>     [System.Text.UTF8Encoding]::new($false)
+>> )
+>>
+>> Write-Host "PythonAnywhere rules and comments removed." -ForegroundColor Green
+>>
+PythonAnywhere rules and comments removed.",
+2026.08.09 20:26: "Yes. LeanSERP Filter Minimal directly parses its bundled public_suffix_list.dat, so deleting an active PSL rule changes how hostnames are divided into searchable labels and protected suffix labels after the extension is reloaded.
+
+For example:
+PSL state	Searchable labels for www.pythonanywhere.com	Suffix labels
+pythonanywhere.com present	www	pythonanywhere, com
+pythonanywhere.com removed	www, pythonanywhere	com
+
+That is why your pythonanywhere blocking label started matching only after those PSL rules were removed.
+
+A few important details:
+
+    Comments do not affect matching. Lines beginning with // are ignored.
+    Deleting a PSL rule does not block anything by itself. It merely allows more of the hostname to be checked against your blocked-label database.
+    Reload the extension after changing the PSL. The background caches the parsed list in memory, so clearing lookup caches alone is not enough.
+    This is a local PSL customization. An upstream replacement of public_suffix_list.dat may restore deleted entries.
+    Removing private-domain PSL entries changes semantics for all their subdomains. For PythonAnywhere, every tenant hostname can now expose pythonanywhere as an ordinary searchable label.
+
+So the effective chain is:
+text
+
+Edit public_suffix_list.dat-> reload extension-> hostname is partitioned differently-> newly searchable labels are checked-> matching blocked labels remove the result"
