@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <title>RawWeb</title>
+
+  <style>
+    body {
+      box-sizing: border-box;
+      width: 280px;
+      margin: 0;
+      padding: 20px;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      text-align: center;
+      background: #ffffff;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      color: #1a1a1a;
+      font-size: 18px;
+      text-align: left;
+    }
+
+    #toggle {
+      width: 100%;
+      padding: 12px;
+      border: 0;
+      border-radius: 8px;
+      color: #ffffff;
+      background: #007aff;
+      box-shadow: 0 2px 8px rgba(0, 122, 255, 0.15);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    #toggle:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    #toggle:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    #toggle:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .status {
+      margin-top: 16px;
+      color: #666666;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .brand {
+      margin-top: 20px;
+      color: #999999;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="[w3.org](http://www.w3.org/2000/svg)"
+      aria-hidden="true"
+    >
+      <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#007AFF"/>
+      <path d="M2 17L12 22L22 17" stroke="#007AFF" stroke-width="2"/>
+      <path d="M2 12L12 17L22 12" stroke="#007AFF" stroke-width="2"/>
+    </svg>
+
+    <h1>RawWeb</h1>
+  </div>
+
+  <button id="toggle" type="button" disabled>Loading...</button>
+  <p class="status" id="statusText">Initializing extension...</p>
+  <p class="brand">Pure Browsing Experience</p>
+
+  <script src="popup.js"></script>
+</body>
+</html>
