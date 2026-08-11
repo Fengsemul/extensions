@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "LowWebx",
+  "version": "1.0.0",
+  "description": "Reduces webpage resource use while retaining practical compatibility.",
+  "icons": {
+    "48": "icons/favicon-48.png",
+    "96": "icons/favicon-96.png",
+    "128": "icons/favicon-128.png"
+  },
+  "permissions": [
+    "declarativeNetRequest",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_title": "LowWebx",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "48": "icons/favicon-48.png",
+      "96": "icons/favicon-96.png",
+      "128": "icons/favicon-128.png"
+    }
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "css": [
+        "lowwebx.css"
+      ],
+      "js": [
+        "lowwebx.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "lowwebx@example.com",
+      "strict_min_version": "128.0"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+:root {
+  color-scheme: light dark;
+  font: menu;
+}
+
+body {
+  box-sizing: border-box;
+  width: 290px;
+  margin: 0;
+  padding: 14px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+fieldset {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 10px;
+}
+
+.toggle-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+label,
+button {
+  cursor: pointer;
+}
+
+#description,
+#status {
+  min-height: 2.5em;
+  margin: 10px 0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+button {
+  width: 100%;
+  padding: 8px;
+}

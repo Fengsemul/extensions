@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+  <title>LowWebx</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1>LowWebx</h1>
+
+  <label class="toggle-row">
+    <input id="enabled" type="checkbox">
+    <span>Enable resource saving</span>
+  </label>
+
+  <fieldset>
+    <legend>Mode</legend>
+
+    <label>
+      <input
+        type="radio"
+        name="mode"
+        value="balanced"
+      >
+      Balanced
+    </label>
+
+    <label>
+      <input
+        type="radio"
+        name="mode"
+        value="maximum"
+      >
+      Maximum saving
+    </label>
+  </fieldset>
+
+  <p id="description"></p>
+  <button id="apply" type="button">Apply and reload</button>
+  <p id="status" role="status"></p>
+
+  <script src="popup.js"></script>
+</body>
+</html>
