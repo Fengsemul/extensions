@@ -1,0 +1,328 @@
+/* css reset */
+/*p, div, a {
+	padding: 0 !important;
+	margin: 0 !important;
+	line-height: 0 !important;
+	display: block !important;
+}*/
+
+html, body{
+	font-size: 16px !important;
+}
+/* webfonts */
+@font-face {
+    font-family: 'yantramanavblack' ;
+    src: url('fonts/yantramanav-black-webfont.woff') format('woff'),
+         url('fonts/yantramanav-black-webfont.ttf') format('truetype') ;
+    font-weight: normal ;
+    font-style: normal ;
+
+}
+
+@font-face {
+    font-family: 'yantramanav_regularregular' ;
+    src: url('fonts/yantramanav-regular-webfont.woff') format('woff'),
+         url('fonts/yantramanav-regular-webfont.ttf') format('truetype') ;
+    font-weight: normal ;
+    font-style: normal ;
+
+}
+
+@font-face {
+    font-family: 'yantramanav_boldbold' ;
+    src: url('fonts/yantramanav-bold-webfont.woff') format('woff'),
+         url('fonts/yantramanav-bold-webfont.ttf') format('truetype') ;
+    font-weight: normal ;
+    font-style: normal ;
+}
+
+/* COLOR VARIABLES */
+:root {
+	--googless-pink: #E64F9B ;
+	--googless-blue: #1A73E8 ;
+	--googless-green: #21bd85 ;
+}
+
+/* googless styling */
+
+#googless-container {
+	/*display: none;*/
+	position: fixed !important;
+	margin: 0 !important;
+	top: 0% !important;
+	bottom: 0% !important;
+	z-index: 2147483647 !important;
+	max-width: 100vw !important;	
+	min-height: 100vh !important;
+
+		background-color: #F9F5F4 !important;
+		background-image:
+		  linear-gradient(rgba(120,169,247,0.5) 0.5px, transparent 1px),
+	  linear-gradient(90deg, rgba(120,169,247,0.5) 0.5px, transparent 1px),
+		  linear-gradient(rgba(120,169,247,0.5) 0.5px, transparent 1px),
+		  linear-gradient(90deg, rgba(120,169,247,0.5) 0.5px, transparent 1px) !important;
+		background-size: 200px 200px, 200px 200px, 40px 40px, 40px 40px !important;
+		background-position: 0px 0px, -0.5px -0.5px, 0px 0px, -0.5px -0.5px !important;
+
+}
+
+#googless-container .topbar {
+	position: absolute !important;
+	margin: 0 !important;
+	top: 0 !important;
+	width: 100% !important;
+	height: 28px !important;
+	background-image: linear-gradient(135deg, #f3d898 25.86%, #141414 25.86%, #141414 50%, #f3d898 50%, #f3d898 75.86%, #141414 75.86%, #141414 100%) !important;
+	background-size: 82.02px 82.02px !important;
+	border: 1px solid black !important;
+}
+
+#googless-container .content-container {
+	padding: 10% !important;
+	overflow-y: scroll !important;
+	height: 100vh !important;
+	max-width: 100vw !important;
+	display: flex !important;
+	flex-direction: column !important;
+}
+
+/* Googless heading texts*/
+
+#googless-container .heading {
+	text-transform: capitalize !important;
+	font-family: 'yantramanavblack' !important;
+	font-size: 4rem !important;
+	font-weight: 900 !important;
+	letter-spacing: 4px !important;
+	color: #F3D898 !important;
+	text-shadow: 4px 4px 0 #141414, -1px 0 0 #141414, 0 1px 0 #141414, 1px 0 0 #141414, 0 -1px 0 #141414 !important;
+	line-height: 78px !important;
+	margin-bottom: 40px !important;
+}
+
+#googless-container .description p, .email-cta p, .mep-email-link {
+	font-family: 'yantramanav_boldbold' !important;
+	font-weight: bold !important;
+	font-size: 2rem !important;
+	color: #141414 !important;
+	/*-webkit-text-stroke: 1px #141414 !important;*/
+	/*text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black !important;*/
+	line-height: 2.3rem !important;
+	letter-spacing: 0.095em !important;
+	margin-bottom: 50px !important;
+}
+
+#googless-container .email-cta p{
+	font-family: 'yantramanav_boldbold' !important;
+	font-weight: bold !important;
+	color: #141414 !important;
+	margin-bottom: 5px !important;
+	font-size: 1.5rem !important;
+	line-height: 2rem !important;
+	font-weight: 700 !important;
+}
+
+#googless-container .highlight-text {
+	/*text-transform: uppercase !important;*/
+	color: var(--googless-pink) !important;
+	/*-webkit-text-stroke: 1px #141414 !important;*/
+	/*text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black !important;*/
+}
+
+#googless-container .email-cta {
+	margin-top: 50px !important;
+	margin-bottom: 160px !important;
+}
+
+#googless-container .email-cta .email-list {
+	list-style-type: none !important;
+	display: block !important;
+	padding-left: 0px !important;
+	columns: 1 !important;
+	margin-bottom: 120px !important;
+
+}
+
+#googless-container .email-cta .email-list .mep-email-link {
+	display: inline-block !important;
+	color: var(--googless-pink) !important;
+	text-decoration: underline !important;
+	margin-bottom: 5px !important;
+padding-left: 0px !important;
+font-size: 1.5rem !important;
+font-weight: 400 !important;
+}
+
+/* Service cards */
+#service-container .service-card {
+	margin: 1rem .5em !important;
+	max-width: 4000px !important;
+	display: flex !important;
+	flex-direction: column !important;
+	justify-content: space-between !important;
+
+
+}
+
+@media screen and (min-width: 40em) {
+
+	#service-container {
+		width: 100% !important;
+		display: flex !important;
+		flex-wrap: wrap !important;
+		justify-content: start !important;
+	}
+
+    #service-container .service-card {
+        flex: 0 1 calc(50% - 2em) !important;
+		margin: 1rem .5em !important;
+		margin-bottom: .5rem;
+		max-width: 320px !important;
+    }
+}
+
+@media screen and (min-width: 70em) {
+
+    #service-container .service-card  {
+        flex: 0 1 calc(25% - 2em) !important;
+    }
+}
+
+
+#service-container .service-card {
+	/*position: absolute !important;*/
+	background: #F9F5F4 !important;
+	border: 2px solid #141414 !important;
+	box-sizing: border-box !important;
+	padding: 20px !important;
+}
+
+#service-container .service-card .inactive {
+	display: none !important;
+}
+
+#service-container .service-card .active {
+	display: block !important;
+}
+
+#service-container .service-card:nth-child(odd) {
+	box-shadow: 5px 6px var(--googless-pink) !important;
+}
+
+#service-container .service-card:nth-child(even) {
+	box-shadow: 5px 6px var(--googless-blue) !important;
+}
+
+#service-container .service-card .googless-icon {
+	width: 100% !important;
+	text-align: center !important;
+	/*background: #FFF !important;*/
+
+}
+
+#service-container .service-card .googless-info {
+	text-align: center !important;
+	display: flex !important;
+	justify-content: center !important;
+	flex-direction: column !important;
+	/*background: #FFF !important;*/
+
+}
+
+#service-container .service-card .googless-icon img {
+
+	display: flex !important;
+	align-items: center !important;
+}
+
+#service-container .service-card .googless-icon img {
+	margin: auto !important;
+	width: 100% !important;
+}
+
+#service-container .service-card .service-title {
+	color: var(--googless-pink) !important;
+}
+
+
+#service-container .service-card .service-title {
+/*	font-family: 'yantramanav_regularregular' !important;
+	font-style: normal !important;
+	font-weight: 900 !important;
+	font-size: 16px !important;
+	line-height: 21px !important;
+	text-align: center !important;*/
+	margin-top: 20px !important;
+	margin-bottom:10px !important;
+
+	/*margin-top: 0px !important;*/
+    font-family: 'yantramanav_boldbold', sans-serif !important;
+    color: #e64f9b !important;
+    font-size: 1.6rem !important;
+    line-height: 2rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+}
+
+
+#service-container .service-card .service-description {
+    font-family: 'yantramanav_regularregular', sans-serif !important;
+	font-style: normal !important;
+	font-weight: normal !important;
+	font-size: 1.1rem !important;
+	line-height: 1.4rem !important;
+	text-align: center !important;
+	color: #141414 !important;
+}
+
+
+#service-container .service-card .service-link {
+	/*font-family: Times, serif !important;
+	font-style: italic !important;
+	font-weight: normal !important;
+	font-size: 12px !important;
+	line-height: 14px !important;
+
+	text-decoration-line: underline !important;
+
+	color: #9632B9 !important;*/
+	text-align: center !important;
+	margin: 20px !important;
+}
+
+#service-container .service-card .service-link a {
+	margin-top: 12px !important;
+	border: 1px solid #141414 !important;
+	border-radius: 50px !important;
+	background-color: #1a73e8 !important;
+	font-family: 'yantramanav_regularregular', sans-serif !important;
+	font-size: 1rem !important;
+	line-height: 1rem !important;
+	font-weight: 700 !important;
+	text-decoration: none !important;
+	padding: 12px 24px !important;
+	text-decoration: none !important;
+	color: #fff !important;
+	white-space: nowrap !important;
+}
+
+#service-container .service-card .service-link a:hover {
+	box-shadow: 4px 4px 0 0 #141414 !important;
+	-webkit-transform: translate(-5px, -5px) !important;
+	-ms-transform: translate(-5px, -5px) !important;
+	transform: translate(-5px, -5px) !important;
+}
+
+@media screen and (min-width: 40em) {
+	#googless-container .email-cta .email-list {
+		columns: 2 !important;
+	}
+
+}
+
+@media screen and (min-width: 70em) {
+	#googless-container .email-cta .email-list {
+		columns: 3 !important;
+	}
+
+}

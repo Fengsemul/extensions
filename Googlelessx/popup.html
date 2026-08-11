@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<!-- <title></title> -->
+	<link rel="stylesheet" href="popup.css" />
+
+</head>
+<body>
+	<div id="popup">
+		<div class="text-container">
+			<p class="heading">Goog<span class="highlight-text">less</span></p>
+			<p class="info"><span id="nService" class="highlight-text"></span> Google services detected on this webpage.</p>
+			<!-- <p class="link"><a href="https://www.googless.xyz/">Visit googless.xyz</a></p> -->
+		</div>
+		<div class="toggle-container">
+			<div><p id="status-text">Enabled</p></div>
+			<div id="switch-btn" class>
+				<label class="switch">
+				  <input type="checkbox" id="checkbox" onchange="toggleGoogless()">
+				  <span class="slider round"></span>
+				</label>
+			</div>
+		</div>
+    </div>
+	<script src="popup.js"></script>
+</body>
+</html>

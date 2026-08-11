@@ -1,0 +1,167 @@
+Manifest-Version: 1.0
+
+Name: popup.js
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: AvybWpDWLR/FRpSq1CERpdfXIWw=
+SHA256-Digest: q6MU5AJN12NKtyfPnViJJyTl78cF276Xr9i0IqJ1Wxs=
+
+Name: background.js
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: VHv59d+5sOUAocNVkb9SdWfSqzE=
+SHA256-Digest: khWlYBOs77Rsc44F3MDUZFJcGnNSM8QTO3KLk1EFrnk=
+
+Name: popup.html
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: ueCJRZNodFnSA8hUJQNozVsmfLc=
+SHA256-Digest: KI2sEl8sVkOiyg78tSKpYrp01IC8kAfLGTll5Jjeh0s=
+
+Name: jquery.min.js
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: uC0jjU4x/fYYuuisEabIEsA90NQ=
+SHA256-Digest: /xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=
+
+Name: package-lock.json
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: skRKWwjpc+PSmUlhJtmGoUJiNF8=
+SHA256-Digest: drXpoSVPeLBfIf8ImQNRPb0sshpzfUho+cEmMGV7LQo=
+
+Name: modal.css
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: AwBpGDSfyzsBpSPSYLH20W925j0=
+SHA256-Digest: bx2rqddSL7Im6AI/uC/NsUwc0kjiHz/K+s80rNS5ACg=
+
+Name: manifest.json
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: 5rRUvVarrAdNFJ8jmCHycrFGkAA=
+SHA256-Digest: la01M6gNGzxdN/UZ83PupjrnO2D4k36hBbBqZn3Y7G4=
+
+Name: popup.css
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: bXkTJ64NUXcyzIOU1swISbCkfPk=
+SHA256-Digest: NNvB9YRLVNM1OW34aJFIYdlE+/PGijetl2ARpsszRmc=
+
+Name: modal.html
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: K1zJ805v+6/3yxnaXbzhJb8kfq0=
+SHA256-Digest: I7G1AO0Gj1hF6rWkAsPBuAwSISAAHV0Mny5GF2zXwys=
+
+Name: content.js
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: QJ9xzZ9P4vot1LraqIfUmf+Z/w4=
+SHA256-Digest: nJ2SjLtCuGdHyDUhtEF57sHsocS4+c1778BD2ykz078=
+
+Name: icons/search.svg
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: 7CAT8ogaKPDV6LEy8SFOGaTunAQ=
+SHA256-Digest: 3p2n/mjrKpEkpl371AkuvPPYx29h3Bx1Rlwff5P+QUM=
+
+Name: icons/locations.svg
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: 8ha3CRIUpejSTBy15wxhZQN8pME=
+SHA256-Digest: CFOT8CdSL525i+ruU20vASpesF76sK/+NZX/WUmdt8w=
+
+Name: icons/googless.svg
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: dsqbkwlgHS7Fb31Sai0joAcchd0=
+SHA256-Digest: q7Zh025rmJjMCVpdy1z6KGvJaoU46DXZ8RTUbBoy3ws=
+
+Name: icons/googless-128.png
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: 6ctAHZchm9YPyWsw6T6FxTPqegA=
+SHA256-Digest: amSKPUBNVMqcrn2BE7DHBGqPAGtDzovXVFPtpTtL41E=
+
+Name: icons/recaptcha.svg
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: O9OD1HEdtjTwnDSNMWmVi5R4v0Q=
+SHA256-Digest: MOgMDhldUEPZ9aD9hrrGI2uQ+Qt15ixcHomtXbxSh7A=
+
+Name: icons/gsi.svg
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: Up06crN4tkKocxw3VUWGduLdY2Y=
+SHA256-Digest: VYX4GyAasvCy3tqYUuOGFGFn4VWtjjPafg/SZVJskJI=
+
+Name: icons/adsense.svg
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: rc+waVS0fsvnlO4p2kpKj2xY1fc=
+SHA256-Digest: bDgqRJtUDmHvnAK5TAAUxm6mhDy8O0gF0UaqTbi1kr0=
+
+Name: icons/youtube.svg
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: SYa2DTDCPsZcf8apHuki6YDDGfY=
+SHA256-Digest: hXb9ZE5MWX3L5KxLF21fYdUv8+iGk6oMEp3VAQ9JMsI=
+
+Name: icons/analytics.svg
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: UiaXd6I+q6F9Xhh795TyBpSq76A=
+SHA256-Digest: KiCwGnOSVmQ3n1/gazFaJfQCjmzltrVBhZZ4Wd40utk=
+
+Name: icons/googless-48.png
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: RGqmVqlouD5l8VUW4aeA4X5kGok=
+SHA256-Digest: Mgufr+0vBpp4s4fFz01arTxXwfMkrKVr5KVvE78xiRw=
+
+Name: icons/fonts.svg
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: wfsM1BBew/9L1q8bjckYUj2nnrg=
+SHA256-Digest: Wcrd1XlCHWnfCD6hh3sgUasNoBe2ohJcJFyS2fC1j2g=
+
+Name: fonts/yantramanav-black.otf
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: wyXOci4UJNz+w65lrXsqF/BpRVs=
+SHA256-Digest: 1M1rrXpl6O2yWd1P0f5zt+h7S9mR2XsLT27CbNAQh/o=
+
+Name: fonts/yantramanav-bold.otf
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: r2Yb6GOLYhXxzymWcz3G0wsx5Qg=
+SHA256-Digest: UsXzjsDBiMTCe8X0UhBg7P9bwM1FszePNXyboY57aI4=
+
+Name: fonts/yantramanav-thin.otf
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: zyVIEPDPT9wdzqa6GwY1KlJ3OXk=
+SHA256-Digest: NAnbTP5szuDbYPdHnxes76s+zp7zu3OA28LWi87kDA4=
+
+Name: fonts/yantramanav-regular.otf
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: xhFordMDLwBJUTsbp22BvFgTie4=
+SHA256-Digest: 57OI1j67zNAMH5r/8YScg7Mih2H7rmtvAqvqZst4VSQ=
+
+Name: fonts/yantramanav-black-webfont.woff
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: vd3OW9rycnH+qgkgZyjXZXxIRmY=
+SHA256-Digest: K1kweCaf+xxnA940TJp8545pn4GYPDPVh3XwOIXVxJQ=
+
+Name: fonts/yantramanav-regular-webfont.woff
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: MzoBn16v0pSm8S4Md1b4CMUWdsY=
+SHA256-Digest: 9MNEmcAcpvvLybcwLyz5uu0Q84SblEM4vB39nOS/jn0=
+
+Name: fonts/yantramanav-light.otf
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: IYbHbzPYVplveM1oNUKaHnRTEPE=
+SHA256-Digest: dAqsMdc21pjkcA9wksOM+glBQ+PkAS0JwkzdEl7udP4=
+
+Name: fonts/yantramanav-bold-webfont.woff
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: SbBo+7MDkYt9CR6Hsv8SoY6qbfo=
+SHA256-Digest: 7ah3h2TzPYncTKALKMpp9+8K8NPIfror9KpYCNMQ+qw=
+
+Name: fonts/yantramanav-regular-webfont.ttf
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: mKhOp/WgCOiojtb1aQ8XhhwtsN8=
+SHA256-Digest: omxXZmmnslQ6Z9AvcvTJQbD4Q140W2UltYcTHIs/kdU=
+
+Name: fonts/yantramanav-medium.otf
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: 9oMfSVwPIPNYemjJMUe6erZcZv4=
+SHA256-Digest: mC9jd0d9C6Ba3872TSHwOTJJ1Litf37IjJ3uyERRXtY=
+
+Name: fonts/yantramanav-bold-webfont.ttf
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: EdakbV4g8hADbmINZDCpsKMlGXQ=
+SHA256-Digest: 5CXcgxRXeHpgMB4cV9TNZfuB4+nFnLgCWe9cj/cWYzg=
+
+Name: fonts/yantramanav-black-webfont.ttf
+Digest-Algorithms: SHA1 SHA256
+SHA1-Digest: znP8bR6I7OkpC5W/uNG5buCBXRM=
+SHA256-Digest: 1fLFKETj8tecxyUYr87QjVYg02sd8wVJQjnliBxZ9Yo=
+
