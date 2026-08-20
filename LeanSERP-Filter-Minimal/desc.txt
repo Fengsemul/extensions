@@ -1612,4 +1612,214 @@ A few important details:
 So the effective chain is:
 text
 
-Edit public_suffix_list.dat-> reload extension-> hostname is partitioned differently-> newly searchable labels are checked-> matching blocked labels remove the result"
+Edit public_suffix_list.dat-> reload extension-> hostname is partitioned differently-> newly searchable labels are checked-> matching blocked labels remove the result",
+2026-08-20: "Moving the folder is not inherently a problem. Manually deleting Firefox's storage\default data can invalidate the extension origin, adapters, manual rules, and IndexedDB state. The production package can then appear active while filtering fails because of one of these conditions:
+
+    The search tabs still contain an old or disconnected content script.
+    The active background cannot retrieve a known production label.
+    The moved extension was loaded under a different runtime origin.
+    Saved search-engine adapters were erased with browser.storage.local.
+    The content script is injected but has no working adapter for that SERP.
+    The imported labels file is not the file you think it is.
+
+Do not delete anything else from the Firefox profile. Diagnose the pipeline in order.
+1. Confirm one extension instance
+
+In about:debugging#/runtime/this-firefox, remove every LeanSERP instance, then load only:
+text
+
+C:\Users\PC\Downloads\extensions\LeanSERP-Filter-Minimal\manifest.json
+
+Close all old manager and search tabs. Open a fresh manager from the toolbar popup.
+
+Run in the manager console:
+javascript
+
+({    extensionId: browser.runtime.id,    managerUrl: location.href,    manifestName: browser.runtime.getManifest().name})
+
+Expected:
+javascript
+
+{    extensionId: "leanserp-filter-minimal@local.invalid",    manifestName: "LeanSERP Filter Minimal"}
+
+The moz-extension:// UUID may differ after reloading. That is normal for a temporary extension.
+2. Confirm the database counts
+
+Run in the manager console:
+javascript
+
+(async () => {    const response =        await browser.runtime.sendMessage({            type: "databaseStatus"        });
+    console.log({        ok: response.ok,        activeSlot:            response.status?.counts?.activeSlot,        stagingSlot:            response.status?.stagingSlot,        production:            response.status?.counts?.production,        manual:            response.status?.counts?.manual,        packages:            response.status?.packages    });
+    return response;})();
+
+Verify:
+
+    ok is true.
+    activeSlot is A or B.
+    stagingSlot is null.
+    production.labels is the exact expected count.
+    The package in the active slot has state active.
+
+"Almost 17 million" is not enough for integrity checking. Compare the displayed count with the deduplicated source file's exact line count.
+3. Test a known production rule directly
+
+Choose a rule definitely present in the newly imported labels.txt, preferably one confirmed by PowerShell.
+
+For example:
+powershell
+
+$path = "C:\Users\PC\Downloads\extensions\LeanSERP-Packages\YOUR-PACKAGE\labels.txt"$rule = "pythonanywhere"
+$match = Select-String `    -LiteralPath $path `    -Pattern ("^{0}$" -f [regex]::Escape($rule)) `    -CaseSensitive:$false
+[pscustomobject]@{    Rule = $rule    Present = [bool]$match    LineNumber = if ($match) {        $match[0].LineNumber    } else {        $null    }} | Format-List
+
+Then run in the manager console:
+javascript
+
+JSON.stringify(    await browser.runtime.sendMessage({        type: "debugRuleLookup",        category: "labels",        keys: [            "pythonanywhere"        ]    }),    null,    2)
+
+Expected:
+json
+
+{  "ok": true,  "activeSlot": "A",  "manual": {    "pythonanywhere": false  },  "production": {    "pythonanywhere": true  },  "combined": {    "pythonanywhere": true  }}
+
+If production.pythonanywhere is false, filtering cannot work. The imported production database does not contain that rule, regardless of the package's displayed total.
+4. Test hostname analysis and the final decision
+
+Because pythonanywhere.com was removed from your locally customized PSL, verify that customization survived the move.
+
+Run:
+javascript
+
+JSON.stringify(    await browser.runtime.sendMessage({        type: "debugHostnameAnalysis",        hostname:            "www.pythonanywhere.com"    }),    null,    2)
+
+Expected:
+json
+
+{  "ok": true,  "analysis": {    "hostname": "www.pythonanywhere.com",    "searchableLabels": [      "www",      "pythonanywhere"    ],    "suffixLabels": [      "com"    ]  }}
+
+Then:
+javascript
+
+JSON.stringify(    await browser.runtime.sendMessage({        type: "confirmHostnames",        hostnames: [            "www.pythonanywhere.com",            "eu.pythonanywhere.com",            "pythonanywhere.com"        ]    }),    null,    2)
+
+Expected:
+json
+
+{  "ok": true,  "decisions": {    "www.pythonanywhere.com": {      "blocked": true,      "matchedRule": "pythonanywhere",      "matchedType": "label"    },    "eu.pythonanywhere.com": {      "blocked": true,      "matchedRule": "pythonanywhere",      "matchedType": "label"    },    "pythonanywhere.com": {      "blocked": true,      "matchedRule": "pythonanywhere",      "matchedType": "label"    }  }}
+
+Interpretation:
+Result	Fault
+Production lookup is false	Import/source-file problem
+Production lookup is true, analysis excludes the label	PSL problem
+Lookup and analysis are correct, final decision is false	Background matching bug
+Final decision is true, result remains visible	Content-script or adapter problem
+5. Verify content-script injection
+
+Open completely new search-result tabs after reloading the extension.
+
+Run this in each website console:
+javascript
+
+document.documentElement.classList.contains(    "leanserp-disable-animations")
+
+Expected: true.
+
+If false, inspect the website console immediately after Ctrl+F5 for an error ending in content.js:<line>. Also confirm the hostname is present in both host_permissions and content_scripts[0].matches.
+6. Check content-script health
+
+Run this from the manager console:
+javascript
+
+(async () => {    const tabs =        await browser.tabs.query({});
+    const supported =        tabs.filter(tab => {            try {                const hostname =                    new URL(tab.url).hostname;
+                return (                    /(^|\.)google\./.test(hostname) ||                    /(^|\.)bing\.com$/.test(hostname) ||                    /(^|\.)duckduckgo\.com$/.test(                        hostname                    ) ||                    hostname ===                        "www.startpage.com"                );            } catch {                return false;            }        });
+    const report = [];
+    for (const tab of supported) {        try {            const response =                await browser.tabs.sendMessage(                    tab.id,                    {                        type:                            "getLeanSerpHealth"                    }                );
+            report.push({                tabId: tab.id,                title: tab.title,                url: tab.url,                response            });        } catch (error) {            report.push({                tabId: tab.id,                title: tab.title,                url: tab.url,                error:                    error.message            });        }    }
+    console.log(report);    return report;})();
+
+For the visible search tab, expect:
+javascript
+
+{    adapterLoadOk: true,    engine: "...",    visible: true,    observerConnected: true,    lastError: ""}
+
+For hidden tabs, visible: false and observerConnected: false are intentional.
+7. Restore the deleted adapters
+
+Deleting Firefox extension storage also deleted browser.storage.local, where learned adapters are stored. The Startpage adapter must be saved again.
+
+Run in the manager console:
+javascript
+
+await browser.runtime.sendMessage({    type: "saveAdapter",    adapter: {        hostname:            "www.startpage.com",        pathPattern:            "^/(?:sp|do)/search$",        resultSelector:            "div.result",        linkSelector:            "a[data-testid='gl-title-link'][href], " +            "a.result-title.result-link[href]",        urlSources: [            "href",            "data-href",            "data-url"        ],        enabled: true    }})
+
+Check what remains:
+javascript
+
+await browser.runtime.sendMessage({    type: "listAdapters"})
+
+Your saved degoog adapter may also need to be restored:
+javascript
+
+await browser.runtime.sendMessage({    type: "saveAdapter",    adapter: {        hostname: "degoog.org",        pathPattern: "^/search$",        resultSelector:            "div.result-item.degoog-result",        linkSelector:            "a.result-title.degoog-result--title[href]",        urlSources: [            "href",            "data-href",            "data-url"        ],        enabled: true    }})
+
+Built-in adapters such as DuckDuckGo and Bing should not require saved adapters.
+8. Clear both background and page caches
+
+Run in the manager console:
+javascript
+
+await browser.runtime.sendMessage({    type: "clearCaches"})
+
+Your current implementation should:
+
+    Clear background hostname and active-slot caches.
+    Send clearLeanSerpContentCaches to open tabs.
+    Clear each page's decision and processed-container caches.
+    Rescan the document.
+
+Then close and reopen the affected search tab once.
+9. Confirm the moved manifest
+
+Your earlier pasted manifest was missing some supported hosts and used document_idle. Check the active manifest:
+javascript
+
+const manifest =    browser.runtime.getManifest();
+console.log({    id: browser.runtime.id,    runAt:        manifest.content_scripts[0].run_at,    matches:        manifest.content_scripts[0].matches,    permissions:        manifest.permissions});
+
+Expected:
+
+    Stable ID: leanserp-filter-minimal@local.invalid
+    run_at: document_start
+    "storage", "unlimitedStorage", and "tabs" permissions
+    Startpage and other intended engines in the match list
+
+10. Validate the active package files
+
+Use the exact moved package path. For example:
+powershell
+
+$folder = "C:\Users\PC\Downloads\extensions\LeanSERP-Packages\YOUR-PACKAGE"
+$files = @(    "labels.txt",    "exact-host-blocks.txt",    "approved_psl_overrides.txt")
+foreach ($name in $files) {    $path = Join-Path $folder $name
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {        throw "Missing package file: $path"    }
+    $valid = @(        Get-Content -LiteralPath $path |        ForEach-Object {            $_.Trim().ToLowerInvariant()        } |        Where-Object {            $_ -ne "" -and            -not $_.StartsWith("#")        }    )
+    $unique = @(        $valid |        Sort-Object -Unique    )
+    [pscustomobject]@{        File = $name        Valid = $valid.Count        Unique = $unique.Count        Duplicates =            $valid.Count -            $unique.Count    }} | Format-Table -AutoSize
+
+For the 17-million-label file, this PowerShell method may use substantial RAM. Since the production importer now requires sorted input, a streaming adjacent-duplicate check is preferable for the full file.
+Most likely recovery path
+
+Given that you manually deleted the extension's profile storage, the practical repair is:
+
+    Keep only C:\Users\PC\Downloads\extensions\LeanSERP-Filter-Minimal.
+    Load its stable manifest once.
+    Verify the exact production count.
+    Verify one known production label with debugRuleLookup.
+    Restore Startpage and degoog adapters.
+    Clear caches.
+    Close and reopen search tabs.
+    Confirm confirmHostnames returns blocked: true.
+    Confirm the website health report shows injection and an active observer.
+
+Do not manually delete any directory under the Firefox profile again. Use Delete entire minimal database only when you intentionally want to erase rules, and treat the package files as the authoritative backup."
