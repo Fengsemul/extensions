@@ -7366,6 +7366,7 @@
 ||zhihu.com^$all
 ||zhimg.com^$all
 ||baidu.com^$all
+||bdstatic.com^$all
 ||yandex.com^$all
 ||alicdn.com^$all
 ||alibaba.com^$all
