@@ -6,3 +6,4 @@ text
 Removing mainstream sources: https://www.google.com/search?q=-%22imgur.%22%20-%22apple.%22%20-%22walmart.%22%20-%22amazon.%22%20-%22microsoft.%22%20-%22google.%22%20-%22gstatic.%22%20-%22wp.com%22%20-%22instagram%22%20-%22wordpress%22%20-%22youtube%22%20-%22x.%22%20-%22reddit.%22%20&gl=us&hl=en&brd_json=1&start=1&pws=0&udm=14
 
 2026.08.30/https://github.com/v2fly/domain-list-community/tree/master/data ;
+2026.08.30/https://github.com/Fengsemul/notes/tree/main/TopMillionLinksZip/Blacklistsonmsm : https://cebeerre.github.io/dnsblocklists/
