@@ -624,10 +624,10 @@ sonicrun: Object.freeze({
         ".pagination",
         "li.page-item",
         "a[href$='/about.html']",
-		"<a[href$='/freelisting.html']",
-		"<a[href$='/privacy.html']",
-		"<a[href$='/link.html']",
-		"<a[href$='/contact.html']",
+		"a[href$='/freelisting.html']",
+		"a[href$='/privacy.html']",
+		"a[href$='/link.html']",
+		"a[href$='/contact.html']"
     ],
 
     allowGenericRoot: false
