@@ -1823,3 +1823,109 @@ Given that you manually deleted the extension's profile storage, the practical r
     Confirm the website health report shows injection and an active observer.
 
 Do not manually delete any directory under the Firefox profile again. Use Delete entire minimal database only when you intentionally want to erase rules, and treat the package files as the authoritative backup."
+2026.09.08: DeepSeek V4: "function isSupportedDiagnosticUrl(value) {
+    try {
+        const url = new URL(value);
+        if (url.protocol !== "http:" && url.protocol !== "https:") {
+            return false;
+        }
+
+        const hostname = url.hostname.toLowerCase();
+        
+        // Define supported domains and their subdomain patterns
+        const exactDomainMatch = new Set([
+            "search.brave.com",
+            "startpage.com",
+            "searx.org",
+            "xka.cz",
+            "searx.tiekoetter.com",
+            "apahcinc.org",
+            "whatuseek.com",
+            "goguides.com",
+            "incrawler.com",
+            "directorytop.com",
+            "directoryfuse.com",
+            "wlddirectory.com",
+            "textfiles.com",
+            "allbusinessdirectory.biz",
+            "sonicrun.com",
+            "illumirate.com",
+            "joeant.com",
+            "livewebdirectory.com",
+            "yeandi.com",
+            "sr.ht",
+            "lobste.rs",
+            "lemmy.ml",
+            "directory.fsf.org",
+            "etools.ch",
+            "wiby.org",
+            "secretsearchenginelabs.com",
+            "rawweb.org",
+            "slsearch.eu.org",
+            "searchthis.ch",
+            "degoog.org"
+        ]);
+
+        const subdomainMatch = new Set([
+            "startpage.com",
+            "searx.org",
+            "xka.cz",
+            "searx.tiekoetter.com",
+            "apahcinc.org",
+            "whatuseek.com",
+            "goguides.com",
+            "incrawler.com",
+            "directorytop.com",
+            "directoryfuse.com",
+            "wlddirectory.com",
+            "textfiles.com",
+            "allbusinessdirectory.biz",
+            "sonicrun.com",
+            "illumirate.com",
+            "joeant.com",
+            "livewebdirectory.com",
+            "yeandi.com",
+            "sr.ht",
+            "lobste.rs",
+            "lemmy.ml",
+            "directory.fsf.org",
+            "etools.ch",
+            "wiby.org",
+            "secretsearchenginelabs.com",
+            "rawweb.org",
+            "slsearch.eu.org",
+            "searchthis.ch",
+            "degoog.org"
+        ]);
+
+        // Special handling for google domains (allows various google TLDs)
+        const googleRegex = /^(?:www\.)?google\.[a-z]{2,}(?:\.[a-z]{2})?$/i;
+
+        // Check exact matches
+        if (exactDomainMatch.has(hostname) || googleRegex.test(hostname)) {
+            return true;
+        }
+
+        // Check subdomain matches
+        for (const domain of subdomainMatch) {
+            if (hostname.endsWith("." + domain)) {
+                return true;
+            }
+        }
+
+        // Special case for bing and duckduckgo (allow subdomains but require exact TLD)
+        if (hostname === "bing.com" || hostname.endsWith(".bing.com")) {
+            return true;
+        }
+        if (hostname === "duckduckgo.com" || hostname.endsWith(".duckduckgo.com")) {
+            return true;
+        }
+        if (hostname === "google.com" || hostname.endsWith(".google.com")) {
+            return true;
+        }
+
+        return false;
+    } catch {
+        return false;
+    }
+}"
