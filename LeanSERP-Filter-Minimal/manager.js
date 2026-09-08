@@ -1388,85 +1388,112 @@ async function removeManualImport(record) {
         setOperationRunning(false);
     }
 }
-    function isSupportedDiagnosticUrl(value) {
-        try {
-            const url = new URL(value);
-            if (
-                url.protocol !== "http:" &&
-                url.protocol !== "https:"
-            ) {
-                return false;
-            }
-            const hostname =
-                url.hostname.toLowerCase();
-            return (
-                /(^|\.)google\./.test(
-                    hostname
-                ) ||
-                /(^|\.)bing\.com$/.test(
-                    hostname
-                ) ||
-                /(^|\.)duckduckgo\.com$/.test(
-                    hostname
-                ) ||
-                hostname ===
-                    "search.brave.com" ||
-                hostname ===
-                    "startpage.com" ||
-                hostname.endsWith(
-                    ".startpage.com"
-                ) ||
-                hostname ===
-                    "searx.org" ||
-                hostname.endsWith(
-                    ".searx.org"
-                ) ||
-                hostname ===
-                    "xka.cz" ||
-                hostname.endsWith(
-                    ".xka.cz"
-                ) ||
-                hostname ===
-                    "searx.tiekoetter.com" ||
-                hostname.endsWith(
-                    ".searx.tiekoetter.com"
-                ) ||
-                hostname === "etools.ch" ||
-                hostname.endsWith(
-                    ".etools.ch"
-                ) ||
-                hostname === "wiby.org" ||
-                hostname.endsWith(
-                    ".wiby.org"
-                ) ||
-                hostname ===
-                    "secretsearchenginelabs.com" ||
-                hostname.endsWith(
-                    ".secretsearchenginelabs.com"
-                ) ||
-                hostname === "rawweb.org" ||
-                hostname.endsWith(
-                    ".rawweb.org"
-                ) ||
-                hostname ===
-                    "slsearch.eu.org" ||
-                hostname.endsWith(
-                    ".slsearch.eu.org"
-                ) ||
-                hostname ===
-                    "searchthis.ch" ||
-                hostname.endsWith(
-                    ".searchthis.ch"
-                ) ||
-                hostname === "degoog.org" ||
-                hostname.endsWith(
-                    ".degoog.org"
-                )
-            );
-        } catch {
+function isSupportedDiagnosticUrl(value) {
+    try {
+        const url = new URL(value);
+        if (url.protocol !== "http:" && url.protocol !== "https:") {
             return false;
         }
+
+        const hostname = url.hostname.toLowerCase();
+        
+        // Define supported domains and their subdomain patterns
+        const exactDomainMatch = new Set([
+            "search.brave.com",
+            "startpage.com",
+            "searx.org",
+            "xka.cz",
+            "searx.tiekoetter.com",
+            "apahcinc.org",
+            "whatuseek.com",
+            "goguides.com",
+            "incrawler.com",
+            "directorytop.com",
+            "directoryfuse.com",
+            "wlddirectory.com",
+            "textfiles.com",
+            "allbusinessdirectory.biz",
+            "sonicrun.com",
+            "illumirate.com",
+            "joeant.com",
+            "livewebdirectory.com",
+            "yeandi.com",
+            "sr.ht",
+            "lobste.rs",
+            "lemmy.ml",
+            "directory.fsf.org",
+            "etools.ch",
+            "wiby.org",
+            "secretsearchenginelabs.com",
+            "rawweb.org",
+            "slsearch.eu.org",
+            "searchthis.ch",
+            "degoog.org"
+        ]);
+
+        const subdomainMatch = new Set([
+            "startpage.com",
+            "searx.org",
+            "xka.cz",
+            "searx.tiekoetter.com",
+            "apahcinc.org",
+            "whatuseek.com",
+            "goguides.com",
+            "incrawler.com",
+            "directorytop.com",
+            "directoryfuse.com",
+            "wlddirectory.com",
+            "textfiles.com",
+            "allbusinessdirectory.biz",
+            "sonicrun.com",
+            "illumirate.com",
+            "joeant.com",
+            "livewebdirectory.com",
+            "yeandi.com",
+            "sr.ht",
+            "lobste.rs",
+            "lemmy.ml",
+            "directory.fsf.org",
+            "etools.ch",
+            "wiby.org",
+            "secretsearchenginelabs.com",
+            "rawweb.org",
+            "slsearch.eu.org",
+            "searchthis.ch",
+            "degoog.org"
+        ]);
+
+        // Special handling for google domains (allows various google TLDs)
+        const googleRegex = /^(?:www\.)?google\.[a-z]{2,}(?:\.[a-z]{2})?$/i;
+
+        // Check exact matches
+        if (exactDomainMatch.has(hostname) || googleRegex.test(hostname)) {
+            return true;
+        }
+
+        // Check subdomain matches
+        for (const domain of subdomainMatch) {
+            if (hostname.endsWith("." + domain)) {
+                return true;
+            }
+        }
+
+        // Special case for bing and duckduckgo (allow subdomains but require exact TLD)
+        if (hostname === "bing.com" || hostname.endsWith(".bing.com")) {
+            return true;
+        }
+        if (hostname === "duckduckgo.com" || hostname.endsWith(".duckduckgo.com")) {
+            return true;
+        }
+        if (hostname === "google.com" || hostname.endsWith(".google.com")) {
+            return true;
+        }
+
+        return false;
+    } catch {
+        return false;
     }
+}
     async function refreshDiagnosticTabs() {
         const previousValue =
             elements.diagnosticsTab.value;
