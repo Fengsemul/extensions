@@ -455,28 +455,24 @@
         }),
 		
 		incrawler: Object.freeze({
-            roots: [
-                ".w-gl__result",
-                ".result",
-                "[data-testid='result']",
-                ".search-result"
-            ],
-            links: [
-                "a.w-gl__result-title[href]",
-                "a[data-testid='result-title'][href]",
-                "h2 a[href]",
-                "h3 a[href]"
-            ],
-            exclusions: [
-                "header",
-                "nav",
-                "footer",
-                "form",
-                "[role='navigation']",
-                ".pagination"
-            ],
-            allowGenericRoot: false
-        }),
+			roots: [
+        "td"
+			],
+			links: [
+				"td > a[href]:first-child"
+			],
+			exclusions: [
+				"header",
+				"nav",
+				"footer",
+				"form",
+				"[role='navigation']",
+				".pagination",
+				"script",
+				"style"
+			],
+			allowGenericRoot: false
+		}),
 		
 		directorytop: Object.freeze({
             roots: [
