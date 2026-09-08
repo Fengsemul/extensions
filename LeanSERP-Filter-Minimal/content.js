@@ -48,7 +48,114 @@
             hostname.endsWith(
                 ".searx.tiekoetter.com"
             ),
+			
+		apahcinc: hostname =>
+            hostname === "apahcinc.org" ||
+            hostname.endsWith(
+                ".apahcinc.org"
+            ),
+			
+		whatuseek: hostname =>
+            hostname === "whatuseek.com" ||
+            hostname.endsWith(
+                ".whatuseek.com"
+            ),
 
+		goguides: hostname =>
+            hostname === "goguides.com" ||
+            hostname.endsWith(
+                ".goguides.com"
+            ),
+
+		incrawler: hostname =>
+            hostname === "incrawler.com" ||
+            hostname.endsWith(
+                ".incrawler.com"
+            ),	
+
+		directorytop: hostname =>
+			hostname === "directorytop.com" ||
+			hostname.endsWith(
+				".directorytop.com"
+    ),
+
+		directoryfuse: hostname =>
+            hostname === "directoryfuse.com" ||
+            hostname.endsWith(
+                ".directoryfuse.com"
+            ),	
+
+		wlddirectory: hostname =>
+            hostname === "wlddirectory.com" ||
+            hostname.endsWith(
+                ".wlddirectory.com"
+            ),
+
+		textfiles: hostname =>
+            hostname === "textfiles.com" ||
+            hostname.endsWith(
+                ".textfiles.com"
+            ),	
+
+		allbusinessdirectory: hostname =>
+            hostname === "allbusinessdirectory.biz" ||
+            hostname.endsWith(
+                ".allbusinessdirectory.biz"
+            ),	
+
+		sonicrun: hostname =>
+            hostname === "sonicrun.com" ||
+            hostname.endsWith(
+                ".sonicrun.com"
+            ),		
+
+		illumirate: hostname =>
+            hostname === "illumirate.com" ||
+            hostname.endsWith(
+                ".illumirate.com"
+            ),	
+
+		joeant: hostname =>
+            hostname === "joeant.com" ||
+            hostname.endsWith(
+                ".joeant.com"
+            ),	
+
+		livewebdirectory: hostname =>
+            hostname === "livewebdirectory.com" ||
+            hostname.endsWith(
+                ".livewebdirectory.com"
+            ),		
+
+		yeandi: hostname =>
+            hostname === "yeandi.com" ||
+            hostname.endsWith(
+                ".yeandi.com"
+            ),	
+
+		srht: hostname =>
+            hostname === "sr.ht" ||
+            hostname.endsWith(
+                ".sr.ht"
+            ),	
+
+		lobste: hostname =>
+            hostname === "lobste.rs" ||
+            hostname.endsWith(
+                ".lobste.rs"
+            ),	
+
+		lemmy: hostname =>
+            hostname === "lemmy.ml" ||
+            hostname.endsWith(
+                ".lemmy.ml"
+            ),	
+
+		fsf: hostname =>
+            hostname === "directory.fsf.org" ||
+            hostname.endsWith(
+                ".directory.fsf.org"
+            ),				
         etools: hostname =>
             hostname === "etools.ch" ||
             hostname.endsWith(".etools.ch"),
@@ -274,6 +381,450 @@
             allowGenericRoot: false
         }),
         
+		apahcinc: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		whatuseek: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		goguides: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result",
+				".result-main"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		incrawler: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		directorytop: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		directoryfuse: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		wlddirectory: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		textfiles: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		allbusinessdirectory: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+sonicrun: Object.freeze({
+    roots: [
+        "li:not(.page-item)",
+        ".w-gl__result",
+        ".result",
+        "[data-testid='result']",
+        ".search-result"
+    ],
+
+    links: [
+        "li:not(.page-item) a[href]:not([href$='/about.html'])",
+        "a.w-gl__result-title[href]",
+        "a[data-testid='result-title'][href]",
+        "h2 a[href]",
+        "h3 a[href]"
+    ],
+
+    exclusions: [
+        "header",
+        "nav",
+        "footer",
+        "form",
+        "[role='navigation']",
+        ".pagination",
+        "li.page-item",
+        "a[href$='/about.html']",
+		"<a[href$='/freelisting.html']",
+		"<a[href$='/privacy.html']",
+		"<a[href$='/link.html']",
+		"<a[href$='/contact.html']",
+    ],
+
+    allowGenericRoot: false
+}),
+		
+		illumirate: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		joeant: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		livewebdirectory: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		yeandi: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		srht: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		lobste: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		lemmy: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
+		fsf: Object.freeze({
+            roots: [
+                ".w-gl__result",
+                ".result",
+                "[data-testid='result']",
+                ".search-result"
+            ],
+            links: [
+                "a.w-gl__result-title[href]",
+                "a[data-testid='result-title'][href]",
+                "h2 a[href]",
+                "h3 a[href]"
+            ],
+            exclusions: [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                "[role='navigation']",
+                ".pagination"
+            ],
+            allowGenericRoot: false
+        }),
+		
 		startpage: Object.freeze({
             roots: [
                 ".w-gl__result",
@@ -553,6 +1104,168 @@
         }
 		
         if (engine === "xka") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "apahcinc") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "whatuseek") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "goguides") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "incrawler") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "directorytop") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "directoryfuse") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "wlddirectory") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "textfiles") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "allbusinessdirectory") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "sonicrun") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "illumirate") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "joeant") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "livewebdirectory") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "yeandi") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "srht") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+
+        if (engine === "lobste") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+
+        if (engine === "lemmy") {
+            return (
+                location.pathname === "/" ||
+                location.pathname
+                    .toLowerCase()
+                    .includes("search")
+            );
+        }
+		
+        if (engine === "fsf") {
             return (
                 location.pathname === "/" ||
                 location.pathname
@@ -2766,6 +3479,21 @@
                         }
                     });
                 }
+
+if (
+    message.type ===
+    "clearLeanSerpContentCaches"
+) {
+    decisionCache.clear();
+    processedHostnames =
+        new WeakMap();
+    pendingRoots.clear();
+    queueRoot(document);
+    scheduleScan();
+    return Promise.resolve({
+        ok: true
+    });
+}
 
                 if (
                     message.type ===
