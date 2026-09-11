@@ -997,6 +997,7 @@
 */wp-json/*$all
 ||wp-includes*$all
 */wp-/*$all
+*/apple-touch-icon/*$all
 ||apple-touch-icon.png^$all
 ||cloudflare.app^$all
 ||cf-ipfs.com^$all
@@ -30277,3 +30278,4 @@
 ||nypost.com^$all
 ||nypost.help^$all
 ||nypostreprints.com^$all
+
