@@ -997,6 +997,7 @@
 */wp-json/*$all
 ||wp-includes*$all
 */wp-/*$all
+||apple-touch-icon.png^$all
 ||cloudflare.app^$all
 ||cf-ipfs.com^$all
 ||cloudflare-ipfs.com^$all
