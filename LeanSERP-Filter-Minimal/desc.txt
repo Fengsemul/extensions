@@ -1928,4 +1928,391 @@ Do not manually delete any directory under the Firefox profile again. Use Delete
     } catch {
         return false;
     }
-}"
+}",
+
+2026.10.06: shorter and more universal version of filtering, but breaks websites such as GitHub: manifest.json: "{
+  "manifest_version": 3,
+  "name": "LeanSERP Filter Minimal",
+  "version": "1.1.0",
+  "description": "Universal SERP filtering with automatic engine detection.",
+  "permissions": ["storage", "unlimitedStorage", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "scripts": ["database.js", "background.js"]
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "css": ["content.css"],
+    "run_at": "document_start",
+    "all_frames": false
+  }],
+  "action": {
+    "default_title": "LeanSERP Filter Minimal",
+    "default_popup": "launcher.html"
+  },
+  "web_accessible_resources": [{
+    "resources": ["public_suffix_list.dat"],
+    "matches": ["<all_urls>"]
+  }],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "leanserp-filter-minimal@local.invalid",
+      "strict_min_version": "109.0"
+    }
+  }
+}", content.js: ""use strict";
+
+(() => {
+    const CONFIG = {
+        MAX_HOSTS_PER_REQUEST: 64,
+        MAX_PENDING_ROOTS: 128,
+        MAX_CANDIDATES_PER_SCAN: 256,
+        MAX_DECISION_CACHE_ENTRIES: 5000,
+        SCAN_DELAY_MS: 100
+    };
+
+    const pendingRoots = new Set();
+    let processedContainers = new WeakMap();
+    const decisionCache = new Map();
+    let observer = null;
+    let scanTimer = null;
+    let scanRunning = false;
+    let rescanRequested = false;
+    let pageVisible = !document.hidden;
+    let stopped = false;
+    let dynamicAdapters = [];
+
+    // Generic selectors for result containers and links
+    const GENERIC_RULE = {
+        roots: ['li', 'article', '.result', '.search-result', '.web-result', 'div[class*="result"]', 'div[class*="search"]'],
+        links: ['a[href]', 'a[data-href]', 'a[data-url]'],
+        exclusions: ['header', 'nav', 'footer', 'form', '[role="navigation"]', '[role="search"]', '.pagination', '#header', '#footer'],
+        allowGenericRoot: true
+    };
+
+    // ---------- Helpers ----------
+    const getHostname = (link) => {
+        const href = link.getAttribute('href') || link.getAttribute('data-href') || link.getAttribute('data-url') || '';
+        if (!href) return '';
+        try {
+            const url = new URL(href, location.href);
+            if (!/^https?:$/.test(url.protocol)) return '';
+            return url.hostname.toLowerCase().replace(/^\.+|\.+$/g, '');
+        } catch { return ''; }
+    };
+
+    const isExcluded = (link) => {
+        const rule = getRule();
+        return rule.exclusions.some(sel => link.closest(sel));
+    };
+
+    const getConfiguredContainer = (link, rule) => {
+        for (const sel of rule.roots) {
+            try {
+                const container = link.closest(sel);
+                if (container) return container;
+            } catch {}
+        }
+        return null;
+    };
+
+    const getSafeGenericContainer = (link) => {
+        let current = link.parentElement;
+        for (let depth = 0; current && depth < 6 && current !== document.body; depth++) {
+            const text = current.textContent.trim().replace(/\s+/g, ' ');
+            const extLinks = current.querySelectorAll('a[href], a[data-href], a[data-url]');
+            const extCount = Array.from(extLinks).filter(l => getHostname(l)).length;
+            if (text.length >= 20 && text.length <= 5000 && extCount >= 1 && extCount <= 5) {
+                return current;
+            }
+            current = current.parentElement;
+        }
+        return null;
+    };
+
+    const getResultContainer = (link, rule) => {
+        const explicit = getConfiguredContainer(link, rule);
+        if (explicit) return explicit;
+        if (rule.allowGenericRoot) {
+            const generic = getSafeGenericContainer(link);
+            if (generic) return generic;
+        }
+        return null;
+    };
+
+    const isProtected = (el) => {
+        if (!el || el === document.body || el === document.documentElement) return true;
+        return el.matches('header, nav, footer, form, [role="navigation"], [role="search"], #center_col, #search, #rso, #results-main');
+    };
+
+    const isSafeContainer = (container, link) => {
+        if (!container || !link || isProtected(container) || !container.contains(link)) return false;
+        const text = container.textContent.trim().replace(/\s+/g, ' ');
+        if (text.length === 0 || text.length > 12000) return false;
+        if (container.querySelector('form, [role="search"], input[type="search"], .pagination')) return false;
+        return true;
+    };
+
+    const hasProcessed = (container, hostname) => processedContainers.get(container) === hostname;
+
+    const markProcessed = (container, hostname) => processedContainers.set(container, hostname);
+
+    const getRule = () => {
+        const dynamic = getDynamicRule();
+        if (dynamic) return dynamic;
+        return GENERIC_RULE;
+    };
+
+    // ---------- Dynamic adapters ----------
+    const normalizeAdapter = (adapter) => {
+        if (!adapter || adapter.enabled === false) return null;
+        const hostname = String(adapter.hostname || '').trim().toLowerCase();
+        const pathPattern = String(adapter.pathPattern || '').trim();
+        const resultSel = String(adapter.resultSelector || '').trim();
+        const linkSel = String(adapter.linkSelector || '').trim();
+        if (!hostname || !pathPattern || !resultSel || !linkSel) return null;
+        try { new RegExp(pathPattern); document.querySelector(resultSel); document.querySelector(linkSel); }
+        catch { return null; }
+        return {
+            hostname,
+            pathPattern,
+            resultSelector: resultSel,
+            linkSelector: linkSel,
+            urlSources: adapter.urlSources && adapter.urlSources.length ? adapter.urlSources : ['href', 'data-href', 'data-url']
+        };
+    };
+
+    const loadDynamicAdapters = async () => {
+        try {
+            const resp = await browser.runtime.sendMessage({ type: 'getAdaptersForLocation', url: location.href });
+            dynamicAdapters = (resp && resp.adapters && Array.isArray(resp.adapters) ? resp.adapters : []).map(normalizeAdapter).filter(Boolean);
+        } catch {
+            dynamicAdapters = [];
+        }
+    };
+
+    const getDynamicRule = () => {
+        const host = location.hostname.toLowerCase();
+        const adapter = dynamicAdapters.find(a => a.hostname === host && new RegExp(a.pathPattern).test(location.pathname));
+        if (!adapter) return null;
+        return {
+            roots: [adapter.resultSelector],
+            links: [adapter.linkSelector],
+            exclusions: GENERIC_RULE.exclusions,
+            allowGenericRoot: false,
+            urlSources: adapter.urlSources
+        };
+    };
+
+    // ---------- Candidate scanning ----------
+    const findCandidates = (root) => {
+        const rule = getRule();
+        const links = root.querySelectorAll ? root.querySelectorAll(rule.links.join(',')) : [];
+        const seen = new Set();
+        const candidates = [];
+
+        for (const link of links) {
+            if (candidates.length >= CONFIG.MAX_CANDIDATES_PER_SCAN) break;
+            if (isExcluded(link) || link.closest('[data-leanserp-ui]')) continue;
+
+            const hostname = getHostname(link);
+            if (!hostname) continue;
+
+            const container = getResultContainer(link, rule);
+            if (!isSafeContainer(container, link) || seen.has(container) || hasProcessed(container, hostname)) continue;
+
+            seen.add(container);
+            candidates.push({ hostname, container });
+        }
+        return candidates;
+    };
+
+    // ---------- Decision processing ----------
+    const getCache = (hostname) => {
+        if (!decisionCache.has(hostname)) return undefined;
+        const val = decisionCache.get(hostname);
+        decisionCache.delete(hostname);
+        decisionCache.set(hostname, val);
+        return val;
+    };
+
+    const setCache = (hostname, decision) => {
+        decisionCache.delete(hostname);
+        decisionCache.set(hostname, decision);
+        if (decisionCache.size > CONFIG.MAX_DECISION_CACHE_ENTRIES) {
+            const oldest = decisionCache.keys().next().value;
+            decisionCache.delete(oldest);
+        }
+    };
+
+    const applyDecision = (candidate, decision) => {
+        if (!candidate || !candidate.container.isConnected) return;
+        if (decision && decision.blocked) {
+            candidate.container.remove();
+        } else {
+            markProcessed(candidate.container, candidate.hostname);
+        }
+    };
+
+    const requestDecisions = async (candidates) => {
+        const hostnames = [...new Set(candidates.map(c => c.hostname))];
+        const resp = await browser.runtime.sendMessage({ type: 'confirmHostnames', hostnames });
+        if (!resp || !resp.ok || !resp.decisions) throw new Error('Bad response');
+        return resp.decisions;
+    };
+
+    const processCandidates = async (candidates) => {
+        const uncached = candidates.filter(c => {
+            const cached = getCache(c.hostname);
+            if (cached !== undefined) {
+                applyDecision(c, cached);
+                return false;
+            }
+            return true;
+        });
+
+        for (let i = 0; i < uncached.length; i += CONFIG.MAX_HOSTS_PER_REQUEST) {
+            const batch = uncached.slice(i, i + CONFIG.MAX_HOSTS_PER_REQUEST);
+            let decisions;
+            try {
+                decisions = await requestDecisions(batch);
+            } catch {
+                continue;
+            }
+            for (const c of batch) {
+                const decision = decisions[c.hostname] || { blocked: false };
+                setCache(c.hostname, decision);
+                applyDecision(c, decision);
+            }
+        }
+    };
+
+    // ---------- Scheduling ----------
+    const queueRoot = (root) => {
+        if (!root) return;
+        if (pendingRoots.size >= CONFIG.MAX_PENDING_ROOTS) {
+            pendingRoots.clear();
+            pendingRoots.add(document);
+            return;
+        }
+        pendingRoots.add(root);
+    };
+
+    const scanPendingRoots = async () => {
+        if (stopped || !pageVisible) return;
+        if (scanRunning) { rescanRequested = true; return; }
+
+        scanRunning = true;
+        try {
+            do {
+                rescanRequested = false;
+                const roots = [...pendingRoots].slice(0, CONFIG.MAX_PENDING_ROOTS);
+                pendingRoots.clear();
+                if (roots.length === 0) roots.push(document);
+
+                const candidates = [];
+                const seen = new Set();
+                for (const root of roots) {
+                    for (const cand of findCandidates(root)) {
+                        if (seen.has(cand.container)) continue;
+                        seen.add(cand.container);
+                        candidates.push(cand);
+                        if (candidates.length >= CONFIG.MAX_CANDIDATES_PER_SCAN) break;
+                    }
+                    if (candidates.length >= CONFIG.MAX_CANDIDATES_PER_SCAN) break;
+                }
+
+                await processCandidates(candidates);
+            } while (rescanRequested && !stopped && pageVisible);
+        } finally {
+            scanRunning = false;
+        }
+    };
+
+    const scheduleScan = (root) => {
+        if (root) queueRoot(root);
+        if (stopped || !pageVisible || scanTimer !== null) return;
+        scanTimer = setTimeout(() => {
+            scanTimer = null;
+            scanPendingRoots();
+        }, CONFIG.SCAN_DELAY_MS);
+    };
+
+    // ---------- Observer & lifecycle ----------
+    const connectObserver = () => {
+        if (observer || stopped || !pageVisible || !document.documentElement) return;
+        observer = new MutationObserver(mutations => {
+            let changed = false;
+            for (const mut of mutations) {
+                for (const node of mut.addedNodes) {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        queueRoot(node);
+                        changed = true;
+                    }
+                }
+            }
+            if (changed) scheduleScan();
+        });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+    };
+
+    const disconnectObserver = () => {
+        if (observer) { observer.disconnect(); observer = null; }
+    };
+
+    const cleanup = () => {
+        stopped = true;
+        disconnectObserver();
+        pendingRoots.clear();
+        decisionCache.clear();
+        if (scanTimer) clearTimeout(scanTimer);
+    };
+
+    // ---------- Message handling ----------
+    const handleMessage = (message) => {
+        if (!message || typeof message !== 'object') return;
+        switch (message.type) {
+            case 'pingLeanSerpContent':
+                return Promise.resolve({ ok: true, injected: true });
+            case 'setDynamicAdapters':
+                dynamicAdapters = (Array.isArray(message.adapters) ? message.adapters : []).map(normalizeAdapter).filter(Boolean);
+                decisionCache.clear();
+                queueRoot(document);
+                scheduleScan();
+                return Promise.resolve({ ok: true });
+            case 'clearLeanSerpContentCaches':
+                decisionCache.clear();
+                queueRoot(document);
+                scheduleScan();
+                return Promise.resolve({ ok: true });
+            case 'refreshDynamicAdapters':
+                return loadDynamicAdapters().then(() => Promise.resolve({ ok: true }));
+        }
+    };
+    browser.runtime.onMessage.addListener(handleMessage);
+
+    // ---------- Init ----------
+    const start = () => {
+        document.documentElement.classList.add('leanserp-disable-animations');
+        queueRoot(document);
+        scheduleScan();
+        connectObserver();
+    };
+
+    (async () => {
+        await loadDynamicAdapters();
+        start();
+        document.addEventListener('visibilitychange', () => {
+            pageVisible = !document.hidden;
+            if (pageVisible) {
+                connectObserver();
+                scheduleScan(document);
+            } else {
+                disconnectObserver();
+                if (scanTimer) { clearTimeout(scanTimer); scanTimer = null; }
+            }
+        });
+        window.addEventListener('pagehide', cleanup, { once: true });
+    })();
+})();"
