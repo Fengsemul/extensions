@@ -1961,7 +1961,7 @@ Do not manually delete any directory under the Firefox profile again. Use Delete
       "strict_min_version": "109.0"
     }
   }
-}", content.js: ""use strict";
+}", 2026.10.11/content.js: ""use strict";
 
 (() => {
     const CONFIG = {
@@ -2106,27 +2106,112 @@ Do not manually delete any directory under the Firefox profile again. Use Delete
     };
 
     // ---------- Candidate scanning ----------
-    const findCandidates = (root) => {
-        const rule = getRule();
-        const links = root.querySelectorAll ? root.querySelectorAll(rule.links.join(',')) : [];
-        const seen = new Set();
-        const candidates = [];
+const findCandidates = (root) => {
+    if (isMwmblPage()) return findMwmblCandidates(root);
 
-        for (const link of links) {
-            if (candidates.length >= CONFIG.MAX_CANDIDATES_PER_SCAN) break;
-            if (isExcluded(link) || link.closest('[data-leanserp-ui]')) continue;
+    const rule = getRule();
+    const links = root.querySelectorAll
+        ? root.querySelectorAll(rule.links.join(','))
+        : [];
+    const seen = new Set();
+    const candidates = [];
 
-            const hostname = getHostname(link);
-            if (!hostname) continue;
+    for (const link of links) {
+        if (candidates.length >= CONFIG.MAX_CANDIDATES_PER_SCAN) break;
+        if (isExcluded(link) || link.closest('[data-leanserp-ui]')) continue;
 
-            const container = getResultContainer(link, rule);
-            if (!isSafeContainer(container, link) || seen.has(container) || hasProcessed(container, hostname)) continue;
+        const hostname = getHostname(link);
+        if (!hostname) continue;
 
-            seen.add(container);
-            candidates.push({ hostname, container });
+        const container = getResultContainer(link, rule);
+        if (!isSafeContainer(container, link) ||
+            seen.has(container) ||
+            hasProcessed(container, hostname)) {
+            continue;
         }
-        return candidates;
-    };
+
+        seen.add(container);
+        candidates.push({ hostname, container });
+    }
+
+    return candidates;
+};
+const isMwmblPage = () =>
+    location.hostname === 'mwmbl.org' ||
+    location.hostname.endsWith('.mwmbl.org');
+
+const hostnameFromText = (text) => {
+    const value = String(text || '').trim();
+    if (!/^(?:[\w-]+\.)+[\w-]+(?::\d+)?$/.test(value)) return '';
+
+    try {
+        return new URL(`https://${value}`).hostname.toLowerCase();
+    } catch {
+        return '';
+    }
+};
+
+const getMwmblCard = (title) => {
+    // Prefer the card wrapper when Mwmbl provides one.
+    const card = title.closest('[data-slot="card"]');
+    if (card) return card;
+
+    // Otherwise find the nearest ancestor containing the title and a
+    // displayed domain such as "www.zeno.org".
+    let current = title.parentElement;
+    for (let depth = 0; current && depth < 8 && current !== document.body; depth++) {
+        const hasDomain = Array.from(current.querySelectorAll('span'))
+            .some(span => hostnameFromText(span.textContent));
+
+        if (hasDomain && current.contains(title)) return current;
+        current = current.parentElement;
+    }
+
+    return null;
+};
+
+const findMwmblCandidates = (root) => {
+    const titles = [];
+
+    if (root.nodeType === Node.ELEMENT_NODE &&
+        root.matches('[data-slot="card-title"]')) {
+        titles.push(root);
+    }
+
+    if (root.querySelectorAll) {
+        titles.push(...root.querySelectorAll('[data-slot="card-title"]'));
+    }
+
+    const candidates = [];
+    const seen = new Set();
+
+    for (const title of titles) {
+        const container = getMwmblCard(title);
+        if (!container || seen.has(container) || isProtected(container)) continue;
+
+        const text = container.textContent.trim().replace(/\s+/g, ' ');
+        if (!text || text.length > 12000) continue;
+
+        // Prefer the actual result URL when available.
+        const link = title.closest('a[href], a[data-href], a[data-url]') ||
+            container.querySelector('a[href], a[data-href], a[data-url]');
+
+ const displayedHostname = Array.from(container.querySelectorAll('span'))
+    .map(span => hostnameFromText(span.textContent))
+    .find(Boolean);
+
+const hostname = displayedHostname || (link && getHostname(link)) || '';
+
+        if (!hostname || hasProcessed(container, hostname)) continue;
+
+        seen.add(container);
+        candidates.push({ hostname, container });
+
+        if (candidates.length >= CONFIG.MAX_CANDIDATES_PER_SCAN) break;
+    }
+
+    return candidates;
+};
 
     // ---------- Decision processing ----------
     const getCache = (hostname) => {
@@ -2187,6 +2272,8 @@ Do not manually delete any directory under the Firefox profile again. Use Delete
             }
         }
     };
+	
+	
 
     // ---------- Scheduling ----------
     const queueRoot = (root) => {
