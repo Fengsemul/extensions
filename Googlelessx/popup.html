@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8" />
-	<!-- <title></title> -->
-	<link rel="stylesheet" href="popup.css" />
-
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-	<div id="popup">
-		<div class="text-container">
-			<p class="heading">Goog<span class="highlight-text">less</span></p>
-			<p class="info"><span id="nService" class="highlight-text"></span> Google services detected on this webpage.</p>
-			<!-- <p class="link"><a href="https://www.googless.xyz/">Visit googless.xyz</a></p> -->
-		</div>
-		<div class="toggle-container">
-			<div><p id="status-text">Enabled</p></div>
-			<div id="switch-btn" class>
-				<label class="switch">
-				  <input type="checkbox" id="checkbox" onchange="toggleGoogless()">
-				  <span class="slider round"></span>
-				</label>
-			</div>
-		</div>
+  <div id="popup-content">
+    <div class="logo">Goog<span>less</span></div>
+    <div class="metrics"><span id="metric-count">0</span> tracked dependencies</div>
+    
+    <div class="row">
+      <span>Extension Active</span>
+      <input type="checkbox" id="toggle-active">
     </div>
-	<script src="popup.js"></script>
+
+    <div class="whitelist-section">
+      <button id="btn-whitelist">Whitelist Current Domain</button>
+    </div>
+
+    <div class="entities-panel" id="entities-list"></div>
+  </div>
+  <script src="popup.js"></script>
 </body>
 </html>
