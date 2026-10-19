@@ -1,118 +1,62 @@
 "use strict";
 
-const toggle = document.getElementById("checkbox");
-const countTarget = document.getElementById("nService");
-const serviceLabel = document.getElementById("serviceLabel");
-const statusText = document.getElementById("status-text");
-const pageStatus = document.getElementById("pageStatus");
+const metricCount = document.getElementById("metric-count");
+const toggleActive = document.getElementById("toggle-active");
+const btnWhitelist = document.getElementById("btn-whitelist");
+const entitiesList = document.getElementById("entities-list");
 
-function updateToggleText() {
-  statusText.textContent = toggle.checked
-    ? "Enabled"
-    : "Disabled";
-}
+function restorePopup() {
+  browser.storage.local.get({ enabled: true, whitelist: [] }).then(conf => {
+    toggleActive.checked = conf.enabled;
 
-function updateCount(count) {
-  const safeCount = Number.isFinite(Number(count))
-    ? Number(count)
-    : 0;
+    browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+      const activeTab = tabs[0];
+      if (!activeTab || !activeTab.id) return;
 
-  countTarget.textContent = String(safeCount);
+      const activeUrl = new URL(activeTab.url);
+      const isDomainWhitelisted = conf.whitelist.includes(activeUrl.hostname);
 
-  serviceLabel.textContent =
-    safeCount === 1
-      ? "Google service detected on this webpage."
-      : "Google services detected on this webpage.";
+      btnWhitelist.textContent = isDomainWhitelisted
+        ? "Remove From Whitelist"
+        : "Whitelist This Domain";
 
-  pageStatus.textContent =
-    safeCount > 0
-      ? "Googless detected Google services on this page."
-      : "No supported Google services were detected.";
-}
-
-function getActiveTab(callback) {
-  chrome.tabs.query(
-    {
-      active: true,
-      currentWindow: true
-    },
-    (tabs) => {
-      callback(tabs[0] || null);
-    }
-  );
-}
-
-function refreshPopup() {
-  chrome.storage.local.get(
-    { enabled: true },
-    (settings) => {
-      toggle.checked = settings.enabled !== false;
-      updateToggleText();
-
-      getActiveTab((tab) => {
-        if (!tab || typeof tab.id !== "number") {
-          updateCount(0);
-          pageStatus.textContent = "No active webpage is available.";
-          return;
-        }
-
-        chrome.tabs.sendMessage(
-          tab.id,
-          { type: "GOOGLESS_GET_STATUS" },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              updateCount(0);
-              pageStatus.textContent =
-                "The content script is not running. Reload the extension, then reload this tab.";
-              return;
-            }
-
-            if (!response) {
-              updateCount(0);
-              pageStatus.textContent =
-                "The webpage did not return a status.";
-              return;
-            }
-
-            toggle.checked = response.enabled !== false;
-            updateToggleText();
-            updateCount(response.count);
-          }
-        );
+      browser.tabs.sendMessage(activeTab.id, { type: "GET_INTERNAL_STATUS" }).then(res => {
+        if (!res) return;
+        metricCount.textContent = res.count;
+        entitiesList.innerHTML = res.services.map(s => `<div>• ${s}</div>`).join("");
+      }).catch(() => {
+        metricCount.textContent = "0";
       });
-    }
-  );
+    });
+  });
 }
 
-toggle.addEventListener("change", () => {
-  const enabled = toggle.checked;
+toggleActive.addEventListener("change", () => {
+  browser.storage.local.set({ enabled: toggleActive.checked }).then(() => {
+    browser.tabs.reload();
+    window.close();
+  });
+});
 
-  updateToggleText();
+btnWhitelist.addEventListener("click", () => {
+  browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+    const activeTab = tabs[0];
+    if (!activeTab || !activeTab.url) return;
 
-  chrome.storage.local.set({ enabled }, () => {
-    getActiveTab((tab) => {
-      if (!tab || typeof tab.id !== "number") {
-        return;
+    const hostname = new URL(activeTab.url).hostname;
+    browser.storage.local.get({ whitelist: [] }).then(conf => {
+      let list = conf.whitelist;
+      if (list.includes(hostname)) {
+        list = list.filter(item => item !== hostname);
+      } else {
+        list.push(hostname);
       }
-
-      chrome.tabs.sendMessage(
-        tab.id,
-        {
-          type: "GOOGLESS_SET_ENABLED",
-          enabled
-        },
-        (response) => {
-          if (chrome.runtime.lastError || !response) {
-            pageStatus.textContent =
-              "Reload this webpage to apply the change.";
-            return;
-          }
-
-          updateCount(response.count);
-        }
-      );
+      browser.storage.local.set({ whitelist: list }).then(() => {
+        browser.tabs.reload();
+        window.close();
+      });
     });
   });
 });
 
-refreshPopup();
+restorePopup();
