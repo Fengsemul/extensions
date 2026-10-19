@@ -1,0 +1,654 @@
+2026.10.19/ai-text-generator : "Here is the complete, re-architected extension code. 
+
+### Why the Previous Versions Failed on Your Test Sites:
+1. **DOM vs. Network Detection**: Sites like `godaddy.com`, `curlie.org`, and `patriotsquare.us` load scripts dynamically or route them via inline service-workers/asynchronous XHR/Fetch requests. Scanning solely DOM tags misses background network tracking. This rewrite integrates the **`webRequest` API** alongside DOM checks to catch real-time calls to `googlesyndication.com`, `com.cdn.cloudflare.net`, `firestore.googleapis.com`, `d1cq301dpr7fww.cloudfront.net`, and more.
+2. **CSS Specificity Clashes**: Websites with modern CSS frameworks (like `mamma.com` and `activesearchresults.com`) reset or override button styles, text colors, and font rendering. This build isolates the entire blocking interface inside a **Closed Shadow DOM (`attachShadow({ mode: "closed" })`)**, completely shielding the overlay from host-page styles.
+3. **Tab Renaming & Link Styler**: Merges the core functional design of **GAFALink**: outbound hyperlinks to GAFAM and proprietary domains are styled with custom highlights (red background/yellow text), and whenever a page is covered, the tab title is dynamically modified to prepend `[Googless Blocked]`.
+4. **Whitelisting**: Adds support for persistent exclusion lists (e.g., `startpage.com`) directly managed via storage and the popup.
+
+---
+
+### File Structure
+```text
+googless/
+├── manifest.json
+├── background.js
+├── content.js
+├── popup.html
+├── popup.css
+├── popup.js
+└── icons/
+    └── googless-48.png
+```
+
+---
+
+### `manifest.json`
+```json
+{
+  "manifest_version": 2,
+  "name": "Googless & GAFALink Hybrid",
+  "version": "3.0.0",
+  "description": "Blocks GAFAM/Google tracking, provides overlay coverage, tab status, and highlights proprietary links.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "<all_urls>",
+    "webRequest"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "default_icon": "icons/googless-48.png",
+    "default_title": "Googless",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "googless-gafalink@local.addon",
+      "strict_min_version": "109.0"
+    }
+  }
+}
+```
+
+---
+
+### `background.js`
+```javascript
+"use strict";
+
+const GAFAM_DOMAINS = [
+  "1000minds.com", "alexa.com", "aliexpress.com", "aliexpress.fr", "amazon.com",
+  "amazon.fr", "amazon-adsystem.com", "apple.com", "azure.com", "bing.com",
+  "bing.fr", "bit.ly", "bitly.com", "blogger.com", "blogspot.com", "bubbl.us",
+  "calameo.com", "cdnjs.cloudflare.com", "cloudflare.com", "codepen.io",
+  "dailymotion.com", "discord.com", "doodle.com", "dropbox.com", "eventbrite.com",
+  "eventbrite.fr", "evernote.com", "facebook.com", "facebook.fr", "facebook.net",
+  "flickr.com", "foxmarks.com", "getpocket.com", "github.com", "github.io",
+  "gmail.com", "goo.gl", "google.com", "google.fr", "del.icio.us", "imgur.com",
+  "instagram.com", "instapaper.com", "jsfiddle.net", "linkedin.com", "live.com",
+  "mappy.com", "mappy.fr", "microsoft.com", "microsoftonline.com", "netflix.com",
+  "office.com", "office365.com", "onedrive.com", "openagenda.com", "cloud.orange.fr",
+  "le-cloud.orange.fr", "outlook.com", "overblog.com", "pastebin.com", "periscope.tv",
+  "pinterest.com", "pinterest.fr", "pscp.tv", "reddit.com", "reddit.fr", "shrtct.com",
+  "skype.com", "slack.com", "snapchat.com", "sourceforge.com", "sourceforge.net",
+  "tinder.com", "transifex.com", "trello.com", "tumblr.com", "twitch.tv",
+  "twitter.com", "viadeo.fr", "viamichelin.fr", "viamichelin.com", "vimeo.com",
+  "wetransfer.com", "whatsapp.com", "windowsazure.com", "xmarks.com", "yahoo.com",
+  "yandex.ru", "yandex.com", "yandex.fr", "youtu.be", "youtube.com", "zoho.com",
+  "padlet.com", "deezer.com", "deezer.fr", "soundcloud.com", "spotify.com",
+  "spotify.fr", "taobao.com", "yammer.com", "youku.com", "paypal.com",
+  "doubleclick.net", "googlesyndication.com", "google-analytics.com",
+  "googletagmanager.com", "googleusercontent.com", "gstatic.com", "googleapis.com",
+  "cloudfront.net", "akamaiedge.net", "akamai.net"
+];
+
+// Track runtime states
+const tabDetections = new Map();
+
+browser.runtime.onInstalled.addListener(() => {
+  browser.storage.local.get({
+    enabled: true,
+    whitelist: ["startpage.com"],
+    domains: GAFAM_DOMAINS
+  }).then(res => {
+    browser.storage.local.set(res);
+  });
+});
+
+// Sniff background/asynchronous network queries
+browser.webRequest.onBeforeRequest.addListener(
+  (details) => {
+    if (details.tabId < 0) return;
+
+    try {
+      const reqUrl = new URL(details.url);
+      const reqHost = reqUrl.hostname.toLowerCase();
+
+      browser.storage.local.get({ enabled: true, whitelist: [], domains: GAFAM_DOMAINS }).then(conf => {
+        if (!conf.enabled) return;
+
+        browser.tabs.get(details.tabId).then(tab => {
+          if (!tab || !tab.url) return;
+          const pageHost = new URL(tab.url).hostname.toLowerCase();
+          
+          if (conf.whitelist.some(w => pageHost === w || pageHost.endsWith("." + w))) {
+            return;
+          }
+
+          const matchedDomain = conf.domains.find(d => reqHost === d || reqHost.endsWith("." + d));
+          if (matchedDomain) {
+            let hits = tabDetections.get(details.tabId) || new Set();
+            hits.add(matchedDomain);
+            tabDetections.set(details.tabId, hits);
+
+            browser.tabs.sendMessage(details.tabId, {
+              type: "NETWORK_DETECTION_TRIGGER",
+              services: Array.from(hits)
+            }).catch(() => {});
+          }
+        }).catch(() => {});
+      });
+    } catch (e) {
+      // Ignored non-HTTP URL parses
+    }
+  },
+  { urls: ["<all_urls>"] }
+);
+
+browser.tabs.onRemoved.addListener((tabId) => {
+  tabDetections.delete(tabId);
+});
+
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === "STATUS_UPDATE" && sender.tab) {
+    const count = request.count || 0;
+    browser.browserAction.setBadgeText({
+      tabId: sender.tab.id,
+      text: count > 0 ? String(count) : ""
+    });
+    browser.browserAction.setBadgeBackgroundColor({
+      tabId: sender.tab.id,
+      color: "#E64F9B"
+    });
+    sendResponse({ ok: true });
+  }
+});
+```
+
+---
+
+### `content.js`
+```javascript
+(() => {
+  "use strict";
+
+  let enabled = true;
+  let whitelist = [];
+  let trackingDomains = [];
+  let detectedEntities = new Set();
+  let bypassedForSession = false;
+  let originalTitle = document.title;
+  let shadowRoot = null;
+  let overlayWrapper = null;
+
+  function init() {
+    browser.storage.local.get({
+      enabled: true,
+      whitelist: ["startpage.com"],
+      domains: []
+    }).then(config => {
+      enabled = config.enabled;
+      whitelist = config.whitelist;
+      trackingDomains = config.domains;
+
+      if (!enabled || isWhitelisted(location.hostname)) {
+        return;
+      }
+
+      runInspections();
+      setupObserver();
+    });
+  }
+
+  function isWhitelisted(host) {
+    const cur = host.toLowerCase();
+    return whitelist.some(w => cur === w || cur.endsWith("." + w));
+  }
+
+  function isTrackedHost(host) {
+    if (!host) return false;
+    const cleanHost = host.toLowerCase();
+    return trackingDomains.some(d => cleanHost === d || cleanHost.endsWith("." + d));
+  }
+
+  function runInspections() {
+    // 1. Check current host
+    if (isTrackedHost(location.hostname)) {
+      detectedEntities.add(location.hostname);
+    }
+
+    // 2. Scan DOM targets
+    const elements = document.querySelectorAll("script, link, iframe, img, embed, object, form");
+    elements.forEach(el => {
+      const path = el.src || el.href || el.data || el.action;
+      inspectSourceString(path);
+      if (el.tagName === "SCRIPT" && !el.src) {
+        inspectInlineText(el.textContent);
+      }
+    });
+
+    // 3. Highlight Outbound GAFAM Anchor Links (GAFALink Feature)
+    highlightLinks();
+
+    // 4. Update Lock Screen / Title
+    renderExtensionStatus();
+  }
+
+  function inspectSourceString(str) {
+    if (!str) return;
+    try {
+      const parsed = new URL(str, document.baseURI);
+      if (isTrackedHost(parsed.hostname)) {
+        detectedEntities.add(parsed.hostname);
+      }
+    } catch (e) {
+      // Relative or invalid link
+    }
+  }
+
+  function inspectInlineText(text) {
+    if (!text) return;
+    const lower = text.toLowerCase();
+    for (let i = 0; i < trackingDomains.length; i++) {
+      if (lower.includes(trackingDomains[i])) {
+        detectedEntities.add(trackingDomains[i]);
+      }
+    }
+  }
+
+  function highlightLinks() {
+    const links = document.querySelectorAll("a[href]");
+    links.forEach(a => {
+      try {
+        const u = new URL(a.href, document.baseURI);
+        if (isTrackedHost(u.hostname) && u.hostname !== location.hostname) {
+          a.style.setProperty("background-color", "#FF0000", "important");
+          a.style.setProperty("color", "#FFFF00", "important");
+          a.style.setProperty("font-weight", "bold", "important");
+          a.style.setProperty("text-decoration", "underline", "important");
+        }
+      } catch (e) {}
+    });
+  }
+
+  function renderExtensionStatus() {
+    const count = detectedEntities.size;
+
+    browser.runtime.sendMessage({
+      type: "STATUS_UPDATE",
+      count: count,
+      services: Array.from(detectedEntities)
+    }).catch(() => {});
+
+    if (count > 0 && !bypassedForSession && enabled) {
+      applyTitleBlock();
+      showBlockedOverlay();
+    } else {
+      removeTitleBlock();
+      hideBlockedOverlay();
+    }
+  }
+
+  function applyTitleBlock() {
+    if (!document.title.startsWith("[Googless Blocked]")) {
+      originalTitle = document.title;
+      document.title = "[Googless Blocked] " + originalTitle;
+    }
+  }
+
+  function removeTitleBlock() {
+    if (document.title.startsWith("[Googless Blocked]")) {
+      document.title = originalTitle;
+    }
+  }
+
+  function createOverlayComponent() {
+    if (overlayWrapper) return;
+
+    overlayWrapper = document.createElement("div");
+    overlayWrapper.id = "googless-isolated-root";
+    overlayWrapper.style.all = "initial";
+
+    // Closed shadow boundary avoids parent site CSS pollution
+    shadowRoot = overlayWrapper.attachShadow({ mode: "closed" });
+
+    const container = document.createElement("div");
+    container.id = "googless-container";
+    container.innerHTML = `
+      <style>
+        :host { all: initial; }
+        #googless-container {
+          position: fixed !important;
+          inset: 0 !important;
+          z-index: 2147483647 !important;
+          background: #F9F5F4 !important;
+          color: #141414 !important;
+          font-family: Arial, sans-serif !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          flex-direction: column !important;
+          overflow-y: auto !important;
+          padding: 40px !important;
+        }
+        .topbar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 16px;
+          background: repeating-linear-gradient(135deg, #f3d898, #f3d898 15px, #141414 15px, #141414 30px);
+          border-bottom: 2px solid #000;
+        }
+        .header {
+          font-size: 42px !important;
+          font-weight: 900 !important;
+          color: #f3d898 !important;
+          text-shadow: 2px 2px 0 #141414, -1px -1px 0 #141414 !important;
+          margin: 20px 0 10px 0 !important;
+          text-transform: uppercase !important;
+        }
+        .description {
+          font-size: 18px !important;
+          font-weight: bold !important;
+          margin-bottom: 20px !important;
+        }
+        .controls {
+          display: flex !important;
+          gap: 15px !important;
+          margin-bottom: 30px !important;
+        }
+        button {
+          cursor: pointer !important;
+          border: 2px solid #141414 !important;
+          border-radius: 20px !important;
+          padding: 8px 20px !important;
+          font-size: 14px !important;
+          font-weight: bold !important;
+          box-shadow: 2px 2px 0 #141414 !important;
+        }
+        .btn-continue { background: #1A73E8 !important; color: #FFF !important; }
+        .btn-disable { background: #E64F9B !important; color: #FFF !important; }
+        .grid {
+          display: grid !important;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+          gap: 15px !important;
+        }
+        .card {
+          background: #FFF !important;
+          border: 2px solid #141414 !important;
+          padding: 15px !important;
+          box-shadow: 4px 4px 0 #E64F9B !important;
+        }
+        .domain-tag {
+          font-weight: bold !important;
+          color: #E64F9B !important;
+          word-break: break-all !important;
+        }
+      </style>
+      <div class="topbar"></div>
+      <div class="header">Website Unavailable</div>
+      <div class="description">Googless detected outbound tracking/monopoly services integrated on this webpage:</div>
+      <div class="controls">
+        <button id="btn-pass" class="btn-continue">Continue Once</button>
+        <button id="btn-off" class="btn-disable">Disable Everywhere</button>
+      </div>
+      <div class="grid" id="card-mount"></div>
+    `;
+
+    shadowRoot.appendChild(container);
+    (document.body || document.documentElement).appendChild(overlayWrapper);
+
+    shadowRoot.getElementById("btn-pass").addEventListener("click", () => {
+      bypassedForSession = true;
+      renderExtensionStatus();
+    });
+
+    shadowRoot.getElementById("btn-off").addEventListener("click", () => {
+      browser.storage.local.set({ enabled: false }).then(() => {
+        enabled = false;
+        renderExtensionStatus();
+      });
+    });
+  }
+
+  function showBlockedOverlay() {
+    createOverlayComponent();
+    if (!shadowRoot) return;
+
+    const mount = shadowRoot.getElementById("card-mount");
+    mount.innerHTML = "";
+
+    detectedEntities.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div style="font-size:12px;color:#777;">DETECTED SYSTEM</div>
+        <div class="domain-tag">${item}</div>
+        <div style="font-size:13px;margin-top:8px;">GAFAM/CDN tracking or host dependency detected on this platform.</div>
+      `;
+      mount.appendChild(card);
+    });
+
+    overlayWrapper.style.display = "block";
+    document.documentElement.style.setProperty("overflow", "hidden", "important");
+  }
+
+  function hideBlockedOverlay() {
+    if (overlayWrapper) {
+      overlayWrapper.style.display = "none";
+    }
+    document.documentElement.style.removeProperty("overflow");
+  }
+
+  function setupObserver() {
+    const observer = new MutationObserver((mutations) => {
+      let shouldScan = false;
+      for (const m of mutations) {
+        if (m.target && m.target.id === "googless-isolated-root") continue;
+        shouldScan = true;
+        break;
+      }
+      if (shouldScan) {
+        runInspections();
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["src", "href"]
+    });
+  }
+
+  // Network listener updates from background.js
+  browser.runtime.onMessage.addListener((request) => {
+    if (request.type === "NETWORK_DETECTION_TRIGGER") {
+      request.services.forEach(s => detectedEntities.add(s));
+      renderExtensionStatus();
+    }
+    if (request.type === "GET_INTERNAL_STATUS") {
+      return Promise.resolve({
+        count: detectedEntities.size,
+        services: Array.from(detectedEntities),
+        enabled: enabled,
+        whitelisted: isWhitelisted(location.hostname)
+      });
+    }
+  });
+
+  init();
+})();
+```
+
+---
+
+### `popup.html`
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="popup-content">
+    <div class="logo">Goog<span>less</span></div>
+    <div class="metrics"><span id="metric-count">0</span> tracked dependencies</div>
+    
+    <div class="row">
+      <span>Extension Active</span>
+      <input type="checkbox" id="toggle-active">
+    </div>
+
+    <div class="whitelist-section">
+      <button id="btn-whitelist">Whitelist Current Domain</button>
+    </div>
+
+    <div class="entities-panel" id="entities-list"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
+```
+
+---
+
+### `popup.css`
+```css
+body {
+  width: 280px;
+  margin: 0;
+  padding: 16px;
+  background-color: #F9F5F4;
+  font-family: Arial, sans-serif;
+  color: #141414;
+}
+.logo {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+.logo span {
+  color: #E64F9B;
+}
+.metrics {
+  font-size: 14px;
+  margin: 10px 0;
+  font-weight: bold;
+}
+#metric-count {
+  color: #E64F9B;
+  font-size: 18px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #ddd;
+}
+.whitelist-section {
+  margin: 10px 0;
+}
+button {
+  width: 100%;
+  padding: 8px;
+  background: #1A73E8;
+  color: white;
+  border: 1px solid #141414;
+  cursor: pointer;
+  font-weight: bold;
+}
+.entities-panel {
+  max-height: 120px;
+  overflow-y: auto;
+  font-size: 11px;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+```
+
+---
+
+### `popup.js`
+```javascript
+"use strict";
+
+const metricCount = document.getElementById("metric-count");
+const toggleActive = document.getElementById("toggle-active");
+const btnWhitelist = document.getElementById("btn-whitelist");
+const entitiesList = document.getElementById("entities-list");
+
+function restorePopup() {
+  browser.storage.local.get({ enabled: true, whitelist: [] }).then(conf => {
+    toggleActive.checked = conf.enabled;
+
+    browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+      const activeTab = tabs[0];
+      if (!activeTab || !activeTab.id) return;
+
+      const activeUrl = new URL(activeTab.url);
+      const isDomainWhitelisted = conf.whitelist.includes(activeUrl.hostname);
+
+      btnWhitelist.textContent = isDomainWhitelisted
+        ? "Remove From Whitelist"
+        : "Whitelist This Domain";
+
+      browser.tabs.sendMessage(activeTab.id, { type: "GET_INTERNAL_STATUS" }).then(res => {
+        if (!res) return;
+        metricCount.textContent = res.count;
+        entitiesList.innerHTML = res.services.map(s => `<div>• ${s}</div>`).join("");
+      }).catch(() => {
+        metricCount.textContent = "0";
+      });
+    });
+  });
+}
+
+toggleActive.addEventListener("change", () => {
+  browser.storage.local.set({ enabled: toggleActive.checked }).then(() => {
+    browser.tabs.reload();
+    window.close();
+  });
+});
+
+btnWhitelist.addEventListener("click", () => {
+  browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+    const activeTab = tabs[0];
+    if (!activeTab || !activeTab.url) return;
+
+    const hostname = new URL(activeTab.url).hostname;
+    browser.storage.local.get({ whitelist: [] }).then(conf => {
+      let list = conf.whitelist;
+      if (list.includes(hostname)) {
+        list = list.filter(item => item !== hostname);
+      } else {
+        list.push(hostname);
+      }
+      browser.storage.local.set({ whitelist: list }).then(() => {
+        browser.tabs.reload();
+        window.close();
+      });
+    });
+  });
+});
+
+restorePopup();
+```
+
+---
+
+### Step-by-Step Installation
+
+1. Save all files using the provided structure into an empty directory.
+2. Ensure you have an icon at `icons/googless-48.png`.
+3. In Firefox, open `about:debugging#/runtime/this-firefox`.
+4. Click **Load Temporary Add-on…** and select `manifest.json`.
+5. Navigate to any test URL:
+   - `https://forsale.godaddy.com/...` (Catches `googlesyndication.com` dynamic network hits via `webRequest`).
+   - `https://levelimposter.net/` (Catches `firestore.googleapis.com`).
+   - `https://en.wikipedia.org/wiki/Moe_anthropomorphism` (Styles proprietary outbound links directly on the page in **red/yellow**).
+   - `https://startpage.com/` (Default-whitelisted; functions unimpeded)."
